@@ -3,16 +3,13 @@ import {ESLint} from 'eslint';
 import {isPathlessViolation} from '../../../src/lib/util/Utils';
 import {EngineExecutionSummary, FormattedOutput, RuleResult, RuleViolation} from '../../../src/types';
 import path = require('path');
-import * as csvParse from 'csv-parse';
+import csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { PathlessEngineFilters, ENGINE, PMD6_VERSION, SFGE_VERSION } from '../../../src/Constants';
+import { PathlessEngineFilters, ENGINE, PMD7_VERSION, SFGE_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
 import {Results, RunResults} from "../../../src/lib/output/Results";
 import { OutputFormat } from '../../../src/lib/output/OutputFormat';
-import {Controller} from "../../../src/Controller";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {PMD7_VERSION} from "../../../src/Constants";
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
 const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js');
@@ -536,7 +533,7 @@ describe('Results Formatting', () => {
 		function validatePMDSarif(run: unknown, normalizeSeverity: boolean): void {
 			const driver = run['tool']['driver'];
 			expect(driver.name).to.equal('pmd');
-			expect(driver.version).to.equal(PMD6_VERSION);
+			expect(driver.version).to.equal(PMD7_VERSION);
 			expect(driver.informationUri).to.equal('https://pmd.github.io/pmd');
 
 			// tool.driver.rules
@@ -790,22 +787,6 @@ describe('Results Formatting', () => {
 				}
 			}
 		});
-
-		it ('Switching to PMD7 is reflected in sarif output for pmd and cpd engines', async () => {
-			const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
-			try {
-				Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
-				for (const engine of ['pmd', 'cpd']) {
-					const results: Results = new RunResults(createSampleRuleResultsForEngine(engine), new Set([engine]));
-					const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
-					const sarifResults: unknown[] = JSON.parse(formattedOutput as string);
-					expect(sarifResults['runs']).to.have.lengthOf(1);
-					expect(sarifResults['runs'][0]['tool']['driver']['version']).to.equal(PMD7_VERSION);
-				}
-			} finally {
-				Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
-			}
-		})
 	});
 
 	describe('Output Format: JSON', () => {

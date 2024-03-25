@@ -3,7 +3,7 @@ import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../Controller';
 
 import process = require('process');
-import * as findJavaHome from 'find-java-home';
+import findJavaHome from 'find-java-home';
 import childProcess = require('child_process');
 import path = require('path');
 import {FileHandler} from './util/FileHandler';

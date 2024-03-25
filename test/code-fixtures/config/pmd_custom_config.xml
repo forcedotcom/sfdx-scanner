@@ -9,6 +9,6 @@
         VF rules I'm testing
     </description>
 
-    <rule ref="category/vf/security.xml/VfUnescapeEl" />
+    <rule ref="category/visualforce/security.xml/VfUnescapeEl" />
 
 </ruleset>

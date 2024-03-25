@@ -2,7 +2,6 @@
 	"categories": [
 		{
 			"paths": [
-				"category/ecmascript/design.xml",
 				"category/apex/design.xml"
 			],
 			"name": "Design",
@@ -10,7 +9,6 @@
 		},
 		{
 			"paths": [
-				"category/ecmascript/bestpractices.xml",
 				"category/apex/bestpractices.xml"
 			],
 			"name": "Best Practices",
@@ -18,7 +16,6 @@
 		},
 		{
 			"paths": [
-				"category/ecmascript/errorprone.xml",
 				"category/apex/errorprone.xml"
 			],
 			"name": "Error Prone",
@@ -63,18 +60,9 @@
 	"rulesets": [
 		{
 			"paths": [
-				"rulesets/ecmascript/braces.xml",
-				"rulesets/apex/braces.xml"
+				"rulesets/apex/quickstart.xml"
 			],
-			"name": "Braces",
-			"engine": "pmd"
-		},
-		{
-			"paths": [
-				"rulesets/apex/security.xml",
-				"rulesets/vf/security.xml"
-			],
-			"name": "Security",
+			"name": "quickstart",
 			"engine": "pmd"
 		}
 	],

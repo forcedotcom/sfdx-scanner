@@ -20,7 +20,7 @@ jobs:
     steps:
       # Private actions must check out repo first.
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Verify PR title
         uses: ./github-actions/verify-pr-title
         id: verify_pr_title

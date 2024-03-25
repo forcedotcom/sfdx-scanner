@@ -1,5 +1,5 @@
 name: 'Verify PR Title'
 description: 'Verifies that a pull request contains a GUS work item and does not start with d/ or r/'
 runs:
-  using: 'node12'
+  using: 'node20'
   main: 'dist/index.js'

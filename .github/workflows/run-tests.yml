@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # First thing's first; we need to get the code.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Next, we need to make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11' # Always use Java v11 for building dependencies.
@@ -35,12 +35,12 @@ jobs:
       # Create a tarball.
       - run: npm pack
       # Upload the `dist` directory as an artifact so the unit test jobs have it.
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: unit-test-dist
           path: ./dist
       # Upload the tarball as an artifact so the smoke test jobs have it.
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: smoke-test-tarball
           path: ./salesforce-sfdx-scanner-*.tgz
@@ -59,12 +59,12 @@ jobs:
     needs: build-dependencies
     steps:
       # Check out the code.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node.version }} # Node version is a matrix.
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }} # Java version is a matrix.
@@ -75,7 +75,7 @@ jobs:
       - run: yarn --network-timeout 600000
       # Download the dist artifact, to save ourselves the trouble of rebuilding our
       # Java dependencies from scratch.
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: unit-test-dist
           path: ./dist
@@ -93,7 +93,7 @@ jobs:
           artifact-name: cli-messaging-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           framework: "junit"
       - if: ${{ failure() && steps.cli-messaging-tests.outcome != 'success' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cli-messaging-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
@@ -112,7 +112,7 @@ jobs:
           artifact-name: pmd-cataloger-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           framework: "junit"
       - if: ${{ failure() && steps.pmd-cataloger-tests.outcome != 'success' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pmd-cataloger-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
@@ -131,7 +131,7 @@ jobs:
           artifact-name: sfge-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           framework: "junit"
       - if: ${{ failure() && steps.sfge-tests.outcome != 'success' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sfge-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
@@ -154,14 +154,14 @@ jobs:
           artifact-name: typescript-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           framework: "mocha"
       - if: ${{ failure() && (steps.typescript-tests.outcome != 'success' || steps.typescript-linting.outcome != 'success') }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: typescript-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
             ./typescript-test-results
       - name: Upload full artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: all-unit-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
@@ -186,19 +186,19 @@ jobs:
     needs: build-dependencies
     steps:
       # Check out the code.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node.version }} # Node version is a matrix.
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }} # Java version is a matrix.
       # Install Salesforce CLI via NPM
       - run: npm install -g @salesforce/cli
       # Download and install the tarball artifact built during setup.
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         id: download
         with:
           name: smoke-test-tarball
@@ -222,7 +222,7 @@ jobs:
       - run: mkdir smoke-test-results
       # Attempt to execute the smoke tests against the plugin, using the specified script.
       - run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: ${{ runner.os }}-java-v${{ matrix.java}}-node-${{ matrix.node.artifact }}-smoke-test-results
@@ -241,12 +241,12 @@ jobs:
     needs: build-dependencies
     steps:
       # First, we need to get the code.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Next, make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*' # Always use Node LTS for self-eval.
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11' # Always use Java v11 for building dependencies.
@@ -266,7 +266,7 @@ jobs:
           echo "Self evaluation failed. The following is the output file. Use it directly or download the build artifact"
           cat ./test-results/src.xml
       # Upload the test results as an artifact.
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-self-eval-results
           path: ./test-results

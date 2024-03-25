@@ -33,18 +33,18 @@ class PmdRuleCataloger {
 	private final List<PmdCatalogRule> masterRuleList = new ArrayList<>();
 	private final List<PmdCatalogRuleset> masterRulesetList = new ArrayList<>();
 
-    /**
-     * The directory in which the catalog file will be placed.
-     */
-    private final String catalogHome;
-    /**
-     * The name that the catalog file will be given.
-     */
-    private final String catalogName;
-    /**
-     * The specific PMD variant whose rules are being cataloged. (E.g., "pmd" vs "pmd-appexchange")
-     */
-    private final String engineSubvariant;
+	/**
+	 * The directory in which the catalog file will be placed.
+	 */
+	private final String catalogHome;
+	/**
+	 * The name that the catalog file will be given.
+	 */
+	private final String catalogName;
+	/**
+	 * The specific PMD variant whose rules are being cataloged. (E.g., "pmd" vs "pmd-appexchange")
+	 */
+	private final String engineSubvariant;
 
 
 	/**
@@ -52,9 +52,9 @@ class PmdRuleCataloger {
 	 */
 	PmdRuleCataloger(Map<String, List<String>> rulePathEntries, String catalogHome, String catalogName, String engineSubvariant) {
 		this.rulePathEntries = rulePathEntries;
-        this.catalogHome = catalogHome;
-        this.catalogName = catalogName;
-        this.engineSubvariant = engineSubvariant;
+		this.catalogHome = catalogHome;
+		this.catalogName = catalogName;
+		this.engineSubvariant = engineSubvariant;
 	}
 
 
@@ -65,10 +65,10 @@ class PmdRuleCataloger {
 	void catalogRules() {
 		//Check for custom rules and process them
 
-		// STEP 1: Identify all of the ruleset and category files for each language we're looking at.
+		// Identify all the ruleset and category files for each language we're looking at.
 		extractRules();
 
-		// STEP 2: Process the category files to derive category and rule representations.
+		//  Process the category files to derive category and rule representations.
 		final Map<String, Set<String>> categoryPathsByLanguage = this.languageXmlFileMapping.getCategoryPaths();
 		for (String language : categoryPathsByLanguage.keySet()) {
 			final Set<String> categoryPaths = categoryPathsByLanguage.get(language);
@@ -77,32 +77,29 @@ class PmdRuleCataloger {
 			}
 		}
 
-		// STEP 3: Process the ruleset files.
+		// Process the ruleset files.
 		final Map<String, Set<String>> rulesetPathsByLanguage = this.languageXmlFileMapping.getRulesetPaths();
 		for (String language : rulesetPathsByLanguage.keySet()) {
 			Set<String> rulesetPaths = rulesetPathsByLanguage.get(language);
-			// STEP 3A: For each ruleset, generate a representation.
+			// For each ruleset, generate a representation.
 			for (String rulesetPath : rulesetPaths) {
 				generateRulesetRepresentation(language, rulesetPath);
 			}
-			// STEP 3B: Create links between dependent rulesets.
+			// Create links between dependent rulesets.
 			linkDependentRulesets(rulesetsByLanguage.get(language));
 		}
 
-		// STEP 4: Link rules to the rulesets that reference them.
+		// Link rules to the rulesets that reference them.
 		for (String language : rulesetsByLanguage.keySet()) {
 			List<PmdCatalogRuleset> rulesets = rulesetsByLanguage.get(language);
 			List<PmdCatalogRule> rules = rulesByLanguage.get(language);
 			linkRulesToRulesets(rules, rulesets);
 		}
 
-        // STEP 5: Verify that the rules are all PMD7-compatible.
-        new Pmd7CompatibilityChecker().validatePmd7Readiness(masterRuleList);
-
-		// STEP 6: Build a JSON using all of our objects.
+		// Build a JSON using all of our objects.
 		PmdCatalogJson json = new PmdCatalogJson(masterRuleList, masterCategoryList, masterRulesetList, engineSubvariant);
 
-		// STEP 7: Write the JSON to a file.
+		// Write the JSON to a file.
 		writeJsonToFile(json);
 	}
 

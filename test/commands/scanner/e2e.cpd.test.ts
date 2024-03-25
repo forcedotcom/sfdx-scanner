@@ -19,21 +19,24 @@ describe("End to end tests for CPD engine", () => {
 		describe("Invoking CPD engine", () => {
 			it("CPD engine should not be invoked by default", () => {
 				const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path}`);
+				assertNoError(output)
 				expect(output.shellOutput.stdout).to.not.contain("Executed cpd");
 			});
 
 			it("CPD engine should be invocable using --engine flag", () => {
 				const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd`);
+				assertNoError(output)
 				expect(output.shellOutput.stdout).to.contain("Executed cpd");
 			});
 		});
 
 		it("Produces correct results in simple case", () => {
 			const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+			assertNoError(output)
 			const ruleResults: RuleResult[] = extractRuleResults(output.shellOutput);
 
 			// Verify number of results.
-			expect(ruleResults).to.have.lengthOf(2);
+			expect(ruleResults).to.have.lengthOf(4);
 			// Verify that each result is well-formed.
 			expect(ruleResults[0].engine).to.equal(ENGINE.CPD);
 			expect(ruleResults[0].fileName).to.not.be.empty;
@@ -55,19 +58,14 @@ describe("End to end tests for CPD engine", () => {
 			const violationMsg2 = ruleResults[1].violations[0].message;
 
 			// confirm that the checksum is the same
-			const checksum1 = violationMsg1.substr(0, violationMsg1.indexOf(":"));
-			const checksum2 = violationMsg2.substr(0, violationMsg2.indexOf(":"));
+			const checksum1 = violationMsg1.substring(0, violationMsg1.indexOf(":"));
+			const checksum2 = violationMsg2.substring(0, violationMsg2.indexOf(":"));
 			expect(checksum2).equals(checksum1);
 
-			// confirm lines and tokens identified are the same
-			const lineAndToken1 = violationMsg1.substr(violationMsg1.indexOf("detected."));
-			const lineAndToken2 = violationMsg2.substr(violationMsg2.indexOf("detected."));
+			// confirm lines, tokens identified, and total counts are the same
+			const lineAndToken1 = violationMsg1.replace("1 of 2", "# of 2");
+			const lineAndToken2 = violationMsg2.replace("2 of 2", "# of 2");
 			expect(lineAndToken2).equals(lineAndToken1);
-
-			// confirm total count of duplications
-			const totalCount1 = violationMsg1.substr(violationMsg1.indexOf("of "), violationMsg1.indexOf(" duplication"));
-			const totalCount2 = violationMsg2.substr(violationMsg2.indexOf("of "), violationMsg2.indexOf(" duplication"));
-			expect(totalCount2).equals(totalCount1);
 		});
 
 		describe("Processing Minimum Tokens value", () => {
@@ -77,14 +75,15 @@ describe("End to end tests for CPD engine", () => {
 
 			describe("Pulls value from environment variable if it is...", () => {
 				it("...a wholly numeric string", () => {
-					process.env[MINIMUM_TOKENS_ENV_VAR] = '50';
+					process.env[MINIMUM_TOKENS_ENV_VAR] = '200';
 					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					assertNoError(output)
 					verifyEnvVarIsUsedForMinimumTokens(output.shellOutput);
 				});
 
 				it("...a partly numeric string", () => {
-					// The environment variable processing will strip non-numeric characters, making this "50".
-					process.env[MINIMUM_TOKENS_ENV_VAR] = 'My5String0';
+					// The environment variable processing will strip non-numeric characters, making this "600".
+					process.env[MINIMUM_TOKENS_ENV_VAR] = 'My2String00';
 					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
 					verifyEnvVarIsUsedForMinimumTokens(output.shellOutput);
 				});
@@ -113,20 +112,20 @@ describe("End to end tests for CPD engine", () => {
 	});
 });
 function verifyEnvVarIsUsedForMinimumTokens(ctx) {
-	const Minimum_Tokens_50 = [Apex_File1, Apex_File2, Vf_File1, Vf_File2].sort();
+	const Minimum_Tokens_200 = [Vf_File1, Vf_File2].sort();
 	const ruleResults: RuleResult[] = extractRuleResults(ctx);
 
 	const actualFileNames = ruleResults.map(ruleResult => ruleResult.fileName).sort();
-	expect(ruleResults.length).equals(Minimum_Tokens_50.length);
+	expect(ruleResults.length).equals(Minimum_Tokens_200.length);
 
 	for (let i = 0; i < ruleResults.length; i++) {
-		// Comparing substring since actualFileName contains full path and Minimum_Tokens_50 contains relative paths
-		expect(actualFileNames[i]).contains(Minimum_Tokens_50[i]);
+		// Comparing substring since actualFileName contains full path and Minimum_Tokens_300 contains relative paths
+		expect(actualFileNames[i]).contains(Minimum_Tokens_200[i]);
 	}
 }
 
 function verifyDefaultConfigIsUsedForMinimumTokens(ctx) {
-	const Minimum_Tokens_100 = [Vf_File1, Vf_File2].sort();
+	const Minimum_Tokens_100 = [Apex_File1, Apex_File2, Vf_File1, Vf_File2].sort();
 
 	const ruleResults: RuleResult[] = extractRuleResults(ctx);
 
@@ -145,5 +144,11 @@ function extractRuleResults(ctx) {
 	expect(jsonOutput).is.not.empty;
 	const ruleResults: RuleResult[] = JSON.parse(jsonOutput);
 	return ruleResults;
+}
+
+function assertNoError(output) {
+	if (output.shellOutput.stderr.includes("Error")) {
+		expect.fail("Found error in stderr output:\n" + output.shellOutput.stderr);
+	}
 }
 

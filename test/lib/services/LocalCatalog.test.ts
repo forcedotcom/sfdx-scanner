@@ -27,8 +27,6 @@ describe('LocalCatalog', () => {
 	describe('getRuleGroupsMatchingFilters', async () => {
 
 		const ENGINES = await Controller.getAllEngines();
-
-		const LANGUAGE_ECMASCRIPT = 'ecmascript';
 		/**
 		 * Return a map of key=<engine.name>:<ruleGroup.name>, value=RuleGroup
 		 */
@@ -100,34 +98,17 @@ describe('LocalCatalog', () => {
 			it('Correctly filters by one value', async () => {
 				// SETUP
 				// Create a filter that matches a single ruleset.
-				const filter: RuleFilter = new RulesetFilter(['Braces']);
+				const filter: RuleFilter = new RulesetFilter(['quickstart']);
 
 				// INVOCATION OF TESTED METHOD
 				// Use the created filter to filter the available rules.
 				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 				// ASSERTIONS
-				// We expect a single ruleset, corresponding to PMD's "Braces" ruleset.
+				// We expect a single ruleset, corresponding to PMD's "quickstart" ruleset.
 				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(1);
 				const mappedRuleGroups = mapRuleGroups(ruleGroups);
-				validatePmdRuleset(mappedRuleGroups, 'Braces', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-			});
-
-			it('Correctly filters by multiple values', async () => {
-				// SETUP
-				// Create a filter that matches two rulesets.
-				const filter: RuleFilter = new RulesetFilter(['Security', 'Braces']);
-
-				// INVOCATION OF TESTED METHOD
-				// Use the created filter to filter the available rules.
-				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
-
-				// ASSERTIONS
-				// We expect two rulesets, corresponding to PMD's "Security" and "Braces" rulesets.
-				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(2);
-				const mappedRuleGroups = mapRuleGroups(ruleGroups);
-				validatePmdRuleset(mappedRuleGroups, 'Braces', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdRuleset(mappedRuleGroups, 'Security', ['apex', 'vf']);
+				validatePmdRuleset(mappedRuleGroups, 'quickstart', [LANGUAGE.APEX]);
 			});
 		});
 
@@ -148,7 +129,7 @@ describe('LocalCatalog', () => {
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 					validateEslintBestPractices(mappedRuleGroups);
-					validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+					validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE.APEX]);
 				});
 
 				it('Correctly filters by multiple values', async () => {
@@ -166,7 +147,7 @@ describe('LocalCatalog', () => {
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 					validateEslintPossibleErrors(mappedRuleGroups);
 					validateEslintBestPractices(mappedRuleGroups);
-					validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
+					validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE.APEX]);
 				});
 			});
 
@@ -186,8 +167,8 @@ describe('LocalCatalog', () => {
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 					validateEslintPossibleErrors(mappedRuleGroups);
-					validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
-					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
+					validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE.APEX]);
+					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX]);
 					validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 
@@ -206,7 +187,7 @@ describe('LocalCatalog', () => {
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 					validateEslintPossibleErrors(mappedRuleGroups);
-					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
+					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX]);
 					validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 			});
@@ -230,7 +211,7 @@ describe('LocalCatalog', () => {
 				const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 				validateEslintBestPractices(mappedRuleGroups);
-				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE.APEX]);
 			});
 		});
 
@@ -241,9 +222,9 @@ describe('LocalCatalog', () => {
 
 				validateEslintBestPractices(mappedRuleGroups);
 				validateEslintPossibleErrors(mappedRuleGroups);
-				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE.APEX]);
+				validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE.APEX]);
+				validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX]);
 				validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 			}
 
