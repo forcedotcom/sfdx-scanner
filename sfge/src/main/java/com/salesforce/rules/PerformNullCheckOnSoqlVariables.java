@@ -23,7 +23,7 @@ public final class PerformNullCheckOnSoqlVariables extends AbstractPathTraversal
             ImmutableSet.copyOf(ApexPathSource.Type.values());
 
     private static final String URL =
-            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#PerformNullCheckOnSoqlVariables";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/performnullcheckonsoqlvariables-rule.html";
 
     // don't instantiate
     private PerformNullCheckOnSoqlVariables() {}

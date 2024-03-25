@@ -63,7 +63,7 @@ public abstract class AbstractRule {
      * Unless the rule has a predetermined URL, we'll return a link to information about the engine.
      */
     protected String getUrl() {
-        return "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/";
+        return "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/salesforce-graph-engine.html";
     }
 
     public static class Descriptor {

@@ -17,7 +17,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 public class UnimplementedTypeRule extends AbstractStaticRule {
     private static final String URL =
-            "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnimplementedTypeRule";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/unimplementedtype-rule.html";
 
     private static final String ABSTRACT_CLASS = "abstract class";
     private static final String INTERFACE = "interface";

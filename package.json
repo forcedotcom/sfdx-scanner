@@ -97,7 +97,7 @@
 		"/retire-js",
 		"/oclif.lock"
 	],
-	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
+	"homepage": "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview",
 	"keywords": [
 		"sfdx-plugin",
 		"sf-plugin"

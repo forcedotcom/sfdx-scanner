@@ -11,10 +11,10 @@ assignees: ''
 Oftentimes, you can resolve `scanner run dfa` issues on your own. Follow these steps.
 
 1. Read the error message.
-2. Read [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/) documentation.
-3. Read our guide for [troubleshooting Graph Engine errors](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/troubleshooting/#issues-using-salesforce-graph-engine).
-4. Read our guidelines to resolve [LimitReached errors](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors) and [path evaluation timeouts](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/troubleshooting/#issues-using-salesforce-graph-engine).
-5. Read our [Guide to Writing Graph Engine-Friendly Code](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/graph-engine-recommendations/).
+2. Read [Salesforce Graph Engine](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/salesforce-graph-engine.html) documentation.
+3. Read our guide for [troubleshooting Graph Engine errors](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/troubleshooting.html).
+4. Read our guidelines to resolve [LimitReached errors](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/working-with-graph-engine.html#limitreached-errors) and [path evaluation timeouts](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/troubleshooting.html#issues-using-salesforce-graph-engine).
+5. Read our [Guide to Writing Graph Engine-Friendly Code](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/graph-engine-friendly-code.html).
 6. Double-check the command that you entered. Ensure that items like file names, method names, and category names are correctly spelled and cased.
 7. Verify that your code is syntactically valid.
 8. Verify that the error is reproducible on another machine.
