@@ -40,6 +40,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		const logger: Logger = await Logger.child(this.ctor.name);
 		const display: Display = new UxDisplay(this, this.spinner, inputs.verbose as boolean);
 
+		display.displayWarning(getMessage(BundleName.Common, 'upgradeTo4xRecommendation'));
 		display.displayWarning(getMessage(BundleName.Common, 'surveyRequestMessage'));
 		this.buildEventListeners(display);
 
