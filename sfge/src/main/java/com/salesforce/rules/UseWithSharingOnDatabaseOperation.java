@@ -14,7 +14,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 public final class UseWithSharingOnDatabaseOperation extends AbstractPathTraversalRule {
 
     private static final String URL =
-            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UseWithSharingOnDatabaseOperation";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/usewithsharingondatabaseoperation-rule.html";
 
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());

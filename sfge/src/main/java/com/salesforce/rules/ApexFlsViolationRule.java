@@ -37,7 +37,7 @@ public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
      * again.
      */
     static final String URL =
-            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#ApexFlsViolationRule";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/apexflsviolation-rule.html";
 
     private static final String DESCRIPTION =
             "Identifies data read/write operations that may not have CRUD/FLS";

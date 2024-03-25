@@ -15,7 +15,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  */
 public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule {
     private static final String URL =
-            "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#ApexNullPointerExceptionRule";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/apexnullpointerexception-rule.html";
     // ApexNullPointerExceptionRule cares about all sources, since they're all equally capable
     // of throwing NPEs.
     private static final ImmutableSet<Type> SOURCE_TYPES = ImmutableSet.copyOf(Type.values());

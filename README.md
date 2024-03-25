@@ -16,7 +16,7 @@ Code Analyzer current supports the PMD rule engine, PMD Copy Paste Detector, ESL
 Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code.
 
 # Salesforce Code Analyzer Documentation
-Read [Salesforce Code Analyzer](https://forcedotcom.github.io/sfdx-scanner/) documentation to learn:
+Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation to learn:
 * how to install Code Analyzer
 * what is included in the Code Analyzer command reference
 * the structure of Code Analyzer architecture

@@ -592,7 +592,7 @@ describe('Results Formatting', () => {
 			const driver = run['tool']['driver'];
 			expect(driver.name).to.equal(ENGINE.SFGE);
 			expect(driver.version).to.equal(SFGE_VERSION);
-			expect(driver.informationUri).to.equal('https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/');
+			expect(driver.informationUri).to.equal('https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/salesforce-graph-engine.html');
 
 			// tool.driver.rules
 			expect(driver['rules']).to.have.lengthOf(1, 'Incorrect rule count');

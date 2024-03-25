@@ -11,7 +11,7 @@ assignees: ''
 Oftentimes, you can resolve `scanner run` issues on your own. Follow these steps.
 
 1. Read the error message.
-2. Read [Salesforce Code Analyzer](https://forcedotcom.github.io/sfdx-scanner/) documentation.
+2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
 3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
 4. Verify that your code is syntactically valid.
 5. Verify that the error is reproducible on another machine.

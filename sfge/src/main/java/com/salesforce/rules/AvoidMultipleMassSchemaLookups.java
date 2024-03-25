@@ -20,7 +20,7 @@ public class AvoidMultipleMassSchemaLookups extends AbstractPathTraversalRule {
     private final MultipleMassSchemaLookupRuleHandler ruleHandler;
 
     private static final String URL =
-            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#AvoidMultipleMassSchemaLookups";
+            "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/avoidmultiplemassschemalookup-rule.html";
 
     private AvoidMultipleMassSchemaLookups() {
         ruleHandler = MultipleMassSchemaLookupRuleHandler.getInstance();

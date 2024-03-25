@@ -324,7 +324,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
             this.url =
-                    "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-errors";
+                    "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/working-with-graph-engine.html#limitreached-errors";
         }
     }
 
@@ -340,7 +340,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
             this.url =
-                    "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/";
+                    "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/working-with-graph-engine.html";
         }
     }
 
