@@ -3,7 +3,7 @@ import {ESLint} from 'eslint';
 import {isPathlessViolation} from '../../../src/lib/util/Utils';
 import {EngineExecutionSummary, FormattedOutput, RuleResult, RuleViolation} from '../../../src/types';
 import path = require('path');
-import * as csvParse from 'csv-parse';
+import csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { PathlessEngineFilters, ENGINE, PMD7_VERSION, SFGE_VERSION } from '../../../src/Constants';

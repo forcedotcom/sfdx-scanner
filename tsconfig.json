@@ -1,11 +1,11 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "NodeNext",
 		"target": "es2021",
 		"lib": ["es2021"],
 		"sourceMap": true,
 		"declaration": true,
-		"moduleResolution": "node16",
+		"moduleResolution": "NodeNext",
 		"alwaysStrict": true,
 		"noUnusedLocals": true,
 		"outDir": "./lib",

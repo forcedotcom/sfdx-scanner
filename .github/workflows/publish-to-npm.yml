@@ -16,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Check out the release branch, and get its head commit as output for later.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: 'release'
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-branch-commit
       # Checkout the tag we want to release, and get its head commit as output for later.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
@@ -68,14 +68,14 @@ jobs:
     runs-on: ${{ matrix.os.vm }}
     steps:
       # We need to checkout the tag to get the smoke tests
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
       # We need Node LTS and Java v11
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '11' # For now, Java version is hardcoded.
@@ -87,7 +87,7 @@ jobs:
       # Attempt to run the smoke tests.
       - run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
       # Upload the smoke test result as an artifact, so it's visible for later.
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
           name: ${{ runner.os }}-smoke-test-results
@@ -97,7 +97,7 @@ jobs:
     needs: rc-test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
       - run: |
