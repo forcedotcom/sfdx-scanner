@@ -20,15 +20,15 @@ Disable warning violations from Salesforce Graph Engine. Inherits value from SFG
 
 # flags.ruledisablewarningviolationDescription
 
-Examples of warning violations include those on StripInaccessible READ access, to get only high-severity violations (default: false).
+Examples of warning violations include those on StripInaccessible READ access, to get only high-severity violations.
 
 # flags.rulethreadcountSummary
 
-Number of DFA rule-evaluation threads or how many entry points can be evaluated concurrently. Inherits its value from the SFGE_RULE_THREAD_COUNT environment variable, if set. The default is 4.
+Number of DFA rule-evaluation threads or how many entry points can be evaluated concurrently. Inherits its value from the SFGE_RULE_THREAD_COUNT environment variable, if set.
 
 # flags.rulethreadtimeoutSummary
 
-Time limit, in milliseconds, for evaluating a single entry point. Inherits its value from the "SFGE_RULE_THREAD_TIMEOUT" environment variable, if set. Default: 900000 ms.
+Time limit, in milliseconds, for evaluating a single entry point. Inherits its value from the "SFGE_RULE_THREAD_TIMEOUT" environment variable, if set.
 
 # flags.sfgejvmargsSummary
 
@@ -36,7 +36,7 @@ Java Virtual Machine (JVM) arguments to override system defaults while executing
 
 # flags.targetSummary
 
-Source code location. Default is ".".
+Source code location.
 
 # flags.targetDescription
 
