@@ -22,8 +22,7 @@ export default class Add extends ScannerCommand {
 	public static readonly flags = {
 		language: Flags.string({
 			char: 'l',
-			summary: getMessage(BundleName.Add, 'flags.languageSummary'),
-			description: getMessage(BundleName.Add, 'flags.languageDescription'),
+			summary: getMessage(BundleName.Add, 'flags.languageSummary')
 			required: true
 		}),
 		path: Flags.custom<string[]>({
