@@ -61,7 +61,8 @@ export default class Dfa extends ScannerRunCommand {
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
 		'rule-disable-warning-violation': Flags.boolean({
 			summary: getMessage(BundleName.RunDfa, 'flags.ruledisablewarningviolationSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.ruledisablewarningviolationDescription')
+			description: getMessage(BundleName.RunDfa, 'flags.ruledisablewarningviolationDescription'),
+			default: 'false'
 		}),
 		'sfgejvmargs': Flags.string({
 			summary: getMessage(BundleName.RunDfa, 'flags.sfgejvmargsSummary'),
