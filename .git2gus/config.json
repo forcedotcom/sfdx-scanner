@@ -11,5 +11,13 @@
         "type:security": "BUG P0",
         "type:feedback": "",
         "type:duplicate": ""
-    }
+    },
+    "issueEpicMapping": {
+        "USER STORY": "a3QEE000000OpkY2AS",
+        "BUG P0": "a3QEE000000V67Z2AS",
+        "BUG P1": "a3QEE000000V67Z2AS",
+        "BUG P2": "a3QEE000000V67Z2AS",
+        "BUG P3": "a3QEE000000V67Z2AS"
+    },
+    "gusTitlePrefix": "[GitHub Issue]"
 }
