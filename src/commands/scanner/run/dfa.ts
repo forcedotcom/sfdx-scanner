@@ -31,8 +31,7 @@ export default class Dfa extends ScannerRunCommand {
 		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
 		'with-pilot': Flags.boolean({
-			summary: getMessage(BundleName.RunDfa, 'flags.withpilotSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.withpilotDescription')
+			summary: getMessage(BundleName.RunDfa, 'flags.withpilotSummary')
 		}),
 		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
@@ -43,18 +42,19 @@ export default class Dfa extends ScannerRunCommand {
 			summary: getMessage(BundleName.RunDfa, 'flags.targetSummary'),
 			description: getMessage(BundleName.RunDfa, 'flags.targetDescription'),
 			delimiter: ',',
+			default: '.',
 			multiple: true
 		})(),
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': Flags.integer({
 			summary: getMessage(BundleName.RunDfa, 'flags.rulethreadcountSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.rulethreadcountDescription'),
+			default: 4,
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
 		'rule-thread-timeout': Flags.integer({
 			summary: getMessage(BundleName.RunDfa, 'flags.rulethreadtimeoutSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.rulethreadtimeoutDescription'),
+			default: 900000,
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
@@ -65,7 +65,6 @@ export default class Dfa extends ScannerRunCommand {
 		}),
 		'sfgejvmargs': Flags.string({
 			summary: getMessage(BundleName.RunDfa, 'flags.sfgejvmargsSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.sfgejvmargsDescription'),
 			env: 'SFGE_JVM_ARGS'
 		}),
 		'pathexplimit': Flags.integer({
