@@ -54,21 +54,19 @@ export default class Run extends ScannerRunCommand {
 			summary: getMessage(BundleName.Run, 'flags.targetSummary'),
 			description: getMessage(BundleName.Run, 'flags.targetDescription'),
 			delimiter: ',',
+			default: '.',
 			multiple: true
 		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
 		tsconfig: Flags.string({
-			summary: getMessage(BundleName.Run, 'flags.tsconfigSummary'),
-			description: getMessage(BundleName.Run, 'flags.tsconfigDescription')
+			summary: getMessage(BundleName.Run, 'flags.tsconfigSummary')
 		}),
 		eslintconfig: Flags.string({
-			summary: getMessage(BundleName.Run, 'flags.eslintConfigSummary'),
-			description: getMessage(BundleName.Run, 'flags.eslintConfigDescription')
+			summary: getMessage(BundleName.Run, 'flags.eslintConfigSummary')
 		}),
 		pmdconfig: Flags.string({
-			summary: getMessage(BundleName.Run, 'flags.pmdConfigSummary'),
-			description: getMessage(BundleName.Run, 'flags.pmdConfigDescription')
+			summary: getMessage(BundleName.Run, 'flags.pmdConfigSummary')
 		}),
 
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
@@ -83,8 +81,7 @@ export default class Run extends ScannerRunCommand {
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
 		"verbose-violations": Flags.boolean({
-			summary: getMessage(BundleName.Run, 'flags.verboseViolationsSummary'),
-			description: getMessage(BundleName.Run, 'flags.verboseViolationsDescription')
+			summary: getMessage(BundleName.Run, 'flags.verboseViolationsSummary')
 		})
 		// END: Flags related to results processing.
 	};
