@@ -12,7 +12,6 @@ import {RuleDescribeAction} from "../../../lib/actions/RuleDescribeAction";
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
 	public static summary = getMessage(BundleName.Describe, 'commandSummary');
-	public static description = getMessage(BundleName.Describe, 'commandDescription');
 	public static examples = [
 		getMessage(BundleName.Describe, 'examples.normalExample')
 	];
@@ -23,7 +22,6 @@ export default class Describe extends ScannerCommand {
 		rulename: Flags.string({
 			char: 'n',
 			summary: getMessage(BundleName.Describe, 'flags.rulenameSummary'),
-			description: getMessage(BundleName.Describe, 'flags.rulenameDescription'),
 			required: true
 		}),
 		verbose: Flags.boolean({
