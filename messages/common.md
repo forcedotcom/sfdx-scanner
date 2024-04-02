@@ -1,9 +1,5 @@
 # flags.verboseSummary
 
-emit additional command output to stdout
-
-# flags.verboseDescription
-
 Emit additional command output to stdout.
 
 # surveyRequestMessage
