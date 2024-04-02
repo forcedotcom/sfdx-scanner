@@ -29,7 +29,6 @@ export default class List extends ScannerCommand {
 		category: Flags.custom<string[]>({
 			char: 'c',
 			summary: getMessage(BundleName.List, 'flags.categorySummary'),
-			description: getMessage(BundleName.List, 'flags.categoryDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
@@ -39,7 +38,6 @@ export default class List extends ScannerCommand {
 				message: getMessage(BundleName.List, 'rulesetDeprecation')
 			},
 			summary: getMessage(BundleName.List, 'flags.rulesetSummary'),
-			description: getMessage(BundleName.List, 'flags.rulesetDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
@@ -53,7 +51,6 @@ export default class List extends ScannerCommand {
 		engine: Flags.custom<string[]>({
 			char: 'e',
 			summary: getMessage(BundleName.List, 'flags.engineSummary'),
-			description: getMessage(BundleName.List, 'flags.engineDescription'),
 			options: [...AllowedEngineFilters],
 			delimiter: ',',
 			multiple: true
