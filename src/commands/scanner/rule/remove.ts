@@ -27,8 +27,7 @@ export default class Remove extends ScannerCommand {
 		}),
 		force: Flags.boolean({
 			char: 'f',
-			summary: getMessage(BundleName.Remove, 'flags.forceSummary'),
-			description: getMessage(BundleName.Remove, 'flags.forceDescription')
+			summary: getMessage(BundleName.Remove, 'flags.forceSummary')
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
