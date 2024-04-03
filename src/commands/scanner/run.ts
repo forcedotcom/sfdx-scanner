@@ -54,7 +54,6 @@ export default class Run extends ScannerRunCommand {
 			summary: getMessage(BundleName.Run, 'flags.targetSummary'),
 			description: getMessage(BundleName.Run, 'flags.targetDescription'),
 			delimiter: ',',
-			default: '.',
 			multiple: true
 		})(),
 		// END: Targeting-related flags.

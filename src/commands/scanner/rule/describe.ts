@@ -25,8 +25,7 @@ export default class Describe extends ScannerCommand {
 			required: true
 		}),
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
-			description: getMessage(BundleName.Common, 'flags.verboseDescription')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
 	};
 

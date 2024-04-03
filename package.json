@@ -112,6 +112,9 @@
 				"subtopics": {
 					"rule": {
 						"description": "View or add rules to scan code."
+					},
+					"run": {
+						"description": "Scan a codebase with a selection of rules."
 					}
 				}
 			},

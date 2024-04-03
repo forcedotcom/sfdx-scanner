@@ -23,12 +23,12 @@ export default class List extends ScannerCommand {
 	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
-			description: getMessage(BundleName.Common, 'flags.verboseDescription')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
 		category: Flags.custom<string[]>({
 			char: 'c',
 			summary: getMessage(BundleName.List, 'flags.categorySummary'),
+			description: getMessage(BundleName.List, 'flags.categoryDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
@@ -51,6 +51,7 @@ export default class List extends ScannerCommand {
 		engine: Flags.custom<string[]>({
 			char: 'e',
 			summary: getMessage(BundleName.List, 'flags.engineSummary'),
+			description: getMessage(BundleName.List, 'flags.engineDescription'),
 			options: [...AllowedEngineFilters],
 			delimiter: ',',
 			multiple: true

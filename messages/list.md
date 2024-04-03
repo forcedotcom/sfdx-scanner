@@ -12,7 +12,7 @@ Select rules by language.
 
 # flags.languageDescription
 
-Enter multiple values as a comma-separated list.
+Specify multiple values as a comma-separated list.
 
 # flags.categorySummary
 
@@ -20,7 +20,7 @@ Select rules by category.
 
 # flags.categoryDescription
 
-Enter multiple values as a comma-separated list.
+Specify multiple values as a comma-separated list.
 
 # flags.rulesetSummary
 
@@ -28,7 +28,11 @@ Deprecated. Use category instead. Select rules by ruleset.
 
 # flags.engineSummary
 
-Deprecated. Use category instead. Select rules by engine.
+Select rules by engine.
+
+# flags.engineDescription
+
+Specify multiple values as a comma-separated list.
 
 # rulesetDeprecation
 
@@ -72,19 +76,14 @@ N
 
 # examples
 
-- This example invokes the command without filter criteria, which returns all rules:
+- This example invokes the command without filter criteria, which returns all rules.
 
 	<%= config.bin %> <%= command.id %>
 
-- This example returns all rules for Apex OR Javascript. Values supplied to a single filter are handled with a logical OR:
+- This example returns all rules for Apex OR Javascript. Values supplied to a single filter are handled with a logical OR.
 
 	<%= config.bin %> <%= command.id %> --language apex,javascript
 
-- This example returns all rules except those in the Design or Best Practices categories. Exclude categories by specifying the negation operator and enclosing the values in single quotes:
-
-	<%= config.bin %> <%= command.id %> --category '!Design,!Best Practices'
-
-- This example returns all rules that target Apex OR Javascript, AND are members of the Braces OR Security rulesets.
-The different filters are combined with a logical AND:
+- This example returns all rules that target Apex OR Javascript, AND are members of the Braces OR Security rulesets. The different filters are combined with a logical AND.
 
 	<%= config.bin %> <%= command.id %> --language apex,javascript --ruleset Braces,Security

@@ -1,18 +1,26 @@
 # flags.categorySummary
 
-One or more categories of rules to run. Specify multiple values as a comma-separated list.
+One or more categories of rules to run.
+
+# flags.categoryDescription
+
+Specify multiple values as a comma-separated list.
 
 # flags.formatSummary
 
-Specify results the output format for results written directly to the console.
+The output format for results written directly to the console.
 
 # flags.normalizesevSummary
 
-Normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine-specific severity. For the html option, the normalized severity is displayed instead of the engine severity.
+Include normalized severity levels 1 (high), 2 (moderate), and 3 (low) with the results.
+
+# flags.normalizesevDescription
+
+For the html option, the normalized severity is displayed instead of the engine severity.
 
 # flags.outfileSummary
 
-Output written to a file
+File to write output to.
 
 # flags.projectdirSummary
 
@@ -24,7 +32,11 @@ Specify multiple values as a comma-separated list. Each project directory must b
 
 # flags.sevthresholdSummary
 
-An error when violations are found with equal or greater severity than the provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag.
+An error will be thrown when a violation is found with a severity equal to or greater than the specified level.
+
+# flags.sevthresholdDescription
+
+Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag.
 
 # internal.outfileMustBeValid
 

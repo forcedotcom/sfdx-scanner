@@ -4,7 +4,7 @@ Add custom rules to Salesforce Code Analyzer's registry to run them along with t
 
 # commandDescription
 
-Compile and test custom rules separately before adding them.
+Bundle custom PMD rules in JAR files. Follow PMD conventions, such as defining the custom rules in XML files under a `/category/` directory. Compile and test custom rules separately before adding them. See PMD's documentation for more information on writing rules.
 
 # flags.languageSummary
 
@@ -36,16 +36,10 @@ Successfully added rules for %s.
 
 # examples
 
-- Bundle custom PMD rules in JAR files. Follow PMD conventions, such as defining the custom rules in XML files under a `/category/` directory. See PMD's documentation for more information on writing rules.
-
 - This example shows how to specify two JAR files directly.
 
 	<%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
-		Successfully added rules for Apex.
-		2 path(s) added:
-		/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar
 
 - This example shows how to specify a directory containing one or more JARs, all of which are added to the registry.
 
 	<%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules"
-		Successfully added rules for Apex.
