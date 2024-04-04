@@ -1,6 +1,6 @@
 # commandSummary
 
-Provides detailed information about a rule that includes the rule's language (such as Apex or Java), the violation it detects, example code of the violation, and the rule's categories and rulesets.
+Provide detailed information about a rule that includes the rule's language (such as Apex or Java), the violation it detects, example code of the violation, and the rule's categories and rulesets.
 
 # flags.rulenameSummary
 
