@@ -84,7 +84,7 @@
 		"ts-mockito": "^2.6.1"
 	},
 	"engines": {
-		"node": ">=8.0.0"
+		"node": ">=20.0.0"
 	},
 	"files": [
 		"/dist",
