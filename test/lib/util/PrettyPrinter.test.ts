@@ -12,7 +12,7 @@ function createRulenameFilter(): {ruleFilter: RuleFilter; expectedRuleFilterStri
 
 function createCategoryFilter(): {ruleFilter: RuleFilter; expectedRuleFilterString: string} {
 	const expectedRuleFilterString = `RuleFilter[filterType=CategoryFilter, filterValues=Rule3,Rule4, negated=false]`;
-	const ruleFilter = new CategoryFilter(['Rule3', 'Rule4']);
+	const ruleFilter = new CategoryFilter(['Rule3', 'Rule4'], true);
 	return {ruleFilter, expectedRuleFilterString};
 }
 
