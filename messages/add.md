@@ -38,8 +38,8 @@ Successfully added rules for %s.
 
 - This example shows how to specify two JAR files directly.
 
-	<%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
+  <%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
 
 - This example shows how to specify a directory containing one or more JARs, all of which are added to the registry.
 
-	<%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules"
+  <%= config.bin %> <%= command.id %> --language apex --path "/Users/me/rules"

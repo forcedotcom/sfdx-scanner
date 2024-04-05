@@ -18,4 +18,4 @@ No rules were found with the name '%s'.
 
 - This example shows how to describe the ApexBadCrypto rule.
 
-	<%= config.bin %> <%= command.id %> --rulename ApexBadCrypto
+  <%= config.bin %> <%= command.id %> --rulename ApexBadCrypto

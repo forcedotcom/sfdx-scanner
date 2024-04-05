@@ -78,12 +78,12 @@ N
 
 - This example invokes the command without filter criteria, which returns all rules.
 
-	<%= config.bin %> <%= command.id %>
+  <%= config.bin %> <%= command.id %>
 
 - This example returns all rules for Apex OR Javascript. Values supplied to a single filter are handled with a logical OR.
 
-	<%= config.bin %> <%= command.id %> --language apex,javascript
+  <%= config.bin %> <%= command.id %> --language apex,javascript
 
 - This example returns all rules that target Apex OR Javascript, AND are members of the Braces OR Security rulesets. The different filters are combined with a logical AND.
 
-	<%= config.bin %> <%= command.id %> --language apex,javascript --ruleset Braces,Security
+  <%= config.bin %> <%= command.id %> --language apex,javascript --ruleset Braces,Security
