@@ -1,16 +1,8 @@
 # commandSummary
 
-provide detailed information about a rule
-
-# commandDescription
-
-Provides detailed information about a rule. Information includes the rule's language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.
+Provide detailed information about a rule that includes the rule's language (such as Apex or Java), the violation it detects, example code of the violation, and the rule's categories and rulesets.
 
 # flags.rulenameSummary
-
-the name of the rule
-
-# flags.rulenameDescription
 
 The name of the rule.
 
@@ -24,10 +16,6 @@ No rules were found with the name '%s'.
 
 # examples.normalExample
 
-$ <%= config.bin %> <%= command.id %> --rulename ExampleRule
-	name:        AvoidWithStatement
-	categories:   Best Practices
-	rulesets:    Controversial Ecmascript
-	languages:   javascript
-	description: Avoid using with - it's bad news
-	message:     Avoid using with - it's bad news
+- This example shows how to describe the ApexBadCrypto rule.
+
+  <%= config.bin %> <%= command.id %> --rulename ApexBadCrypto
