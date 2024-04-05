@@ -10,8 +10,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 */
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
-			description: getMessage(BundleName.Common, 'flags.verboseDescription')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
 		// BEGIN: Filter-related flags.
 		category: Flags.custom<string[]>({
@@ -25,13 +24,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		format: Flags.custom<OutputFormat>({
 			char: 'f',
 			summary: getMessage(BundleName.CommonRun, 'flags.formatSummary'),
-			description: getMessage(BundleName.CommonRun, 'flags.formatDescription'),
 			options: Object.values(OutputFormat)
 		})(),
 		outfile: Flags.string({
 			char: 'o',
-			summary: getMessage(BundleName.CommonRun, 'flags.outfileSummary'),
-			description: getMessage(BundleName.CommonRun, 'flags.outfileDescription')
+			summary: getMessage(BundleName.CommonRun, 'flags.outfileSummary')
 		}),
 		'severity-threshold': Flags.integer({
 			char: 's',

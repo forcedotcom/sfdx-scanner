@@ -23,7 +23,6 @@ export default class Add extends ScannerCommand {
 		language: Flags.string({
 			char: 'l',
 			summary: getMessage(BundleName.Add, 'flags.languageSummary'),
-			description: getMessage(BundleName.Add, 'flags.languageDescription'),
 			required: true
 		}),
 		path: Flags.custom<string[]>({

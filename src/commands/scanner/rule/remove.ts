@@ -22,13 +22,11 @@ export default class Remove extends ScannerCommand {
 	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
-			description: getMessage(BundleName.Common, 'flags.verboseDescription')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
 		force: Flags.boolean({
 			char: 'f',
-			summary: getMessage(BundleName.Remove, 'flags.forceSummary'),
-			description: getMessage(BundleName.Remove, 'flags.forceDescription')
+			summary: getMessage(BundleName.Remove, 'flags.forceSummary')
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
