@@ -89,6 +89,18 @@ const DEFAULT_CONFIG: ConfigContent = {
 			disabled: false
 		},
 		{
+			name: ENGINE.ESLINT_CUSTOM,
+			targetPatterns: [
+				// Reduce default to be only what the other eslint engines can do (i.e. js and ts files).
+				// See https://github.com/forcedotcom/sfdx-scanner/issues/1146
+				// If user wants other files, then they update this inside of their ~/.sfdx-scanner/Config.json file
+				"**/*.js",
+				"**/*.ts",
+				"!**/node_modules/**",
+				"!**/bower_components/**"
+			]
+		},
+		{
 			name: ENGINE.ESLINT_LWC,
 			targetPatterns: [
 					"**/*.js",

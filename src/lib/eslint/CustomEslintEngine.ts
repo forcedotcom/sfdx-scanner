@@ -7,12 +7,16 @@ import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
 import {ESLint, Linter} from 'eslint';
 import {BundleName, getMessage} from "../../MessageCatalog";
+import {Config} from "../util/Config";
+import {Controller} from "../../Controller";
 
 export class CustomEslintEngine extends AbstractRuleEngine {
 
 	private dependencies: StaticDependencies;
 	private helper: EslintProcessHelper;
 	private eventCreator: EventCreator;
+	private initialized: boolean;
+	private config: Config;
 	protected logger: Logger;
 
 	getEngine(): ENGINE {
@@ -44,14 +48,18 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
 		this.logger = await Logger.child(`eslint-custom`);
+		this.config = await Controller.getConfig();
 		this.dependencies = dependencies;
 		this.helper = new EslintProcessHelper();
 		this.eventCreator = await EventCreator.create({});
 	}
 
 	async getTargetPatterns(): Promise<TargetPattern[]> {
-		return Promise.resolve(["**"]); // TODO: We need a different way to set target pattern. Somehow eslintrc's ignore pattern doesn't work as expected
+		return await this.config.getTargetPatterns(this.getEngine());
 	}
 
 	getCatalog(): Promise<Catalog> {
