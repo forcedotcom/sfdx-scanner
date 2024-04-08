@@ -40,17 +40,34 @@ describe('Misc scanner run tests', () => {
 	});
 
 	it('We can successful call the retire engine and get a violation', async () => {
-			const inputs: Inputs = {
-				target: [path.join(PATH_TO_CODE_FIXTURES, 'projects', 'dep-test-app', 'folder-a')],
-				engine: ['retire-js']
-			};
-			await runAction.run(inputs);
+		const inputs: Inputs = {
+			target: [path.join(PATH_TO_CODE_FIXTURES, 'projects', 'dep-test-app', 'folder-a')],
+			engine: ['retire-js']
+		};
+		await runAction.run(inputs);
 
-			const results: Results = resultsProcessor.getResults();
-			let ruleResults: RuleResult[] = results.getRuleResults();
-			expect(ruleResults).to.have.length(1);
-			expect(ruleResults[0].engine).to.equal('retire-js');
-			expect(ruleResults[0].violations).to.have.length(1);
-			expect(ruleResults[0].violations[0].ruleName).to.equal('insecure-bundled-dependencies');
-		});
+		const results: Results = resultsProcessor.getResults();
+		let ruleResults: RuleResult[] = results.getRuleResults();
+		expect(ruleResults).to.have.length(1);
+		expect(ruleResults[0].engine).to.equal('retire-js');
+		expect(ruleResults[0].violations).to.have.length(1);
+		expect(ruleResults[0].violations[0].ruleName).to.equal('insecure-bundled-dependencies');
 	});
+
+	it('Our eslint and eslint-lwc engines should not complain about the aura namespace $A variable (W-15080616)', async () => {
+		const inputs: Inputs = {
+			target: [path.join(PATH_TO_CODE_FIXTURES, 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'AccountRepeat')],
+			engine: ['eslint', 'eslint-lwc']
+		};
+		await runAction.run(inputs);
+
+		for (let ruleResult of resultsProcessor.getResults().getRuleResults()) {
+			for (let violation of ruleResult.violations) {
+				if (violation.ruleName == 'no-undef' && violation.message.includes("$A")) {
+					expect.fail("The " + ruleResult.engine + " engine complained about $A being undefined when it shouldn't have. Message:\n"  + violation.message)
+				}
+			}
+		}
+
+	})
+});
