@@ -31,7 +31,8 @@ describe('scanner run with custom config E2E', () => {
 	});
 
 	it('Can use custom ESLint config to detect violations', () => {
-		const targetPath = path.join('.', 'test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts');
+		const targetPath = '"' + path.join('.', 'test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts') +
+			',' + path.join('.', 'test', 'code-fixtures', 'unparsable-json') + '"'; // Adding this to check that json files aren't picked up
 		const output = runCommand(`scanner run --target ${targetPath} --eslintconfig ${customEslintConfig} --format json`);
 		assertNoError(output);
 		const stdout = output.shellOutput.stdout;
@@ -45,7 +46,7 @@ describe('scanner run with custom config E2E', () => {
 		const jsonOutput = stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1);
 		expect(jsonOutput).to.not.be.empty;
 		const parsedJson = JSON.parse(jsonOutput);
-		expect(parsedJson).to.have.lengthOf(1);
+		expect(parsedJson).to.have.lengthOf(1); // Should only be length of 1 and not 2 since custom engine should not pick up json files
 		expect(parsedJson[0].engine).to.equal(ENGINE.ESLINT_CUSTOM.valueOf());
 		expect(parsedJson[0].violations.length).to.equal(1);
 	});
