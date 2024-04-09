@@ -12,6 +12,9 @@ const LWC_RULES = rules as {[ruleName: string]: ESRule};
 const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
+		"globals": {
+			"$A": "readonly", // For Aura: https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_jsapi_dollarA.htm
+		},
 		"parser": "@babel/eslint-parser",
 		"parserOptions": {
 			"requireConfigFile": false,
