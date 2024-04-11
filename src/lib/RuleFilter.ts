@@ -55,7 +55,7 @@ export function isEngineFilter(object): object is EngineFilterInterface {
 
 export abstract class RuleFilter {
 	protected readonly filterValues: ReadonlyArray<string>;
-	private readonly negated: boolean;
+	protected readonly negated: boolean;
 
 	protected constructor(filterValues: string[], negated: boolean) {
 		this.filterValues = filterValues;
@@ -74,12 +74,6 @@ export abstract class RuleFilter {
 	public matchesRule(rule: Rule): boolean {
 		if (this.isEmpty()) {
 			return true;
-		}
-
-		// Positive filtering a rule includes those rules that aren't enabled by default
-		// This ensures that negative filtering doesn't include default disabled rules
-		if (this.negated && !rule.defaultEnabled) {
-			return false;
 		}
 
 		const ruleValues = this.getRuleValues(rule);
@@ -126,7 +120,9 @@ abstract class PositiveRuleFilter extends RuleFilter {
  * This class will parse filter values for positive and negative filters. Mixed types will throw an exception.
  */
 abstract class NegateableRuleFilter extends RuleFilter {
-    protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
+	private readonly usingDefaultEngines: boolean;
+
+    protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[], usingDefaultEngines: boolean) {
 		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 
 		// Throw an exception if there are mixed types
@@ -135,7 +131,19 @@ abstract class NegateableRuleFilter extends RuleFilter {
 		}
 
 		const negated = mapped.negative.length > 0;
+
 		super(negated ? mapped.negative : mapped.positive, negated);
+		this.usingDefaultEngines = usingDefaultEngines;
+	}
+
+	public matchesRule(rule: Rule): boolean {
+		// If this rule is negated, we need to make sure to not match if it not on by default while we are using
+		// the default engine. If using specified (non-default) engine list, then the defaultEnabled flag is irrelevant.
+		if (this.negated && this.usingDefaultEngines && !rule.defaultEnabled) {
+			return false;
+		}
+
+		return super.matchesRule(rule);
 	}
 }
 
@@ -201,8 +209,8 @@ export class SourcePackageFilter extends PositiveRuleFilter {
 }
 
 export class CategoryFilter extends NegateableRuleFilter implements RuleGroupFilter {
-	constructor(filterValues: string[]) {
-		super(FilterDisplayName.CATEGORY, filterValues);
+	constructor(filterValues: string[], usingDefaultEngines: boolean) {
+		super(FilterDisplayName.CATEGORY, filterValues, usingDefaultEngines);
 	}
 
 	protected getRuleValues(rule: Rule): string[] {
