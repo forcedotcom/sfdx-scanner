@@ -117,7 +117,7 @@ describe('LocalCatalog', () => {
 				it('Correctly filters by one value', async () => {
 					// SETUP
 					// Create a filter that matches one category
-					const filter: RuleFilter = new CategoryFilter(['Best Practices']);
+					const filter: RuleFilter = new CategoryFilter(['Best Practices'], true);
 
 					// INVOCATION OF TESTED METHOD
 					// Use the created filter to filter the available rules.
@@ -135,7 +135,7 @@ describe('LocalCatalog', () => {
 				it('Correctly filters by multiple values', async () => {
 					// SETUP
 					// Create a filter that matches two categories
-					const filter: RuleFilter = new CategoryFilter(['Best Practices', 'Possible Errors']);
+					const filter: RuleFilter = new CategoryFilter(['Best Practices', 'Possible Errors'], true);
 
 					// INVOCATION OF TESTED METHOD
 					// Use the created filter to filter the available rules.
@@ -155,7 +155,7 @@ describe('LocalCatalog', () => {
 				it('Correctly filters by one value', async () => {
 					// SETUP
 					// Create a filter that matches every category EXCEPT one.
-					const filter: RuleFilter = new CategoryFilter(['!Best Practices']);
+					const filter: RuleFilter = new CategoryFilter(['!Best Practices'], true);
 
 					// INVOCATION OF TESTED METHOD
 					// Use the filter on our catalog.
@@ -175,7 +175,7 @@ describe('LocalCatalog', () => {
 				it('Correctly filters by multiple values', async () => {
 					// SETUP
 					// Create a filter that matches every category EXCEPT two.
-					const filter: RuleFilter = new CategoryFilter(['!Best Practices', '!Design']);
+					const filter: RuleFilter = new CategoryFilter(['!Best Practices', '!Design'], true);
 
 					// INVOCATION OF TESTED METHOD
 					// Use the filter on our catalog.
@@ -197,7 +197,7 @@ describe('LocalCatalog', () => {
 			it('Inapplicable filters are ignored', async () => {
 				// SETUP
 				// Create a filter that matches one category, and a filter that matches only PMD.
-				const catFilter: RuleFilter = new CategoryFilter(['Best Practices']);
+				const catFilter: RuleFilter = new CategoryFilter(['Best Practices'], false);
 				const engineFilter: RuleFilter = new EngineFilter([ENGINE.PMD]);
 
 				// INVOCATION OF TESTED METHOD
@@ -300,7 +300,7 @@ describe('LocalCatalog', () => {
 		describe('CategoryFilter', () => {
 			describe ('Positive', () => {
 				it ('Single Value', async () => {
-					const filter: RuleFilter = new CategoryFilter(['Possible Errors']);
+					const filter: RuleFilter = new CategoryFilter(['Possible Errors'], true);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
 					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(4);
 					const mappedRules = mapRules(rules);
@@ -309,7 +309,7 @@ describe('LocalCatalog', () => {
 				});
 
 				it ('Multiple Values', async () => {
-					const filter: RuleFilter = new CategoryFilter(['Possible Errors', 'Design']);
+					const filter: RuleFilter = new CategoryFilter(['Possible Errors', 'Design'], true);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
 					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(6);
 					const mappedRules = mapRules(rules);
@@ -325,7 +325,7 @@ describe('LocalCatalog', () => {
 
 			describe ('Negative', () => {
 				it ('Single Value', async () => {
-					const filter: RuleFilter = new CategoryFilter(['!Possible Errors']);
+					const filter: RuleFilter = new CategoryFilter(['!Possible Errors'], true);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
 					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(8);
 					const mappedRules = mapRules(rules);
@@ -337,7 +337,7 @@ describe('LocalCatalog', () => {
 				});
 
 				it ('Multiple Values', async () => {
-					const filter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style']);
+					const filter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style'], true);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
 					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(5);
 					const mappedRules = mapRules(rules);
@@ -366,7 +366,7 @@ describe('LocalCatalog', () => {
 				 */
 				describe('Rules must match a parameter from each filter when multiple filters are specified', () => {
 					it ('Two Filters - Single Parameter', async () => {
-						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices']);
+						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices'], false);
 						const engineFilter: RuleFilter = new EngineFilter([ENGINE.PMD]);
 						const rules: Rule[] = catalog.getRulesMatchingFilters([categoryFilter, engineFilter]);
 						expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(2);
@@ -376,7 +376,7 @@ describe('LocalCatalog', () => {
 					});
 
 					it ('Two Filters - Single/Multiple Parameters', async () => {
-						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices']);
+						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices'], false);
 						const engineFilter: RuleFilter = new EngineFilter([ENGINE.ESLINT, ENGINE.PMD]);
 						const rules: Rule[] = catalog.getRulesMatchingFilters([categoryFilter, engineFilter]);
 						expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(4);
@@ -387,7 +387,7 @@ describe('LocalCatalog', () => {
 					});
 
 					it ('Two Filters - Multiple/Multiple Parameters', async () => {
-						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design']);
+						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design'], false);
 						const engineFilter: RuleFilter = new EngineFilter([ENGINE.ESLINT, ENGINE.PMD]);
 						const rules: Rule[] = catalog.getRulesMatchingFilters([categoryFilter, engineFilter]);
 						expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(6);
@@ -399,7 +399,7 @@ describe('LocalCatalog', () => {
 					});
 
 					it ('Three Filters - Multiple/Multiple/Single Parameters', async () => {
-						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design']);
+						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design'], false);
 						const engineFilter: RuleFilter = new EngineFilter([ENGINE.ESLINT, ENGINE.PMD]);
 						// Missing LANGUAGE.APEX will exclude the PMD Design category
 						const languageFilter: RuleFilter = new LanguageFilter([LANGUAGE.JAVASCRIPT]);
@@ -412,7 +412,7 @@ describe('LocalCatalog', () => {
 					});
 
 					it ('Three Filters - Multiple/Multiple/Single Parameters', async () => {
-						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design']);
+						const categoryFilter: RuleFilter = new CategoryFilter(['Best Practices', 'Design'], false);
 						const engineFilter: RuleFilter = new EngineFilter([ENGINE.ESLINT, ENGINE.PMD]);
 						// Adding LANGUAGE.APEX will add the PMD Design category
 						const languageFilter: RuleFilter = new LanguageFilter([LANGUAGE.JAVASCRIPT, LANGUAGE.APEX]);
@@ -430,7 +430,7 @@ describe('LocalCatalog', () => {
 
 		describe('Mixed Positive and Negative', () => {
 			it ('Multiple Positive and Negative Values', async () => {
-				const categoryFilter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style']);
+				const categoryFilter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style'], true);
 				const languageFilter: RuleFilter = new LanguageFilter([LANGUAGE.APEX]);
 				const rules: Rule[] = catalog.getRulesMatchingFilters([categoryFilter, languageFilter]);
 				expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(3);

@@ -95,5 +95,47 @@ describe("Tests for RuleListAction", () => {
 			let tableData: Ux.Table.Data[] = display.getLastTableData();
 			expect(tableData).to.have.length(0, 'No rules should have been logged');
 		});
+
+		it('Test Case: Negative category filtering when using default engines', async () => {
+			const inputs: Inputs = {
+				category: ['!layout']
+			};
+
+			await ruleListAction.run(inputs);
+
+			const categoriesListed: Set<string> = new Set();
+			let tableData: Ux.Table.Data[] = display.getLastTableData();
+			for (const rowData of tableData) {
+				for (const category of rowData.categories as string[]) {
+					categoriesListed.add(category);
+				}
+			}
+			expect(categoriesListed).to.not.include('layout');
+			expect(categoriesListed).to.include('suggestion');
+			expect(categoriesListed).to.include('problem');
+			expect(categoriesListed).to.include('Security'); // From PMD which is on by default
+		});
+
+		it('Test Case: Negative category filtering when non-default engine is specified', async () => {
+			const inputs: Inputs = {
+				category: ['!layout'],
+				engine: ['eslint-lwc'] // This is a non-default engine
+			};
+
+			await ruleListAction.run(inputs);
+
+			const categoriesListed: Set<string> = new Set();
+			let tableData: Ux.Table.Data[] = display.getLastTableData();
+			for (const rowData of tableData) {
+				for (const category of rowData.categories as string[]) {
+					categoriesListed.add(category);
+				}
+			}
+			expect(categoriesListed).to.not.include('layout');
+			expect(categoriesListed).to.include('suggestion');
+			expect(categoriesListed).to.include('problem');
+			expect(categoriesListed).to.not.include('Security'); // From PMD (which isn't specified)
+
+		});
 	});
 });

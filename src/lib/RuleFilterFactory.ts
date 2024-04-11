@@ -9,9 +9,18 @@ export interface RuleFilterFactory {
 export class RuleFilterFactoryImpl implements RuleFilterFactory {
 	public createRuleFilters(inputs: Inputs): RuleFilter[] {
 		const filters: RuleFilter[] = [];
+
+		let usingDefaultEngines: boolean = true;
+
+		// Create a filter for any provided engines.
+		if (inputs.engine && stringArrayTypeGuard(inputs.engine) && inputs.engine.length) {
+			filters.push(new EngineFilter(inputs.engine));
+			usingDefaultEngines = false;
+		}
+
 		// Create a filter for any provided categories.
 		if (inputs.category && stringArrayTypeGuard(inputs.category) && inputs.category.length) {
-			filters.push(new CategoryFilter(inputs.category));
+			filters.push(new CategoryFilter(inputs.category, usingDefaultEngines));
 		}
 
 		// Create a filter for any provided rulesets.
@@ -28,11 +37,6 @@ export class RuleFilterFactoryImpl implements RuleFilterFactory {
 		// NOTE: Only a single rule name can be provided. It will be treated as a singleton list.
 		if (inputs.rulename && typeof inputs.rulename === 'string') {
 			filters.push(new RulenameFilter([inputs.rulename]));
-		}
-
-		// Create a filter for any provided engines.
-		if (inputs.engine && stringArrayTypeGuard(inputs.engine) && inputs.engine.length) {
-			filters.push(new EngineFilter(inputs.engine));
 		}
 
 		return filters;

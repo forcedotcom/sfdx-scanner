@@ -33,19 +33,19 @@ const assertMixedFilterThrows = (method: () => void, filterName: string): void =
 describe('RuleFilter', () => {
 	describe('Positive Cases', () => {
 		it('Values are trimmed', () => {
-			const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS);
+			const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS, true);
 			expect((filter as any).filterValues, 'Filter Values').to.eql(TRIMMED_FILTERS);
 			expect((filter as any).negated, 'Negated').to.be.false;
 		});
 
 		it('Negated values are converted', () => {
-			const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS);
+			const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS, true);
 			expect((filter as any).filterValues, 'Filter Values').to.eql(TRIMMED_FILTERS);
 			expect((filter as any).negated, 'Negated').to.be.true;
 		});
 
 		it('isRuleGroupFilter', () => {
-			expect(isRuleGroupFilter(new CategoryFilter([])), 'CategoryFilter').to.be.true;
+			expect(isRuleGroupFilter(new CategoryFilter([], true)), 'CategoryFilter').to.be.true;
 			expect(isRuleGroupFilter(new RulesetFilter([])), 'RulesetFilter').to.be.true;
 			expect(isRuleGroupFilter(new RulenameFilter([])), 'RulenameFilter').to.be.false;
 		});
@@ -72,7 +72,7 @@ describe('RuleFilter', () => {
 					...baseRule,
 					categories: TRIMMED_FILTERS
 				}
-				const filter: RuleFilter = new CategoryFilter([]);
+				const filter: RuleFilter = new CategoryFilter([], true);
 				expect((filter as any).getRuleValues(rule), 'Category').to.eql(TRIMMED_FILTERS);
 			});
 
@@ -143,7 +143,7 @@ describe('RuleFilter', () => {
 				};
 
 				it ('Positive Filters', () => {
-					const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS);
+					const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS, true);
 					expect (filter.matchesRuleGroup(ruleGroup1), ruleGroup1.name).to.be.true;
 					expect (filter.matchesRuleGroup(ruleGroup2), ruleGroup2.name).to.be.true;
 					expect (filter.matchesRuleGroup(ruleGroup3), ruleGroup3.name).to.be.false;
@@ -151,7 +151,7 @@ describe('RuleFilter', () => {
 				});
 
 				it ('Negated Filters', () => {
-					const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS);
+					const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS, true);
 					expect (filter.matchesRuleGroup(ruleGroup1), ruleGroup1.name).to.be.false;
 					expect (filter.matchesRuleGroup(ruleGroup2), ruleGroup2.name).to.be.false;
 					expect (filter.matchesRuleGroup(ruleGroup3), ruleGroup3.name).to.be.true;
@@ -197,7 +197,7 @@ describe('RuleFilter', () => {
 				};
 
 				it ('Positive Filters', () => {
-					const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS);
+					const filter: RuleFilter = new CategoryFilter(POSITIVE_FILTERS, true);
 					expect (filter.matchesRule(rule1), rule1.name).to.be.true;
 					expect (filter.matchesRule(rule2), rule2.name).to.be.true;
 					expect (filter.matchesRule(rule3), rule3.name).to.be.false;
@@ -205,7 +205,7 @@ describe('RuleFilter', () => {
 				});
 
 				it ('Negated Filters', () => {
-					const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS);
+					const filter: RuleFilter = new CategoryFilter(NEGATIVE_FILTERS, true);
 					expect (filter.matchesRule(rule1), rule1.name).to.be.false;
 					expect (filter.matchesRule(rule2), rule2.name).to.be.false;
 					expect (filter.matchesRule(rule3), rule3.name).to.be.true;
@@ -225,7 +225,7 @@ describe('RuleFilter', () => {
 		});
 
 		it('Mixed types throws Exception', () => {
-			assertMixedFilterThrows(() => new CategoryFilter(MIXED_FILTERS), 'Category');
+			assertMixedFilterThrows(() => new CategoryFilter(MIXED_FILTERS, true), 'Category');
 		});
 	});
 });
