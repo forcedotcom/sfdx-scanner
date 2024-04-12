@@ -151,6 +151,65 @@ public class ApexPathExpanderTest {
         MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(3)));
     }
 
+    @Test
+    public void testLazyExpansion() {
+        // Set the maximum expander registry size to a very low value.
+        setPathRegistryLimit(5);
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n"
+                // This method has only one fork, but that fork has 8 branches.
+                // If all the expanders get created and added to the registry at once,
+                // it will exceed the limit. But if they're being lazily generated, it'll
+                // be fine.
+          + "    public static void doSomething(boolean b1, boolean b2, boolean b3) {\n"
+          + "        innerMethod1(b1, b2, b3);\n"
+          + "    }\n"
+          + "    \n"
+          + "    private static void innerMethod1(boolean b1, boolean b2, boolean b3) {\n"
+          + "        if (b1) {\n"
+          + "            System.debug('b1 is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b1 is false');\n"
+          + "        }\n"
+          + "    \n"
+          + "        if (b2) {\n"
+          + "            System.debug('b2 is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b2 is false');\n"
+          + "        }\n"
+          + "    \n"
+          + "        if (b3) {\n"
+          + "            System.debug('b3 is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b3 is false');\n"
+          + "        }\n"
+          + "    }\n"
+          + "}\n";
+        // spotless:on
+
+        List<ApexPath> paths;
+        ApexPath path;
+
+        paths =
+                TestRunner.get(g, sourceCode)
+                        .withExpanderConfig(ApexPathUtil.getSimpleNonExpandingConfig())
+                        .getPaths();
+        MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
+        path = paths.get(0);
+        // The path should not have any method calls mapped since we used the non-expanding config
+        MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(0)));
+
+        paths =
+                ApexPathExpanderUtil.expand(
+                                g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig())
+                        .getAcceptedResults();
+        MatcherAssert.assertThat(paths, hasSize(equalTo(8)));
+        path = paths.get(0);
+        // The path should have a mapping for #getInstance and #getName
+        MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(1)));
+    }
+
     /**
      * Tests that fork in a static initialization path is correctly handled. There was previously a
      * bug in which the ApexPathExpander was invoking {@link ClassStaticScope#setInitialized()} too
