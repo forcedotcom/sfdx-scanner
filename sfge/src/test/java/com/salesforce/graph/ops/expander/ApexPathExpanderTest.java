@@ -5,6 +5,8 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
+import com.salesforce.config.SfgeConfigTestProvider;
+import com.salesforce.config.TestSfgeConfig;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ops.ApexPathUtil;
 import com.salesforce.graph.symbols.ClassStaticScope;
@@ -19,6 +21,7 @@ import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +34,11 @@ public class ApexPathExpanderTest {
     @BeforeEach
     public void setup() {
         this.g = TestUtil.getGraph();
+    }
+
+    @AfterEach
+    public void cleanup() {
+        SfgeConfigTestProvider.remove();
     }
 
     @Test
@@ -74,6 +82,73 @@ public class ApexPathExpanderTest {
         path = paths.get(0);
         // The path should have a mapping for #getInstance and #getName
         MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(2)));
+    }
+
+    @Test
+    public void testRegistryCleanup() {
+        // Set the maximum expander registry size to a very low value.
+        setPathRegistryLimit(6);
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n"
+                // This method has three forks that create a total of 8 paths, which is greater
+                // than the maximum registry size.
+                // Since the paths fork via multiple methods instead of a single method,
+                // the expanders are added to the stack gradually and should be removed at a similar
+                // rate. So if they're being removed properly, the limit should never actually be reached,
+                // and expansion should succeed.
+          + "    public static void doSomething(boolean b1, boolean b2, boolean b3) {\n"
+          + "        innerMethod1(b1);\n"
+          + "        innerMethod2(b2);\n"
+          + "        innerMethod3(b3);\n"
+          + "    }\n"
+          + "    \n"
+          + "    private static void innerMethod1(boolean b) {\n"
+          + "        if (b) {\n"
+          + "            System.debug('b is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b is false');\n"
+          + "        }\n"
+          + "    }\n"
+          + "    \n"
+          + "    private static void innerMethod2(boolean b) {\n"
+          + "        if (b) {\n"
+          + "            System.debug('b is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b is false');\n"
+          + "        }\n"
+          + "    }\n"
+          + "    \n"
+          + "    private static void innerMethod3(boolean b) {\n"
+          + "        if (b) {\n"
+          + "            System.debug('b is true');\n"
+          + "        } else {\n"
+          + "            System.debug('b is false');\n"
+          + "        }\n"
+          + "    }\n"
+          + "}\n";
+        // spotless:on
+
+        List<ApexPath> paths;
+        ApexPath path;
+
+        paths =
+                TestRunner.get(g, sourceCode)
+                        .withExpanderConfig(ApexPathUtil.getSimpleNonExpandingConfig())
+                        .getPaths();
+        MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
+        path = paths.get(0);
+        // The path should not have any method calls mapped since we used the non-expanding config
+        MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(0)));
+
+        paths =
+                ApexPathExpanderUtil.expand(
+                                g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig())
+                        .getAcceptedResults();
+        MatcherAssert.assertThat(paths, hasSize(equalTo(8)));
+        path = paths.get(0);
+        // The path should have a mapping for #getInstance and #getName
+        MatcherAssert.assertThat(path.getInvocableVertexToPaths().entrySet(), hasSize(equalTo(3)));
     }
 
     /**
@@ -659,5 +734,15 @@ public class ApexPathExpanderTest {
         ApexBooleanValue boolValue = systemDebugAccumulatorResult.getVisitor().getSingletonResult();
 
         MatcherAssert.assertThat(boolValue.isIndeterminant(), equalTo(true));
+    }
+
+    private void setPathRegistryLimit(int limit) {
+        SfgeConfigTestProvider.set(
+                new TestSfgeConfig() {
+                    @Override
+                    public int getPathExpansionLimit() {
+                        return 6;
+                    }
+                });
     }
 }
