@@ -1,7 +1,7 @@
 {
     "productTag": "a1aB0000000c7jnIAA",
     "defaultBuild": "[SFCA] Scanner 4.0",
-    "hideWorkItemUrl": true,
+    "hideWorkItemUrl": "true",
     "issueTypeLabels": {
         "type:feature": "USER STORY",
         "type:bug-p0": "BUG P0",
