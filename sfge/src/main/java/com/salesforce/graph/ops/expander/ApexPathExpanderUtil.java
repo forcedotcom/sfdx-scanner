@@ -168,8 +168,11 @@ public final class ApexPathExpanderUtil {
             // traversed
             // depth first in order
             // to keep the peak number of active expanders lower.
-            while (!apexPathExpanders.isEmpty()) {
-                ApexPathExpander apexPathExpander = apexPathExpanders.pop();
+            PendingForkStack pendingForkStack = new PendingForkStack(apexPathCollapser);
+            Optional<ApexPathExpander> nextExpander;
+            while ((nextExpander = getNextExpander(apexPathExpanders, pendingForkStack))
+                    .isPresent()) {
+                ApexPathExpander apexPathExpander = nextExpander.get();
                 ContextProviders.CLASS_STATIC_SCOPE.push(apexPathExpander);
                 ContextProviders.ENGINE_DIRECTIVE_CONTEXT.push(apexPathExpander);
                 try {
@@ -288,29 +291,7 @@ public final class ApexPathExpanderUtil {
                         LOGGER.warn("expand-StackDepthLimit. ex=" + ex);
                     }
                 } catch (MethodPathForkedException ex) {
-                    List<ApexPathExpander> forkedPathExpanders = new ArrayList<>();
-                    for (ApexPathExpander forkedApexPathExpander : getForkedExpanders(ex)) {
-                        if (forkedApexPathExpander.getTopMostPath().endsInException()) {
-                            // This happens when a path invokes a method that only throws an
-                            // exception
-                            ThrowStatementVertex throwStatementVertex =
-                                    forkedApexPathExpander
-                                            .getTopMostPath()
-                                            .getThrowStatementVertex()
-                                            .get();
-                            logFilteredOutPath(throwStatementVertex);
-                            forkedApexPathExpander.finished();
-                        } else {
-                            apexPathExpanders.push(forkedApexPathExpander);
-                            forkedPathExpanders.add(forkedApexPathExpander);
-                        }
-                    }
-                    apexPathCollapser.pathForked(
-                            ex.getForkEvent(), apexPathExpander, forkedPathExpanders);
-                    apexPathExpander.finished();
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("expand-Forked. ex=" + ex);
-                    }
+                    pendingForkStack.addStackFrame(ex);
                 } catch (RuntimeException ex) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.error(
@@ -345,27 +326,108 @@ public final class ApexPathExpanderUtil {
             }
         }
 
-        /** Returns the number of ApexPathExpanders indicated by the exception */
-        private List<ApexPathExpander> getForkedExpanders(MethodPathForkedException ex) {
-            List<ApexPathExpander> result = new ArrayList<>();
+        private Optional<ApexPathExpander> getNextExpander(
+                Stack<ApexPathExpander> baseExpanderStack, PendingForkStack pendingForkStack) {
+            Optional<ApexPathExpander> nextExpander = pendingForkStack.getNextExpander();
+            if (nextExpander.isPresent()) {
+                return nextExpander;
+            } else if (!baseExpanderStack.isEmpty()) {
+                return Optional.of(baseExpanderStack.pop());
+            } else {
+                return Optional.empty();
+            }
+        }
+    }
 
-            // TODO: Efficiency. We could iterate to size() - 1 and reuse the existing path
-            for (int i = 0; i < ex.getPaths().size(); i++) {
-                ApexPath forkedPath = ex.getPaths().get(i);
-                if (forkedPath.endsInException()) {
-                    logFilteredOutPath(forkedPath.getThrowStatementVertex().get());
-                    continue;
-                }
-                // Establish a context so that objects passed by reference are only cloned once
+    private static class PendingForkStack {
+        private final Stack<PendingForkStackFrame> stack;
+        private final ApexPathCollapser apexPathCollapser;
+
+        PendingForkStack(ApexPathCollapser apexPathCollapser) {
+            stack = new Stack<>();
+            this.apexPathCollapser = apexPathCollapser;
+        }
+
+        void addStackFrame(MethodPathForkedException ex) {
+            stack.push(new PendingForkStackFrame(ex, apexPathCollapser));
+        }
+
+        Optional<ApexPathExpander> getNextExpander() {
+            // Base Case: The stack is empty, so there are no more frames to inspect.
+            // Return an empty optional.
+            if (stack.empty()) {
+                return Optional.empty();
+            }
+            PendingForkStackFrame frame = stack.peek();
+            Optional<ApexPathExpander> nextExpanderOptional = frame.getNextExpander();
+            if (nextExpanderOptional.isEmpty()) {
+                // Recursive Case: The current frame is empty. Pop it off, and call recursively
+                // to move to the next frame.
+                stack.pop();
+                return getNextExpander();
+            } else {
+                // Base Case: The current frame returned an Expander. Return it.
+                return nextExpanderOptional;
+            }
+        }
+    }
+
+    private static class PendingForkStackFrame {
+
+        private final MethodPathForkedException ex;
+        private final ApexPathCollapser apexPathCollapser;
+        private int idx;
+
+        PendingForkStackFrame(MethodPathForkedException ex, ApexPathCollapser apexPathCollapser) {
+            this.ex = ex;
+            this.apexPathCollapser = apexPathCollapser;
+            this.idx = 0;
+        }
+
+        private boolean done() {
+            return idx >= ex.getPaths().size();
+        }
+
+        Optional<ApexPathExpander> getNextExpander() {
+            // Base Case: There are no more unprocessed paths on this frame.
+            if (done()) {
+                // Finish the expander and return an empty optional.
+                ex.getApexPathExpander().finished();
+                return Optional.empty();
+            }
+            ApexPath nextPotentialPath = ex.getPaths().get(idx);
+            if (nextPotentialPath.endsInException()) {
+                // Recursive Case: This particular path ends in an exception, so we skip it, log it,
+                // and do a recursive call.
+                logFilteredOutPath(nextPotentialPath.getThrowStatementVertex().get());
+                idx += 1;
+                return getNextExpander();
+            } else {
                 DeepCloneContextProvider.establish();
+                ApexPathExpander tentativeResult;
                 try {
-                    result.add(new ApexPathExpander(ex.getApexPathExpander(), ex, i));
+                    tentativeResult = new ApexPathExpander(ex.getApexPathExpander(), ex, idx);
                 } finally {
                     DeepCloneContextProvider.release();
                 }
+                if (tentativeResult.getTopMostPath().endsInException()) {
+                    // Recursive case: The topmost path ends in an exception, so we skip it, log it,
+                    // and do a recursive call.
+                    logFilteredOutPath(
+                            tentativeResult.getTopMostPath().getThrowStatementVertex().get());
+                    idx += 1;
+                    tentativeResult.finished();
+                    return getNextExpander();
+                } else {
+                    // Base Case: We have an expander.
+                    apexPathCollapser.pathForked(
+                            ex.getForkEvent(),
+                            ex.getApexPathExpander(),
+                            Collections.singletonList(tentativeResult));
+                    idx += 1;
+                    return Optional.of(tentativeResult);
+                }
             }
-
-            return result;
         }
     }
 }
