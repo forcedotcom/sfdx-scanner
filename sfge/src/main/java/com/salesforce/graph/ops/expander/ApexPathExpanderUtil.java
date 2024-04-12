@@ -162,12 +162,10 @@ public final class ApexPathExpanderUtil {
 
         private void expand(
                 Stack<ApexPathExpander> apexPathExpanders, ApexPathCollector resultCollector) {
-
-            // Continue while there is work to do. This stack is updated as the path is forked.
-            // Forked expanders are pushed to the front of the stack, causing the paths to be
-            // traversed
-            // depth first in order
-            // to keep the peak number of active expanders lower.
+            // Since ApexPathExpanders are so memory intensive, we want to limit the number
+            // that exist at once. So we use this stack to lazily create them as needed, storing
+            // only the information that is used to create them. This allows us to do a reasonably
+            // efficient depth-first expansion.
             PendingForkStack pendingForkStack = new PendingForkStack(apexPathCollapser);
             Optional<ApexPathExpander> nextExpander;
             while ((nextExpander = getNextExpander(apexPathExpanders, pendingForkStack))
@@ -291,6 +289,8 @@ public final class ApexPathExpanderUtil {
                         LOGGER.warn("expand-StackDepthLimit. ex=" + ex);
                     }
                 } catch (MethodPathForkedException ex) {
+                    // Add this exception to the PendingForkStack, so it can be lazily processed
+                    // later.
                     pendingForkStack.addStackFrame(ex);
                 } catch (RuntimeException ex) {
                     if (LOGGER.isErrorEnabled()) {
@@ -326,21 +326,43 @@ public final class ApexPathExpanderUtil {
             }
         }
 
+        /**
+         * Returns the next {@link ApexPathExpander} to be processed, either by lazily creating it
+         * with {@code pendingForkStack} or by popping it off of {@code baseExpanderStack}.
+         *
+         * @param baseExpanderStack A stack of the base expanders that will need to be processed
+         * @param pendingForkStack A stack of fork events that are waiting to be processed.
+         */
         private Optional<ApexPathExpander> getNextExpander(
                 Stack<ApexPathExpander> baseExpanderStack, PendingForkStack pendingForkStack) {
+            // If the pending fork stack can give us an expander, we should use that in order to
+            // keep the expansion truly depth-first.
             Optional<ApexPathExpander> nextExpander = pendingForkStack.getNextExpander();
             if (nextExpander.isPresent()) {
                 return nextExpander;
             } else if (!baseExpanderStack.isEmpty()) {
+                // Otherwise, if there are still expanders in the base stack, use one of those.
                 return Optional.of(baseExpanderStack.pop());
             } else {
+                // Otherwise, we're just done.
                 return Optional.empty();
             }
         }
     }
 
+    /**
+     * Since {@link ApexPathExpander}s have a large memory footprint, we want to minimize the number
+     * of instances that exist simultaneously. This class allows us to lazily create the expanders
+     * as needed, and perform a true depth-first expansion.
+     */
     private static class PendingForkStack {
+        /**
+         * We use a Stack instead of a List to allow for a true depth-first expansion. i.e., when a
+         * new fork is encountered, it's added to the top of the stack, meaning it gets processed
+         * first.
+         */
         private final Stack<PendingForkStackFrame> stack;
+        /** The collapser is present to allow each stack frame to handle forks. */
         private final ApexPathCollapser apexPathCollapser;
 
         PendingForkStack(ApexPathCollapser apexPathCollapser) {
@@ -348,10 +370,20 @@ public final class ApexPathExpanderUtil {
             this.apexPathCollapser = apexPathCollapser;
         }
 
+        /**
+         * Use the provide Exception to create a new {@link PendingForkStackFrame} and add it to the
+         * top of the stack.
+         *
+         * @param ex An exception thrown when a method is determined to fork.
+         */
         void addStackFrame(MethodPathForkedException ex) {
             stack.push(new PendingForkStackFrame(ex, apexPathCollapser));
         }
 
+        /**
+         * @return An Optional containing either the next {@link ApexPathExpander} to be processed,
+         *     or nothing.
+         */
         Optional<ApexPathExpander> getNextExpander() {
             // Base Case: The stack is empty, so there are no more frames to inspect.
             // Return an empty optional.
@@ -372,10 +404,18 @@ public final class ApexPathExpanderUtil {
         }
     }
 
+    /**
+     * Each frame in the {@link PendingForkStack} represents a fork event currently being processed.
+     */
     private static class PendingForkStackFrame {
-
+        /** The exception that triggered the fork. */
         private final MethodPathForkedException ex;
+        /** The collapser used to process forks. */
         private final ApexPathCollapser apexPathCollapser;
+        /**
+         * The index of the next {@link ApexPath} that should be turned into an {@link
+         * ApexPathExpander}.
+         */
         private int idx;
 
         PendingForkStackFrame(MethodPathForkedException ex, ApexPathCollapser apexPathCollapser) {
@@ -384,10 +424,17 @@ public final class ApexPathExpanderUtil {
             this.idx = 0;
         }
 
+        /**
+         * @return {@code true} if this frame is out of paths to turn into expanders; else {@link
+         *     false}.
+         */
         private boolean done() {
             return idx >= ex.getPaths().size();
         }
 
+        /**
+         * @return An Optional containing either the next {@link ApexPathExpander} or nothing.
+         */
         Optional<ApexPathExpander> getNextExpander() {
             // Base Case: There are no more unprocessed paths on this frame.
             if (done()) {
@@ -416,6 +463,8 @@ public final class ApexPathExpanderUtil {
                     logFilteredOutPath(
                             tentativeResult.getTopMostPath().getThrowStatementVertex().get());
                     idx += 1;
+                    // Make sure to call `finished()` before we discard it, otherwise it won't get
+                    // garbage-collected.
                     tentativeResult.finished();
                     return getNextExpander();
                 } else {
