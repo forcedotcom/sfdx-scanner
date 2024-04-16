@@ -9,9 +9,7 @@ import com.salesforce.graph.symbols.*;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -226,6 +224,7 @@ public final class ApexPathExpanderUtil {
                         final ThrowStatementVertex throwStatementVertex =
                                 apexPathExpander.getTopMostPath().getThrowStatementVertex().get();
                         logFilteredOutPath(throwStatementVertex);
+                        apexPathExpander.finished();
                     } else {
                         resultCollector.collectAccepted(apexPathExpander);
                     }
@@ -300,6 +299,7 @@ public final class ApexPathExpanderUtil {
                                             .getThrowStatementVertex()
                                             .get();
                             logFilteredOutPath(throwStatementVertex);
+                            forkedApexPathExpander.finished();
                         } else {
                             apexPathExpanders.push(forkedApexPathExpander);
                             forkedPathExpanders.add(forkedApexPathExpander);
@@ -307,6 +307,7 @@ public final class ApexPathExpanderUtil {
                     }
                     apexPathCollapser.pathForked(
                             ex.getForkEvent(), apexPathExpander, forkedPathExpanders);
+                    apexPathExpander.finished();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("expand-Forked. ex=" + ex);
                     }
@@ -331,6 +332,7 @@ public final class ApexPathExpanderUtil {
                             LOGGER.warn("Unable to find apexPathExpander=" + pathExpander);
                         }
                     }
+                    pathExpander.finished();
                 }
             }
 
