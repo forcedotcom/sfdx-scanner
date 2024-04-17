@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
-        node: ['lts/*']
+        node: ['20.12.1']
     runs-on: ${{ matrix.os.vm }}
     timeout-minutes: 60
     steps:
