@@ -195,8 +195,8 @@ describe('#verifyMain2DevPrTitle', () => {
 	 * E.g., "Main2Dev ; @W-1234@ . Rebasing after v4.2.0".
 	 */
 	describe('Portion separation', () => {
-		it('Whitespace separation is allowed', () => {
-			const title = "Main2Dev		@W-1234@  		rebasing after  v4.2.0";
+		it('Space (" ") separation is allowed', () => {
+			const title = "Main2Dev     @W-1234@  rebasing after  v4.2.0";
 			expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 		});
 

@@ -7,9 +7,9 @@
 export const WORK_ITEM_PORTION = "@W-\\d{4,9}@"
 
 /**
- * This regex matches one or more whitespace, comma, period, n-dash,
+ * This regex matches one or more space, comma, period, n-dash,
  * colon, or semicolon characters. All pull request titles allow these
  * characters as separators between portions
  */
-export const SEPARATOR = "[\\s-.,;:]+";
+export const SEPARATOR = "[ -.,;:]+";
 

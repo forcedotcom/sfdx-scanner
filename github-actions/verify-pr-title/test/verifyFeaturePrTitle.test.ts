@@ -221,8 +221,8 @@ describe('#verifyFeaturePrTitle', () => {
 	 * E.g., "NEW - (PMD) ; @W-1234@ . Added whatever".
 	 */
 	describe('Portion separation', () => {
-		it('Whitespace separation is allowed', () => {
-			const title = "NEW     (PMD)		@W-1234@  		  Added whatever";
+		it('Space (" ") separation is allowed', () => {
+			const title = "NEW     (PMD)  @W-1234@          Added whatever";
 			expect(verifyFeaturePrTitle(title)).to.equal(true, 'Should be accepted');
 		});
 

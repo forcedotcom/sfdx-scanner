@@ -30,7 +30,7 @@ function run(): void {
 				console.log(`PR title '${title}' accepted for dev branch.`);
 			} else {
 				core.setFailed(
-					`PR title '${title} does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`
+					`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`
 				);
 				return;
 			}
@@ -40,7 +40,7 @@ function run(): void {
 				console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
 			} else {
 				core.setFailed(
-					`PR title '${title} does not match the template of "RELEASE @W-XXXX@ Summary"`
+					`PR title '${title}' does not match the template of "RELEASE @W-XXXX@ Summary"`
 				);
 				return;
 			}

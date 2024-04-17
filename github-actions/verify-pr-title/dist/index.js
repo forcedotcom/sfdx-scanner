@@ -16,11 +16,11 @@ exports.SEPARATOR = exports.WORK_ITEM_PORTION = void 0;
  */
 exports.WORK_ITEM_PORTION = "@W-\\d{4,9}@";
 /**
- * This regex matches one or more whitespace, comma, period, n-dash,
+ * This regex matches one or more space, comma, period, n-dash,
  * colon, or semicolon characters. All pull request titles allow these
  * characters as separators between portions
  */
-exports.SEPARATOR = "[\\s-.,;:]+";
+exports.SEPARATOR = "[ -.,;:]+";
 //# sourceMappingURL=common.js.map
 
 /***/ }),
@@ -33906,7 +33906,7 @@ function run() {
                 console.log(`PR title '${title}' accepted for dev branch.`);
             }
             else {
-                core.setFailed(`PR title '${title} does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`);
+                core.setFailed(`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`);
                 return;
             }
         }
@@ -33916,7 +33916,7 @@ function run() {
                 console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
             }
             else {
-                core.setFailed(`PR title '${title} does not match the template of "RELEASE @W-XXXX@ Summary"`);
+                core.setFailed(`PR title '${title}' does not match the template of "RELEASE @W-XXXX@ Summary"`);
                 return;
             }
         }

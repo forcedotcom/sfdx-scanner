@@ -184,8 +184,8 @@ describe('#verifyReleasePrTitle', () => {
 	 * E.g., "NEW - (PMD) ; @W-1234@ . Added whatever".
 	 */
 	describe('Portion separation', () => {
-		it('Whitespace separation is allowed', () => {
-			const title = "RELEASE		@W-1234@  		  v4.2.0";
+		it('Space (" ") separation is allowed', () => {
+			const title = "RELEASE  @W-1234@        v4.2.0";
 			expect(verifyReleasePrTitle(title)).to.equal(true, 'Should be accepted');
 		});
 
