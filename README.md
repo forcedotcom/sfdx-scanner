@@ -18,7 +18,7 @@ Integrate Code Analyzer into your Continuous Integration/Continuous Development 
 # Salesforce Code Analyzer Documentation
 Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation to learn:
 * how to install Code Analyzer
-* what is included in the Code Analyzer command reference
+* what is included in the Code Analyzer command reference 
 * the structure of Code Analyzer architecture
 * how to write and manage custom rules
 
