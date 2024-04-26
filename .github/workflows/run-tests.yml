@@ -6,7 +6,7 @@ on:
         description: "An array of node versions against which the tests should be run"
         required: false
         type: string
-        default: "[{version: '20.12.1', artifact: 'lts'}]"
+        default: "[{version: 'lts/*', artifact: 'lts'}]"
       java-matrix:
         description: "An array of java versions against which the tests should be run"
         required: false
