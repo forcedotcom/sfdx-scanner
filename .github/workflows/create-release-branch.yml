@@ -1,0 +1,87 @@
+name: create-release-branch
+on:
+  workflow_dispatch:
+    inputs:
+      # When the workflow is executed manually, the user can select whether the branch should correspond to a major,
+      # minor, or patch release.
+      release-type:
+        type: choice
+        description: what kind of release?
+        options:
+          - major
+          - minor
+          - patch
+        required: true
+  schedule:
+    # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value,' and multiple values
+    # can be specified with comma-separated lists. All times are UTC.
+    # So this expression means "run at 12 PM UTC, every Friday".
+    - cron: "0 12 * * 5"
+
+jobs:
+  create-release-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      branch-name: ${{ steps.create-branch.branch_name }}
+    steps:
+      # Depending on circumstances, we may want to exit early instead of running the job to completion.
+      - name: Exit early if applicable
+        # This step is skipped if the workflow was invoked manually, since such an invocation should bypass validations
+        # surrounding what day it is.
+        if: $GITHUB_EVENT_NAME != 'workflow_dispatch'
+        run: |
+          # `date -u` returns UTC datetime, and `%u` formats the output to be the day of the week, with 1 being Monday,
+          # 2 being Tuesday, etc.
+          TODAY_DOW=$(date -u +%u)
+          # Exit early if it's not Friday.
+          [[ $TODAY_DOW != 5 ]] && echo "Not a Friday, should not run" && exit 1
+          # This `date` expression returns the last Tuesday of the month, which is our Release Day. %d formats the output
+          # as the day of the month (1-31).
+          NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue +%d)
+          # This `date` expression returns next Tuesday, and `%d` formats the output as the day of the month (1-31).
+          UPCOMING_TUESDAY_DATE=$(date -u -v+tue +%d)
+          # If next Tuesday isn't Release Day, exit early.
+          [[ $NEXT_RELEASE_DATE != $UPCOMING_TUESDAY_DATE ]] && echo "Wrong Friday" && exit 1
+      # Checkout `dev`
+      - uses: actions/checkout@v4
+      # Increment version
+      - name: Increment version
+        run: |
+          # A workflow dispatch event lets the user specify what release type they want.
+          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
+            RELEASE_TYPE=${{ github.event.inputs.release-type }}
+          # The regularly scheduled releases are always minor.
+          else
+            RELEASE_TYPE=minor
+          fi
+          # Increment the version as needed
+          npm --no-git-tag-version version $RELEASE_TYPE
+          git add package.json
+      # Update the dependencies
+      - name: Update dependencies
+        run: |
+          yarn upgrade
+          node tools/UpdateRetireJsVulns.js
+          git add yarn.lock
+          git add retire-js
+      # Create the new branch
+      - name: Checkout new branch, commit, push
+        id: create-branch
+        run: |
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git config --global user.name "sfca-bot"
+          git config --global user.email "cli-scanner@salesforce.com"
+          git commit -m "Incrementing version for $NEW_VERSION release"
+          git push --set-upstream origin release-$NEW_VERSION
+          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+  # Run all of the various tests against the newly created branch.
+  test-release-branch:
+    needs: create-release-branch
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
+      java-matrix: "['11', '17']"
+      target-branch: ${{ needs.create-release-branch.outputs.branch-name }}
