@@ -21,7 +21,7 @@ on:
 jobs:
   # Depending on circumstances, we may want to exit early instead of running the workflow to completion.
   verify-should-run:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     outputs:
       should-run: ${{ steps.main.outputs.should_run }}
     steps:
