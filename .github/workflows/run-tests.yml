@@ -12,6 +12,12 @@ on:
         required: false
         type: string
         default: "['11']"
+      target-branch:
+        description: "What branch should be checked out?"
+        required: false
+        type: string
+        # If no target branch is specified, just use the one we'd use normally.
+        default: ${{ github.sha }}
 
 jobs:
   # Step 1: We have a number of dependencies that we can build now and cache
@@ -21,6 +27,8 @@ jobs:
     steps:
       # First thing's first; we need to get the code.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
       # Next, we need to make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v4
         with:
@@ -54,12 +62,14 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
         java: ${{ fromJson(inputs.java-matrix) }}
-        os: [ubuntu-latest, windows-2019]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     needs: build-dependencies
     steps:
       # Check out the code.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
       # Make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v4
         with:
@@ -181,12 +191,14 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
         java: ${{ fromJson(inputs.java-matrix) }}
-        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: macos-latest, exe: .sh}, {vm: windows-latest, exe: .cmd}]
     runs-on: ${{ matrix.os.vm }}
     needs: build-dependencies
     steps:
       # Check out the code.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
       # Make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v4
         with:
@@ -242,6 +254,8 @@ jobs:
     steps:
       # First, we need to get the code.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
       # Next, make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v4
         with:
