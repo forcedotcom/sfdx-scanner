@@ -20,7 +20,7 @@ exports.WORK_ITEM_PORTION = "@W-\\d{4,9}@";
  * colon, or semicolon characters. All pull request titles allow these
  * characters as separators between portions
  */
-exports.SEPARATOR = "[ -.,;:]+";
+exports.SEPARATOR = "[ -.,;:]*";
 //# sourceMappingURL=common.js.map
 
 /***/ }),
@@ -48,7 +48,7 @@ const SCOPE_PORTION = "\\([^()]+\\)";
  * i.e., a PR aimed at {@code dev} or a {@code release-x.y.z} branch, not
  * coming from {@code main}.
  */
-const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${SCOPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}.+`, "i");
+const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${SCOPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
  * aimed at {@code dev} or a {@code release-x.y.z} branch, not coming
@@ -121,7 +121,7 @@ const PR_TYPE_PORTION = "RELEASE";
  * This RegExp matches the title format for Release Branch pull requests,
  * i.e., a PR aimed at the {@code release} or {@code main} branches.
  */
-const RELEASE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}.+`, "i");
+const RELEASE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
  * aimed at the {@code release} or {@code main} branches.

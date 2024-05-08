@@ -17,6 +17,11 @@ describe('JreSetupManager #verifyJreSetup', () => {
 	const validVersion11 = 'openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n';
 	const invalidVersion = 'openjdk version "1.8.0_172"\nOpenJDK Runtime Environment (Zulu 8.30.0.2-macosx) (build 1.8.0_172-b01)\nOpenJDK 64-Bit Server VM (Zulu 8.30.0.2-macosx) (build 25.172-b01, mixed mode)\n';
 	const validVersion12 = 'java version "12.0.1" 2019-04-16\nJava(TM) SE Runtime Environment (build 12.0.1+12)\nJava HotSpot(TM) 64-Bit Server VM (build 12.0.1+12, mixed mode, sharing)';
+
+	// This comes from https://github.com/forcedotcom/sfdx-scanner/issues/1453
+	const validVersion17WithJavaOptions = 'Picked up _JAVA_OPTIONS: -Xmx5g\njava version "17.0.11" 2024-04-16 LTS\nJava(TM) SE Runtime Environment (build 17.0.11+7-LTS-207)'
+
+	// This type of output typically comes from "java --version" instead of "java -version" but we will try to support it as well
 	const validVersion14Win = 'openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n';
 
 	describe('With valid javaHome path in Config and an accepted Java version', () => {
@@ -242,6 +247,23 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
 			const statStub = Sinon.stub(FileHandler.prototype, 'stats').resolves();
 			const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion14Win);
+
+			// Execute
+			const javaHome = await verifyJreSetup();
+
+			// Verify
+			expect(javaHome).equals(javaHomeValidPath);
+
+			configGetJavaHomeStub.restore();
+			statStub.restore();
+			execStub.restore();
+		});
+
+		it('should finish successfully when Java17 is found even with java options displayed', async () => {
+			// More stubbing
+			const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
+			const statStub = Sinon.stub(FileHandler.prototype, 'stats').resolves();
+			const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion17WithJavaOptions);
 
 			// Execute
 			const javaHome = await verifyJreSetup();
