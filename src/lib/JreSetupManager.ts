@@ -116,27 +116,35 @@ class JreSetupManager extends AsyncCreatable {
 	}
 
 	private async verifyJavaVersion(javaHome: string): Promise<void> {
-		const versionOut = await this.fetchJavaVersion(javaHome);
+		const versionCommandOut = await this.fetchJavaVersion(javaHome);
 
-		// Version output looks like this:
-		// MacOS: "openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n"
-		// Win10: "openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n"
-		// We want to get the "11.0" or "14" part
-		// The version number could be of the format 11.0 or 1.8 or 14
-		const regex = /(\d+)(\.(\d+))?/;
-		const matchedParts = regex.exec(versionOut);
-		this.logger.trace(`Version output match for pattern ${regex.toString()} is ${JSON.stringify(matchedParts)}`);
+		// We are using "java -version" below which has output that typically looks like:
+		// * (from MacOS): "openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n"
+		// From much research it should ideally say "version " and then either a number with or without quotes.
+		// If instead we used java --version then the output would look something like:
+		// * (from Win10): "openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n"
+		// Notice it doesn't have the word "version" but again, we don't call "--version". But for sanity sakes,
+		// we will attempt to support this as well. Basically we want to get the "11.0.6" or "14" part.
 
-		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
-		if (!matchedParts || matchedParts.length < 4) {
-			throw new SfError(getMessage(BundleName.JreSetupManager, 'VersionNotFound', [this.configFile]));
+		// First we'll see if the word "version" exists with the version number and use that first.
+		const matchedParts = versionCommandOut.match(/version\s+"?(\d+(\.\d+)*)"?/i);
+		this.logger.trace(`Attempt 1: Java version output match results is ${JSON.stringify(matchedParts)}`);
+        let version: string = "";
+		if (matchedParts && matchedParts.length > 1) {
+			version = matchedParts[1];
+		} else {
+			// Otherwise we'll try to get the version number the old way just be looking for the first number
+			const matchedParts = versionCommandOut.match(/\s+(\d+(\.\d+)*)/);
+			this.logger.trace(`Attempt 2: Java version output match results is ${JSON.stringify(matchedParts)}`);
+			if (!matchedParts || matchedParts.length < 2) {
+				throw new SfError(getMessage(BundleName.JreSetupManager, 'VersionNotFound', [this.configFile]));
+			}
+			version = matchedParts[1];
 		}
 
 		// Up to JDK8, the version scheme is 1.blah
 		// Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
-		const majorVersion = parseInt(matchedParts[1]);
-		const minorVersion = matchedParts[3] ? parseInt(matchedParts[3]) : '';
-		const version = `${majorVersion}${minorVersion ? `.${minorVersion}` : ''}`;
+		const majorVersion = parseInt(version.split('.')[0]);
 
 		if (majorVersion < 11) {
 			// Not matching what we are looking for
