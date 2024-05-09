@@ -51,6 +51,11 @@ jobs:
     steps:
       # Checkout `dev`
       - uses: actions/checkout@v4
+      # We need to set up Node and install our Node dependencies.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*' # Always use Node LTS for building dependencies.
+      - run: yarn
       # Increment version
       - name: Increment version
         run: |
