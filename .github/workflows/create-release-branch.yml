@@ -51,14 +51,10 @@ jobs:
     steps:
       # Checkout `dev`
       - uses: actions/checkout@v4
-      # We need to set up Node and Java, and build our dependencies.
+      # We need to set up Node and install our Node dependencies.
       - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '11' # Always use Java v11 for building dependencies.
       - run: yarn
       # Increment version
       - name: Increment version
