@@ -79,10 +79,10 @@ public class CliMessager {
 
     private static Message createMessage(String internalLog, EventKey eventKey, String[] args) {
         // Developer error if eventKey was not added to exception and we'll get a bunch of NPEs
-        assert (eventKey != null);
+        assert eventKey != null : "EventKey must not be null";
         // Confirm that the correct number of arguments for the message has been provided
         // If this fails, this would be a developer error
-        assert (eventKey.getArgCount() == args.length);
+        assert eventKey.getArgCount() == args.length : "EventKey expected " + eventKey.getArgCount() + " args, received " + args.length;
 
         final Message message = new Message(
             eventKey.getMessageKey(),
