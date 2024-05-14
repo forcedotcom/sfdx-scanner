@@ -73,27 +73,27 @@ exports.verifyMain2DevPrTitle = void 0;
 const common_1 = __nccwpck_require__(6979);
 /**
  * This regex portion matches the accepted Type options for a pull request
- * merging {@code main} back into {@dev}.
+ * merging {@code main} (or an {@code m2d/*} branch) back into {@dev}.
  * NOTE: The only acceptable option for this is {@code MAIN2DEV}, with flexible
  * casing.
  */
 const PR_TYPE_PORTION = "MAIN2DEV";
 /**
  * This regex portion matches the accepted Descriptor portion of a pull request
- * title merging {@code main} back into {@dev}.
- * It can contain anything, but its contents must include the words "rebasing" (as a
- * reminder that the PR must be merged with a rebase instead of a simple merge) and
- * "vX.Y.Z", which should correspond to the new release.
+ * title merging {@code main} (or an {@code m2d/*} branch) back into {@dev}.
+ * It can contain anything, but its contents must include the words "merging" (as a
+ * reminder that the PR must be merged with a merge commit as opposed to a squash or rebase),
+ * and "vX.Y.Z", which should correspond to the new release.
  */
-const DESCRIPTOR_PORTION = ".*rebasing.+\\d+\\.\\d+\\.\\d+.*";
+const DESCRIPTOR_PORTION = ".*merging.+\\d+\\.\\d+\\.\\d+.*";
 /**
- * This RegExp matches the title format for pull requests merging {@code main} back
- * into {@code dev}.
+ * This RegExp matches the title format for pull requests merging {@code main} (or
+ * an {@code m2d/*} branch) back into {@code dev}.
  */
 const MAIN2DEV_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}${DESCRIPTOR_PORTION}`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * merging {@code main} back into {@code dev}.
+ * merging {@code main} (or an {@code m2d/*} branch) back into {@code dev}.
  * @param title
  */
 function verifyMain2DevPrTitle(title) {
@@ -31239,13 +31239,15 @@ function run() {
         const baseBranch = base.ref;
         const head = pullRequest.head;
         const headBranch = head.ref;
-        if (headBranch === "main" && baseBranch === "dev") {
-            // There's a title convention for merging `main` into `dev`.
+        if (headBranch.startsWith("m2d/") && baseBranch === "dev") {
+            // "m2d/" is the prefix of the auto-generated branches we use to merge `main` into `dev` post-release.
+            // Pull Requests merging these branches into `dev` have their own title convention separate from
+            // the convention for other aimed-at-`dev` PRs.
             if ((0, verifyMain2DevPrTitle_1.verifyMain2DevPrTitle)(title)) {
                 console.log(`PR title '${title}' accepted for dev branch.`);
             }
             else {
-                core.setFailed(`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`);
+                core.setFailed(`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Merging after vX.Y.Z"`);
                 return;
             }
         }

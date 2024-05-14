@@ -24,13 +24,15 @@ function run(): void {
 		const baseBranch = base.ref;
 		const head = pullRequest.head as {ref: string};
 		const headBranch = head.ref;
-		if (headBranch === "main" && baseBranch === "dev") {
-			// There's a title convention for merging `main` into `dev`.
+		if (headBranch.startsWith("m2d/") && baseBranch === "dev") {
+			// "m2d/" is the prefix of the auto-generated branches we use to merge `main` into `dev` post-release.
+			// Pull Requests merging these branches into `dev` have their own title convention separate from
+			// the convention for other aimed-at-`dev` PRs.
 			if (verifyMain2DevPrTitle(title)) {
 				console.log(`PR title '${title}' accepted for dev branch.`);
 			} else {
 				core.setFailed(
-					`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Rebasing after vX.Y.Z"`
+					`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Merging after vX.Y.Z"`
 				);
 				return;
 			}
