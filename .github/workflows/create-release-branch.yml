@@ -53,6 +53,8 @@ jobs:
     steps:
       # Checkout `dev`
       - uses: actions/checkout@v4
+        with:
+          ref: 'dev'
       # We need to set up Node and install our Node dependencies.
       - uses: actions/setup-node@v4
         with:
@@ -75,12 +77,9 @@ jobs:
       - id: create-branch
         run: |
           NEW_VERSION=$(jq -r ".version" package.json)
-          git stash
-          git checkout dev
-          git pull
           git checkout -b release-$NEW_VERSION
+          # Push the branch immediately without committing anything.
           git push --set-upstream origin release-$NEW_VERSION
-          git stash pop
           # Output the branch name so we can use it in later jobs.
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
       # Update our dependencies.
