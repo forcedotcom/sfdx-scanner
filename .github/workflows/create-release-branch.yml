@@ -123,7 +123,7 @@ jobs:
                     }
                   ]
                 },
-                expectedHeadOid: $oidOid
+                expectedHeadOid: $oldOid
               }) {
                 commit {
                   id
