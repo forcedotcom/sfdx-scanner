@@ -89,7 +89,7 @@ jobs:
       # Use the GraphQL API to create a signed commit with the various changes.
       - run: |
           # GraphQL needs to know what branch to push to.
-          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
           # GraphQL needs a message for the commit.
           NEW_VERSION=$(jq -r ".version" package.json)
           MESSAGE="Preparing for v$NEW_VERSION release."
