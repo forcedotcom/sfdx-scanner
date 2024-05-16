@@ -9,7 +9,7 @@ describe('#verifyMain2DevPrTitle', () => {
 	 * Only acceptable value is Main2Dev, with flexible casing.
 	 */
 	describe('Type portion', () => {
-		const restOfTitle = "@W-111111@ Rebasing after v4.2.0";
+		const restOfTitle = "@W-111111@ Merging after v4.2.0";
 		describe('Valid types', () => {
 			it('Uppercase: MAIN2DEV', () => {
 				const title = `MAIN2DEV ${restOfTitle}`
@@ -102,17 +102,17 @@ describe('#verifyMain2DevPrTitle', () => {
 	 * The Scope portion is not used for Release pull requests.
 	 */
 	it('Scope portion is rejected', () => {
-		const title = "Main2Dev (PMD) @W-1234@ Rebasing after v4.2.0";
+		const title = "Main2Dev (PMD) @W-1234@ Merging after v4.2.0";
 		expect(verifyMain2DevPrTitle(title)).to.equal(false, 'Should be rejected');
 	});
 
 	/**
 	 * The Work Item portion is the third part of the title.
-	 * E.g., in "Main2Dev @W-1234@ - Rebasing after v4.2.0", the Work Item portion is "@W-1234@".
+	 * E.g., in "Main2Dev @W-1234@ - Merging after v4.2.0", the Work Item portion is "@W-1234@".
 	 */
 	describe('Work Item portion', () => {
 		function createTitle(workItem: string): string {
-			return `Main2Dev ${workItem} Rebasing after v4.2.0`;
+			return `Main2Dev ${workItem} Merging after v4.2.0`;
 		}
 
 		it('Work Item cannot be absent', () => {
@@ -158,7 +158,7 @@ describe('#verifyMain2DevPrTitle', () => {
 
 	/**
 	 * The Description portion is the fourth (and last) part of the title.
-	 * E.g., in "Main2Dev @W-1234@ - Rebasing after v4.2.0", the Description portion is "Rebasing after v4.2.0"
+	 * E.g., in "Main2Dev @W-1234@ - Merging after v4.2.0", the Description portion is "Merging after v4.2.0"
 	 */
 	describe('Description portion', () => {
 		const restOfTitle = "Main2Dev @W-123456@";
@@ -173,18 +173,18 @@ describe('#verifyMain2DevPrTitle', () => {
 			expect(verifyMain2DevPrTitle(title)).to.equal(false, 'Should be rejected');
 		});
 
-		it('Description must contain "rebasing"', () => {
+		it('Description must contain "merging"', () => {
 			const title = `${restOfTitle} after v4.2.0`;
 			expect(verifyMain2DevPrTitle(title)).to.equal(false, 'Should be rejected');
 		});
 
 		it('Description must contain "vX.Y.Z"', () => {
-			const title = `${restOfTitle} rebasing`;
+			const title = `${restOfTitle} merging`;
 			expect(verifyMain2DevPrTitle(title)).to.equal(false, 'Should be rejected');
 		})
 
 		it('Description can contain any character classes', () => {
-			const title = `${restOfTitle} rebasing asdfasdf334 v4.2.0 @@$%#!{}`;
+			const title = `${restOfTitle} merging asdfasdf334 v4.2.0 @@$%#!{}`;
 			expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 		});
 	});
@@ -192,37 +192,37 @@ describe('#verifyMain2DevPrTitle', () => {
 	/**
 	 * The portions should be separated from each other by either whitespace or a flexible group
 	 * of special characters.
-	 * E.g., "Main2Dev ; @W-1234@ . Rebasing after v4.2.0".
+	 * E.g., "Main2Dev ; @W-1234@ . Merging after v4.2.0".
 	 */
 	describe('Portion separation', () => {
 		it('Space (" ") separation is allowed', () => {
-			const title = "Main2Dev     @W-1234@  rebasing after  v4.2.0";
+			const title = "Main2Dev     @W-1234@  merging after  v4.2.0";
 			expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 		});
 
 		describe('Separator characters are allowed', () => {
 			it('n-dash (-)', () => {
-				const title = "Main2Dev - @W-1234@ - rebasing after v4.2.0";
+				const title = "Main2Dev - @W-1234@ - merging after v4.2.0";
 				expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 			});
 
 			it('period (.)', () => {
-				const title = "Main2Dev.@W-1234@.rebasing after v4.2.0";
+				const title = "Main2Dev.@W-1234@.merging after v4.2.0";
 				expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 			});
 
 			it('comma (,)', () => {
-				const title = "Main2Dev,@W-1234@,rebasing after v4.2.0";
+				const title = "Main2Dev,@W-1234@,merging after v4.2.0";
 				expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 			});
 
 			it('colon (:)', () => {
-				const title = "Main2Dev:@W-1234@:rebasing after v4.2.0";
+				const title = "Main2Dev:@W-1234@:merging after v4.2.0";
 				expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 			});
 
 			it('semi colon (;)', () => {
-				const title = "Main2Dev;@W-1234@;rebasing after v4.2.0";
+				const title = "Main2Dev;@W-1234@;merging after v4.2.0";
 				expect(verifyMain2DevPrTitle(title)).to.equal(true, 'Should be accepted');
 			});
 		});
