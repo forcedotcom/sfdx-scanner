@@ -49,7 +49,7 @@ jobs:
     permissions:
       contents: write
     outputs:
-      branch-name: ${{ steps.create-branch.branch_name }}
+      branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
       # Checkout `dev`
       - uses: actions/checkout@v4
