@@ -1,0 +1,88 @@
+name: Report a False Result with scanner run dfa
+description: Report false results returned in scanner run dfa scan reports. If you're submitting for AppExchange security review, include documentation of your false results with your submission.
+title: "[False Result] <YOUR_TITLE_HERE>"
+labels: []
+body:
+- type: textarea
+  attributes:
+    label: Bug Description
+    description: Provide a clear and concise description of what the bug is.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Output / Logs
+    description: Attach any output or logs here. The log for the Salesforce Graph Engine can be found in `~/.sfdx-scanner/sfge.log`. If the error message mentions a specific graph vertex, check its DefiningType and BeginLine properties and include the code at that line.
+    render: shell
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: List out the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+    placeholder: |
+      1. I first do ...
+      2. Then I do ...
+      3. Lastly, I do ...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected Behavior
+    description: Provide a clear and concise description of what you expected to happen.
+- type: input
+  attributes:
+    label: Operating System
+    description: |
+      What is your machine's operating system?
+    placeholder: |
+      Example: MacOS Sonoma 14.4.1
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Salesforce CLI Version
+    description: |
+      What do you get from the command "sf --version"?
+    placeholder: |
+      Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Code Analyzer Plugin (@salesforce/sfdx-scanner) Version
+    description: |
+      What do you get from the command "sf plugins"?
+    placeholder: |
+      Example: @salesforce/sfdx-scanner 4.1.0 (latest-beta)
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Java Version
+    description: |
+      What do you get from the command "java -version"?
+    placeholder: |
+      Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional Context (Screenshots, Files, etc)
+    description: Add any other context about the problem.
+    placeholder: |
+      Drag any files or screenshots you have here.
+- type: textarea
+  attributes:
+    label: Workaround
+    description: What ways have you found to sidestep the problem? If you haven't found a workaround, what have you tried so far?
+- type: dropdown
+  attributes:
+    label: Urgency
+    description: What is the severity of the problem?
+    options:
+    - Low
+    - Moderate
+    - High
+    - Critical
+    default: 0
+  validations:
+    required: true

@@ -1,0 +1,49 @@
+name: Request a New Feature
+description: Request a new Salesforce Code Analyzer feature. Suggest a new rule or an additional engine.
+title: "[Feature Request] <YOUR_TITLE_HERE>"
+labels: ['USER STORY']
+body:
+- type: textarea
+  attributes:
+    label: Need/Problem Description
+    description: First provide a clear and concise description of what your need or problem is.
+    placeholder: When I do XYZ, I am unable to...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Describe your Desired Solution
+    description: Provide a clear and concise description of the enhancement you would like to see added to Salesforce Code Analyzer.
+    placeholder: |
+      Please add a command
+         scanner abc xyz
+      that gives the following output:
+         ...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Alternatives Considered
+    description: Describe any alternative solutions or features you've considered.
+- type: textarea
+  attributes:
+    label: Additional Context (Screenshots, Files, etc)
+    description: Add any other context about the problem.
+    placeholder: |
+      Drag any files or screenshots you have here.
+- type: textarea
+  attributes:
+    label: Workaround
+    description: What ways have you found to sidestep the problem? If you haven't found a workaround, what have you tried so far?
+- type: dropdown
+  attributes:
+    label: Urgency
+    description: What is the severity of the problem?
+    options:
+    - Low
+    - Moderate
+    - High
+    - Critical
+    default: 0
+  validations:
+    required: true
