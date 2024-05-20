@@ -1,0 +1,101 @@
+name: Report a Bug with scanner run
+description: Report an issue with the scanner run command.
+title: "[BUG] <YOUR_TITLE_HERE>"
+labels: []
+body:
+- type: dropdown
+  attributes:
+    label: Have you tried to resolve this issue yourself first?
+    description: |
+      Oftentimes, you can resolve `scanner run` issues on your own. Follow these steps:
+      1. Read the error message.
+      2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
+      3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
+      4. Verify that your code is syntactically valid.
+      5. Verify that the error is reproducible on another machine.
+      6. Attempt to reproduce the error by running against that engine directly instead of via the Code Analyzer. If you can reproduce the error, create an issue on that engine's repo instead of on Code Analyzer's repo.
+      7. Check open and closed [issues](https://github.com/forcedotcom/sfdx-scanner/issues) to see if your issue is already logged.
+
+      If you're listing a managed package on AppExchange, prepare for the security review by following the instructions in the [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) section of the ISVforce Guide.
+
+      **I confirm that I have gone through these steps and still have an issue to report.**
+      <sup>(You must select "Yes" to create an issue.)</sup>
+    options:
+    - ''
+    - "Yes"
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Bug Description
+    description: Provide a clear and concise description of what the bug is.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Output / Logs
+    description: Attach any output or logs here
+    render: shell
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: List out the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+    placeholder: |
+      1. I first do ...
+      2. Then I do ...
+      3. Lastly, I do ...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Expected Behavior
+    description: Provide a clear and concise description of what you expected to happen.
+- type: input
+  attributes:
+    label: Operating System
+    description: |
+      What is your machine's operating system?
+    placeholder: |
+      Example: MacOS Sonoma 14.4.1
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Salesforce CLI Version
+    description: |
+      What do you get from the command "sf --version"?
+    placeholder: |
+      Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+  validations:
+    required: true
+- type: input
+  attributes:
+    label: Code Analyzer Plugin (@salesforce/sfdx-scanner) Version
+    description: |
+      What do you get from the command "sf plugins"?
+    placeholder: |
+      Example: @salesforce/sfdx-scanner 4.1.0 (latest-beta)
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional Context (Screenshots, Files, etc)
+    description: Add any other context about the problem.
+    placeholder: |
+      Drag any files or screenshots you have here.
+- type: textarea
+  attributes:
+    label: Workaround
+    description: What ways have you found to sidestep the problem? If you haven't found a workaround, what have you tried so far?
+- type: dropdown
+  attributes:
+    label: Urgency
+    description: What is the severity of the problem?
+    options:
+    - Low
+    - Moderate
+    - High
+    - Critical
+    default: 0
+  validations:
+    required: true
