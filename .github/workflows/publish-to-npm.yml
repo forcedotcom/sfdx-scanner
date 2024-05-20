@@ -108,7 +108,7 @@ jobs:
     needs: promote-to-latest
     runs-on: macos-latest
     env:
-      GH_TOKEN: ${{ github.token }}
+      GH_TOKEN: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
     permissions:
       contents: write
       pull-requests: write
@@ -131,13 +131,13 @@ jobs:
           It must be MERGED into dev, NOT SQUASHED OR REBASED. Squashing or rebasing this branch onto dev can cause potentially irreconcilable merge conflicts later.\n\
           As an additional safeguard and reminder, the title of this PR MUST include the word 'merging' in the description portion of the PR title, e.g., 'Main2Dev @W-XXXXXXX@ Merging main to dev after vX.Y.Z'.\n\
           If there are conflicts between dev and this branch, you should do the following locally:\n\
-          - $ git checkout dev
-          - $ git pull
-          - $ git fetch --all
-          - $ git checkout m2d/v$NEW_VERSION
-          - $ git pull origin dev --no-rebase # You MUST include this flag, or someone's day will be ruined.
-          - Resolve the merge conflicts manually. When in doubt, ask the code's author for help.
-          - $ git commit
+          - $ git checkout dev\n\
+          - $ git pull\n\
+          - $ git fetch --all\n\
+          - $ git checkout m2d/v$NEW_VERSION\n\
+          - $ git pull origin dev --no-rebase # You MUST include this flag, or someone's day will be ruined.\n\
+          - Resolve the merge conflicts manually. When in doubt, ask the code's author for help.\n\
+          - $ git commit\n\
           - $ git push" > body.txt
           # Create the pull request.
           gh pr create -B dev -H m2d/v$NEW_VERSION --title "Filler title. Read description and rename." -F body.txt
