@@ -3,6 +3,19 @@ description: Report false results in scanner run scan reports. If you're submitt
 title: "[False Result] <YOUR_TITLE_HERE>"
 labels: []
 body:
+- type: dropdown
+  attributes:
+    label: Have you verified this is Salesforce Code Analyzer specific?
+    description: |
+      Oftentimes, a rule is not directly owned by Salesforce Code Analyzer but instead owned by the underlying tool associated with the rule (like PMD or eslint for example). Before reporting this issue, please check to see if running the corresponding tool separate from Salesforce Code Analyzer also gives you a false positive. If so, then please create an issue with that corresponding tool instead of here. Otherwise, create your issue here.
+
+      **I have verified that the issue is only reproducible when running through Salesforce Code Analyzer.**
+      <sup>(You must select "Yes" to create an issue.)</sup>
+    options:
+    - ''
+    - "Yes"
+  validations:
+    required: true
 - type: textarea
   attributes:
     label: Description
@@ -13,7 +26,8 @@ body:
   attributes:
     label: Output / Logs
     description: Attach any output or logs here
-    render: shell
+    placeholder: |
+      Add log output here or drag files here.
 - type: textarea
   attributes:
     label: Steps To Reproduce
@@ -27,7 +41,12 @@ body:
 - type: textarea
   attributes:
     label: Expected Behavior
-    description: Provide a clear and concise description of what you expected to happen.
+    description: Provide a clear and concise description of why you believe this is a false result.
+    placeholder: |
+      I expected the result to be ...
+      I believe the provide result is wrong because ...
+  validations:
+    required: true
 - type: input
   attributes:
     label: Operating System

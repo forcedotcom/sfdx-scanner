@@ -13,7 +13,8 @@ body:
   attributes:
     label: Output / Logs
     description: Attach any output or logs here. The log for the Salesforce Graph Engine can be found in `~/.sfdx-scanner/sfge.log`. If the error message mentions a specific graph vertex, check its DefiningType and BeginLine properties and include the code at that line.
-    render: shell
+    placeholder: |
+      Add log output here or drag files here.
 - type: textarea
   attributes:
     label: Steps To Reproduce
@@ -27,7 +28,12 @@ body:
 - type: textarea
   attributes:
     label: Expected Behavior
-    description: Provide a clear and concise description of what you expected to happen.
+    description: Provide a clear and concise description of why you believe this is a false result.
+    placeholder: |
+      I expected the result to be ...
+      I believe the provide result is wrong because ...
+  validations:
+    required: true
 - type: input
   attributes:
     label: Operating System
