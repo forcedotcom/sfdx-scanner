@@ -35,7 +35,8 @@ body:
   attributes:
     label: Output / Logs
     description: Attach any output or logs here
-    render: shell
+    placeholder: |
+      Add log output here or drag files here.
 - type: textarea
   attributes:
     label: Steps To Reproduce
@@ -50,6 +51,8 @@ body:
   attributes:
     label: Expected Behavior
     description: Provide a clear and concise description of what you expected to happen.
+  validations:
+    required: true
 - type: input
   attributes:
     label: Operating System
