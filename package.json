@@ -10,6 +10,7 @@
 		"@eslint/js": "8.57.0",
 		"@lwc/eslint-plugin-lwc": "^1.7.2",
 		"@oclif/core": "^3.3.2",
+		"@salesforce/code-analyzer-core": "^0.1.0-alpha",
 		"@salesforce/core": "^5",
 		"@salesforce/eslint-config-lwc": "^3.5.3",
 		"@salesforce/eslint-plugin-lightning": "^1.0.0",
@@ -107,6 +108,9 @@
 		"commands": "./lib/commands",
 		"bin": "sf",
 		"topics": {
+			"code-analyzer": {
+				"description": "[FILLER DESCRIPTION]"
+			},
 			"scanner": {
 				"description": "Scan code to detect code quality issues and security vulnerabilities.",
 				"subtopics": {

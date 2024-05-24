@@ -1232,6 +1232,21 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.0"
 
+"@salesforce/code-analyzer-core@^0.1.0-alpha":
+  version "0.1.0-alpha"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.1.0-alpha.tgz#ae5427c49a6d44b283433a86bbba5b0dab5aa387"
+  integrity sha512-GCFnerLdIi4ddSnZV7vA5WGJhK2U2jfHh+JBF0/HRcZa5Hj1McQF5JzUYMnU6sB+Raqhkjr/W0zD2auKfds/wQ==
+  dependencies:
+    "@salesforce/code-analyzer-engine-api" "0.1.0-alpha"
+    "@types/node" "^20.0.0"
+
+"@salesforce/code-analyzer-engine-api@0.1.0-alpha":
+  version "0.1.0-alpha"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-engine-api/-/code-analyzer-engine-api-0.1.0-alpha.tgz#9116674cfc4e9bb0eb7f979eafd2423a27fb070c"
+  integrity sha512-4G1YxJhUiUUinQYE/vrYmZG1/Q2CB1eTvbJtJzRW0k0tR0WVTYEBMIzBdMIPJ2BjRMmgkDaZR8x3wvhZnZUIrQ==
+  dependencies:
+    "@types/node" "^20.0.0"
+
 "@salesforce/core@^5":
   version "5.3.20"
   resolved "https://registry.yarnpkg.com/@salesforce/core/-/core-5.3.20.tgz#4e934d4551bb70423cb1c4115615bc41cffca41e"
@@ -2014,6 +2029,13 @@
   version "17.0.45"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.45.tgz#2c0fafd78705e7a18b7906b5201a522719dc5190"
   integrity sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==
+
+"@types/node@^20.0.0":
+  version "20.12.12"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.12.12.tgz#7cbecdf902085cec634fdb362172dfe12b8f2050"
+  integrity sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==
+  dependencies:
+    undici-types "~5.26.4"
 
 "@types/normalize-path@^3.0.0":
   version "3.0.2"
