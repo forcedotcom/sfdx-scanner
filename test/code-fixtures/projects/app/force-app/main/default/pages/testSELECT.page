@@ -1,4 +1,0 @@
-<apex:page showHeader="true" sidebar="true" controller="testSELECT">
-	<apex:outputText value="{!Name}" escape="false"/> <!--sfdc:sink31-->
-	
-</apex:page>

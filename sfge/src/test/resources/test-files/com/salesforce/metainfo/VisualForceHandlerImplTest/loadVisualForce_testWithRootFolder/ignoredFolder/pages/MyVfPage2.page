@@ -1,2 +1,0 @@
-<apex:page controller="MyController2" layout="none">
-</apex:page>
