@@ -14,6 +14,8 @@ public final class EnvUtil {
     private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
     private static final String ENV_STACK_DEPTH_LIMIT = "SFGE_STACK_DEPTH_LIMIT";
     private static final String ENV_PATH_EXPANSION_LIMIT = "SFGE_PATH_EXPANSION_LIMIT";
+    private static final String ENV_CACHE_DIR = "SFGE_CACHE_DIR";
+    private static final String ENV_FILES_TO_ENTRIES_CACHE_DATA = "SFGE_FILES_TO_ENTRIES_CACHE_DATA";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
     @VisibleForTesting
@@ -34,6 +36,11 @@ public final class EnvUtil {
     @VisibleForTesting
     static final int DEFAULT_PATH_EXPANSION_LIMIT =
             RegistryDataLimitCalculator.getApexPathExpanderRegistryLimit();
+
+    @VisibleForTesting static final String DEFAULT_CACHE_DIR = ".sfge-cache";
+
+    @VisibleForTesting static final String DEFAULT_FILES_TO_ENTRIES_CACHE_DATA = "fileToEntryMapData.json";
+
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -101,6 +108,14 @@ public final class EnvUtil {
         return getIntOrDefault(ENV_PATH_EXPANSION_LIMIT, DEFAULT_PATH_EXPANSION_LIMIT);
     }
 
+    static String getCacheDir() {
+        return getStringOrDefault(ENV_CACHE_DIR, DEFAULT_CACHE_DIR);
+    }
+
+    static String getFilesToEntriesCacheData() {
+        return getStringOrDefault(ENV_FILES_TO_ENTRIES_CACHE_DATA, DEFAULT_FILES_TO_ENTRIES_CACHE_DATA);
+    }
+
     private static int getIntOrDefault(String name, int defaultValue) {
         String strVal = System.getProperty(name);
         return strVal == null ? defaultValue : Integer.parseInt(strVal);
@@ -114,6 +129,11 @@ public final class EnvUtil {
     private static boolean getBoolOrDefault(String name, boolean defaultValue) {
         String strVal = System.getProperty(name);
         return strVal == null ? defaultValue : Boolean.parseBoolean(strVal);
+    }
+
+    private static String getStringOrDefault(String name, String defaultValue) {
+        String strVal = System.getProperty(name);
+        return strVal == null ? defaultValue : strVal;
     }
 
     private EnvUtil() {}

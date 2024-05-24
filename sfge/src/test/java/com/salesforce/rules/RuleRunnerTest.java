@@ -55,7 +55,7 @@ public class RuleRunnerTest {
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         final Result result = rr.runRules(rules);
-        List<Violation> vs = result.getViolations();
+        List<Violation> vs = result.getOrderedViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded static violation", vs.get(0).getMessage());
@@ -82,7 +82,7 @@ public class RuleRunnerTest {
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         final Result result = rr.runRules(rules);
-        List<Violation> vs = result.getViolations();
+        List<Violation> vs = result.getOrderedViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded path violation", vs.get(0).getMessage());
@@ -108,7 +108,7 @@ public class RuleRunnerTest {
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         final Result result = rr.runRules(rules);
-        List<Violation> vs = result.getViolations();
+        List<Violation> vs = result.getOrderedViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded path violation", vs.get(0).getMessage());
@@ -162,7 +162,7 @@ public class RuleRunnerTest {
         // Since we're providing a list of targeted files, only those files should have violations
         // associated with them.
         final Result result = rr.runRules(rules, targets);
-        List<Violation> vs = result.getViolations();
+        List<Violation> vs = result.getOrderedViolations();
 
         MatcherAssert.assertThat(vs, hasSize(4));
         Set<String> filesWithStaticViolation = new HashSet<>();
@@ -303,8 +303,8 @@ public class RuleRunnerTest {
                 }
 
                 @Override
-                public void afterRun(TreeSet<Violation> violations) {
-                    super.afterRun(violations);
+                public void afterRun(Result result) {
+                    super.afterRun(result);
                     VertexCacheTestProvider.remove();
                 }
             };

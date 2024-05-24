@@ -39,4 +39,15 @@ public class TestSfgeConfig implements SfgeConfig {
     public int getPathExpansionLimit() {
         return SfgeConfigImpl.getInstance().getPathExpansionLimit();
     }
+
+    @Override
+    public String getCacheDir() {
+        // Use an alternate directory for tests
+        return ".sfge-cache-test";
+    }
+
+    @Override
+    public String getFilesToEntriesCacheData() {
+        return SfgeConfigImpl.getInstance().getFilesToEntriesCacheData();
+    }
 }

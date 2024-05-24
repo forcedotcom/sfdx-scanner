@@ -1,5 +1,6 @@
 package com.salesforce.rules;
 
+import com.salesforce.cli.Result;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ApexPathVertexMetaInfo;
@@ -8,6 +9,7 @@ import com.salesforce.graph.ops.ApexPathUtil.ApexPathRetrievalSummary;
 import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
 import com.salesforce.graph.ops.expander.PathExpansionException;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
+import com.salesforce.graph.ops.expander.ops.TaintedFileTracker;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
@@ -58,21 +60,26 @@ public class PathBasedRuleRunner {
      *
      * @return a set of violations that were detected
      */
-    public Set<Violation> runRules() {
+    public Result runRules() {
+        final Result result = new Result();
         if (allRules.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(
                         "EntryPoint=" + methodVertex.toSimpleString() + "; No interested rules.");
             }
             // TODO: SURFACE A WARNING TO THE USER.
-            return new HashSet<>();
+            return result;
         }
 
+        final TaintedFileTracker taintedFileTracker = new TaintedFileTracker();
+
         // Build configuration to define how apex paths will be expanded
-        final ApexPathExpanderConfig expanderConfig = getApexPathExpanderConfig();
+        final ApexPathExpanderConfig expanderConfig = getApexPathExpanderConfig(taintedFileTracker);
 
         // Get all the paths that originate in the entry point
         final ApexPathRetrievalSummary pathSummary = getPathSummary(expanderConfig);
+
+        extractFileEntryMapping(taintedFileTracker, methodVertex, result);
 
         // Execute rules on the paths rejected
         executeRulesOnAnomalies(pathSummary.getRejectionReasons());
@@ -95,8 +102,18 @@ public class PathBasedRuleRunner {
         }
 
         progressListener.finishedAnalyzingEntryPoint(pathSummary.getAcceptedPaths(), violations);
+        result.addViolations(violations);
 
-        return violations;
+        return result;
+    }
+
+    private void extractFileEntryMapping(TaintedFileTracker taintedFileTracker, MethodVertex entryMethod, Result result) {
+        final String entryFile = entryMethod.getFileName();
+        final String entryMethodName = entryMethod.getName();
+
+        for (String taintedFile : taintedFileTracker.getTaintedFiles()) {
+            result.addFileToEntryPoint(taintedFile, entryFile, entryMethodName);
+        }
     }
 
     private void executeRulesOnAnomalies(List<PathExpansionException> anomalies) {
@@ -222,9 +239,15 @@ public class PathBasedRuleRunner {
         return ApexPathUtil.summarizeForwardPaths(g, methodVertex, expanderConfig);
     }
 
-    private ApexPathExpanderConfig getApexPathExpanderConfig() {
+    private ApexPathExpanderConfig getApexPathExpanderConfig(TaintedFileTracker taintedFileTracker) {
         ApexPathExpanderConfig.Builder expanderConfigBuilder =
                 ApexPathUtil.getFullConfiguredPathExpanderConfigBuilder();
+        // Add default PathExpansionObservers
+
+        // We need a new instance of TaintedFileTracker since the tainted files are unique to each path expansion.
+        expanderConfigBuilder = expanderConfigBuilder.withPathExpansionObserver(taintedFileTracker);
+
+        // Add observers that the rules request
         for (AbstractPathBasedRule rule : allRules) {
             Optional<PathExpansionObserver> observerOptional = rule.getPathExpansionObserver();
             if (observerOptional.isPresent()) {
@@ -232,6 +255,8 @@ public class PathBasedRuleRunner {
                         expanderConfigBuilder.withPathExpansionObserver(observerOptional.get());
             }
         }
+
+        // Add vertices that rules express interest in
         for (AbstractPathTraversalRule rule : traversalRules) {
             expanderConfigBuilder = expanderConfigBuilder.withVertexPredicate(rule);
         }

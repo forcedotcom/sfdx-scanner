@@ -1,5 +1,6 @@
 package com.salesforce.graph;
 
+import com.google.common.collect.ImmutableList;
 import com.salesforce.Collectible;
 import com.salesforce.NullCollectible;
 import com.salesforce.collections.CollectionUtil;
@@ -438,6 +439,10 @@ public class ApexPath implements DeepCloneable<ApexPath>, Collectible<ApexPath> 
     @Override
     public ApexPath getCollectible() {
         return this;
+    }
+
+    public Optional<MethodVertex> getEntryMethod() {
+        return Optional.ofNullable(this.methodVertex);
     }
 
     /** Users should not call #equals on this. It would be too expensive. */

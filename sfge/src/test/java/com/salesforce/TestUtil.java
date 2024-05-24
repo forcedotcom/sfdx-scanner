@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
+import com.salesforce.cli.Result;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
@@ -320,7 +321,8 @@ public final class TestUtil {
 
         final PathBasedRuleRunner ruleRunner =
                 new PathBasedRuleRunner(g, Arrays.asList(rules), methodVertex);
-        final List<Violation> violations = new ArrayList<>(ruleRunner.runRules());
+        Result result = ruleRunner.runRules();
+        final List<Violation> violations = new ArrayList<>(result.getOrderedViolations());
 
         return violations;
     }

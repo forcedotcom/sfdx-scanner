@@ -40,6 +40,16 @@ public final class SfgeConfigImpl implements SfgeConfig {
         return EnvUtil.getPathExpansionLimit();
     }
 
+    @Override
+    public String getCacheDir() {
+        return EnvUtil.getCacheDir();
+    }
+
+    @Override
+    public String getFilesToEntriesCacheData() {
+        return EnvUtil.getFilesToEntriesCacheData();
+    }
+
     static SfgeConfigImpl getInstance() {
         return SfgeConfigImpl.LazyHolder.INSTANCE;
     }
