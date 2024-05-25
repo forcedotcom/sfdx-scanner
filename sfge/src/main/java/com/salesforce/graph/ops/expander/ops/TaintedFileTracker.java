@@ -21,9 +21,9 @@ public class TaintedFileTracker implements PathExpansionObserver {
 
     @Override
     public void onPathVisit(ApexPath path) {
-        Optional<MethodVertex> entryMethodOpt = path.getEntryMethod();
-        if (entryMethodOpt.isPresent()) {
-            taintedFiles.add(entryMethodOpt.get().getFileName());
+        Optional<MethodVertex> methodOpt = path.getMethodVertex();
+        if (methodOpt.isPresent()) {
+            taintedFiles.add(methodOpt.get().getFileName());
         }
     }
 

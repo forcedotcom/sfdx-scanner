@@ -41,13 +41,13 @@ public final class SfgeConfigImpl implements SfgeConfig {
     }
 
     @Override
-    public String getCacheDir() {
-        return EnvUtil.getCacheDir();
+    public String getFilesToEntriesCacheLocation() {
+        return EnvUtil.getFilesToEntriesCacheLocation();
     }
 
     @Override
-    public String getFilesToEntriesCacheData() {
-        return EnvUtil.getFilesToEntriesCacheData();
+    public boolean isCachingDisabled() {
+        return EnvUtil.isCachingDisabled();
     }
 
     static SfgeConfigImpl getInstance() {

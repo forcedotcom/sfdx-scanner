@@ -9,8 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -18,9 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class CacheCreatorTest {
-
-    private static final String DUMMY_CACHE_DIR = ".test-sfge-cache";
-    private static final String DUMMY_FILE_NAME = "myFileToEntriesDummy.json";
+    private static final String DUMMY_FILE_NAME = ".test-sfge-cache" + File.separator + "myFileToEntriesDummy.json";
     @Mock CacheCreator.Dependencies dependencies;
 
     AutoCloseable openMocks;
@@ -30,12 +30,7 @@ public class CacheCreatorTest {
         openMocks = MockitoAnnotations.openMocks(this);
         SfgeConfigTestProvider.set(new TestSfgeConfig() {
             @Override
-            public String getCacheDir() {
-                return DUMMY_CACHE_DIR;
-            }
-
-            @Override
-            public String getFilesToEntriesCacheData() {
+            public String getFilesToEntriesCacheLocation() {
                 return DUMMY_FILE_NAME;
             }
         });
@@ -58,7 +53,6 @@ public class CacheCreatorTest {
         verify(dependencies, times(1)).writeFile(fileNameCaptor.capture(), dataCaptor.capture());
 
         String actualFilename = fileNameCaptor.getValue();
-        MatcherAssert.assertThat(actualFilename, Matchers.containsString(DUMMY_CACHE_DIR));
         MatcherAssert.assertThat(actualFilename, Matchers.containsString(DUMMY_FILE_NAME));
 
     }
@@ -71,5 +65,29 @@ public class CacheCreatorTest {
         CacheCreator cacheCreator = new CacheCreator(dependencies);
 
         assertDoesNotThrow(() -> cacheCreator.create(result));
+    }
+
+    @Test
+    public void testNoFileWrittenWhenCachingIsDisabled() throws IOException {
+
+        // Disable caching
+        SfgeConfigTestProvider.set(new TestSfgeConfig() {
+            @Override
+            public boolean isCachingDisabled() {
+                return true;
+            }
+        });
+
+        try {
+            Result result = new Result();
+            CacheCreator cacheCreator = new CacheCreator(dependencies);
+            cacheCreator.create(result);
+
+            verify(dependencies, Mockito.never()).writeFile(anyString(), anyString());
+
+        } finally {
+            // Cleanup test config override
+            SfgeConfigTestProvider.remove();
+        }
     }
 }

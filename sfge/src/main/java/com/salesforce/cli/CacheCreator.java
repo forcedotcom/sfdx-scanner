@@ -30,6 +30,13 @@ public final class CacheCreator {
      * @param result from the current execution
      */
     public void create(Result result) {
+        if (SfgeConfigProvider.get().isCachingDisabled()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(
+                    "Skipping to cache information since it has been disabled.");
+            }
+            return;
+        }
         createFilesToEntriesCache(result.getFilesToEntriesMap());
     }
 
@@ -58,10 +65,7 @@ public final class CacheCreator {
     }
 
     private String getFilesToEntriesDataFilename() {
-        final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
-        final String cacheDir = sfgeConfig.getCacheDir();
-        final String filesToEntriesCacheData = sfgeConfig.getFilesToEntriesCacheData();
-        return cacheDir + File.separator + filesToEntriesCacheData;
+        return SfgeConfigProvider.get().getFilesToEntriesCacheLocation();
     }
 
     static class Dependencies {

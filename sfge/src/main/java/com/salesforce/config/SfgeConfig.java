@@ -32,9 +32,9 @@ public interface SfgeConfig {
     /** Limit to control the growth of path expansion to help alleviate OutOfMemoryError. */
     int getPathExpansionLimit();
 
-    /** File Directory to store cache data **/
-    String getCacheDir();
-
     /** Filename of data that stores Files to Entries **/
-    String getFilesToEntriesCacheData();
+    String getFilesToEntriesCacheLocation();
+
+    /** Indicates if caching should be disabled in the current run **/
+    boolean isCachingDisabled();
 }

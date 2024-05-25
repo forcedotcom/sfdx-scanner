@@ -35,7 +35,8 @@ public class PathEntryCaptureTest {
         String entryMethod = "doSomething";
         String keyClass = "EntryAndKeyClass";
 
-        FilesToEntriesMap filesToEntriesMap = executeTest(testInfo, entryClass, entryMethod);
+        TestUtil.compileTestFiles(g, testInfo);
+        FilesToEntriesMap filesToEntriesMap = executePathBasedRuleRunner(entryClass, entryMethod);
 
         Verifier verifier = new Verifier(filesToEntriesMap, testInfo);
         verifier.assertKeyCount(1);
@@ -48,18 +49,13 @@ public class PathEntryCaptureTest {
         String entryMethod = "doSomething";
         String keyClass = "KeyClass";
 
-        FilesToEntriesMap filesToEntriesMap = executeTest(testInfo, entryClass, entryMethod);
+        TestUtil.compileTestFiles(g, testInfo);
+        FilesToEntriesMap filesToEntriesMap = executePathBasedRuleRunner(entryClass, entryMethod);
 
         Verifier verifier = new Verifier(filesToEntriesMap, testInfo);
         verifier.assertKeyCount(2);
         verifier.assertFileToEntryExists(keyClass, entryClass, entryMethod);
         verifier.assertFileToEntryExists(entryClass, entryClass, entryMethod);
-    }
-
-    private FilesToEntriesMap executeTest(TestInfo testInfo, String entryClass, String entryMethod) throws GraphUtil.GraphLoadException {
-        TestUtil.compileTestFiles(g, testInfo);
-        FilesToEntriesMap filesToEntriesMap = executePathBasedRuleRunner(entryClass, entryMethod);
-        return filesToEntriesMap;
     }
 
     @Test
@@ -68,13 +64,27 @@ public class PathEntryCaptureTest {
         String entryMethod = "doSomething";
         String unusedClass = "UnusedClass";
 
-        FilesToEntriesMap filesToEntriesMap = executeTest(testInfo, entryClass, entryMethod);
+        TestUtil.compileTestFiles(g, testInfo);
+        FilesToEntriesMap filesToEntriesMap = executePathBasedRuleRunner(entryClass, entryMethod);
 
         Verifier verifier = new Verifier(filesToEntriesMap, testInfo);
         verifier.assertFileToEntryDoesNotExist(unusedClass, entryClass, entryMethod);
     }
 
+    @Test
+    public void testMultiplePathsToDifferentClasses(TestInfo testInfo) throws GraphUtil.GraphLoadException {
+        String entryClass = "EntryClass";
+        String entryMethod = "doSomething";
 
+        TestUtil.compileTestFiles(g, testInfo);
+        FilesToEntriesMap filesToEntriesMap = executePathBasedRuleRunner(entryClass, entryMethod);
+
+        Verifier verifier = new Verifier(filesToEntriesMap, testInfo);
+        verifier.assertKeyCount(3);
+        verifier.assertFileToEntryExists("KeyClass1", entryClass, entryMethod);
+        verifier.assertFileToEntryExists("KeyClass2", entryClass, entryMethod);
+        verifier.assertFileToEntryExists(entryClass, entryClass, entryMethod);
+    }
 
 
 
@@ -90,6 +100,9 @@ public class PathEntryCaptureTest {
         return result.getFilesToEntriesMap();
     }
 
+    /**
+     * Helper class to offload the brunt of assertions and make the tests more readable.
+     */
     class Verifier {
         private final HashMap<String, HashSet<FilesToEntriesMap.Entry>> map;
         private final Path testFileDirectory;

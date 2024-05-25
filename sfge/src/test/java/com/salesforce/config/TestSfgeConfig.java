@@ -41,13 +41,12 @@ public class TestSfgeConfig implements SfgeConfig {
     }
 
     @Override
-    public String getCacheDir() {
-        // Use an alternate directory for tests
-        return ".sfge-cache-test";
+    public String getFilesToEntriesCacheLocation() {
+        return SfgeConfigImpl.getInstance().getFilesToEntriesCacheLocation();
     }
 
     @Override
-    public String getFilesToEntriesCacheData() {
-        return SfgeConfigImpl.getInstance().getFilesToEntriesCacheData();
+    public boolean isCachingDisabled() {
+        return SfgeConfigImpl.getInstance().isCachingDisabled();
     }
 }

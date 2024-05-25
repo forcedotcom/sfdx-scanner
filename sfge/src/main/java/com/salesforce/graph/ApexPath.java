@@ -441,10 +441,6 @@ public class ApexPath implements DeepCloneable<ApexPath>, Collectible<ApexPath> 
         return this;
     }
 
-    public Optional<MethodVertex> getEntryMethod() {
-        return Optional.ofNullable(this.methodVertex);
-    }
-
     /** Users should not call #equals on this. It would be too expensive. */
     @Override
     public boolean equals(Object o) {
