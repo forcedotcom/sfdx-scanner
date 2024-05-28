@@ -33,5 +33,6 @@ jobs:
           tag_name: v${{ steps.get-version-property.outputs.package_version }}
           name: v${{ steps.get-version-property.outputs.package_version }}
           body: See [release notes](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/release-notes.html)
+          target_commitish: main
           token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
           make_latest: true

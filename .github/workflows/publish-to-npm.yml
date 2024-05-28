@@ -15,10 +15,10 @@ jobs:
   verify-candidate-tag:
     runs-on: ubuntu-latest
     steps:
-      # Check out the release branch, and get its head commit as output for later.
+      # Check out the main branch, and get its head commit as output for later.
       - uses: actions/checkout@v4
         with:
-          ref: 'release'
+          ref: 'main'
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-branch-commit
       # Checkout the tag we want to release, and get its head commit as output for later.
@@ -31,7 +31,7 @@ jobs:
       - name: Fail non-matching commits
         if: ${{ steps.get-branch-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
         run: |
-          echo "Tag commit must match latest commit in release. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
+          echo "Tag commit must match latest commit in main. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
       # Verify that the `package.json`'s version property is 4.Y.Z, as we want to restrict the `dev` and `release`
       # branches to publishing v4.x.
