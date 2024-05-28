@@ -1,2 +1,0 @@
-<apex:component controller="UnsafeVfController" layout="none">
-</apex:component>

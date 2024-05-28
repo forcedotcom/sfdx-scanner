@@ -1,1 +1,0 @@
-Unable to find referenced rule ApexUnitTestCassShouldHaveAsserts; perhaps the rule name is misspelled?
