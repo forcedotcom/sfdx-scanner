@@ -13,7 +13,7 @@ export default class Run extends SfCommand<void> {
 	public static readonly flags = {};
 
 	public run(): Promise<void> {
-		return;
+		return Promise.resolve();
 	}
 }
 
