@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"module": "NodeNext",
+		"target": "es2021",
+		"lib": ["es2021"],
+		"sourceMap": true,
+		"declaration": true,
+		"moduleResolution": "NodeNext",
+		"alwaysStrict": true,
+		"noUnusedLocals": true,
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"allowJs": false,
+		"strictNullChecks": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	},
+	"include": [
+		"./src"
+	]
+}

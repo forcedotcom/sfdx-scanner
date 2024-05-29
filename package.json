@@ -1,100 +1,39 @@
 {
-	"name": "@salesforce/sfdx-scanner",
+	"name": "@salesforce/plugin-code-analyzer",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "4.1.0",
+	"version": "5.0.0-alpha.1",
 	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
-		"@babel/core": "^7.11.0",
-		"@babel/eslint-parser": "^7",
-		"@eslint/js": "8.57.0",
-		"@lwc/eslint-plugin-lwc": "^1.7.2",
 		"@oclif/core": "^3.3.2",
 		"@salesforce/core": "^5",
-		"@salesforce/eslint-config-lwc": "^3.5.3",
-		"@salesforce/eslint-plugin-lightning": "^1.0.0",
 		"@salesforce/sf-plugins-core": "^5.0.4",
 		"@types/node": "^17",
-		"@types/wordwrap": "^1.0.3",
-		"@typescript-eslint/eslint-plugin": "^7.2.0",
-		"@typescript-eslint/parser": "^7.2.0",
-		"cross-spawn": "^7.0.3",
-		"csv-stringify": "^6.0.5",
-		"eslint": "^8.57.0",
-		"eslint-plugin-import": "^2.29.1",
-		"eslint-plugin-jest": "^27.9.0",
-		"find-java-home": "1.2.2",
-		"globby": "^11.0.0",
-		"html-escaper": "^3.0.0",
-		"is-zip": "^1.0.0",
-		"isbinaryfile": "^5",
-		"mustache": "^4.0.1",
-		"node-stream-zip": "1.13.2",
-		"normalize-path": "^3.0.0",
-		"picomatch": "^2.2.2",
-		"reflect-metadata": "^0.1.13",
-		"retire": "^4.4.2",
-		"semver": "^7.3.4",
-		"tmp": "^0.2.0",
 		"ts-node": "^10",
-		"tslib": "^2",
-		"tsyringe": "^4.1.0",
-		"typescript": "~5.1.0",
-		"untildify": "^4.0.0",
-		"uuid": "^9.0.0",
-		"xml-js": "^1.6.11"
-	},
-	"resolutions": {
-		"bl": "^4.0.3",
-		"lodash": "^4.17.21",
-		"ajv": "^6.12.3",
-		"minimist": "^1.2.3",
-		"hosted-git-info": "^3.0.8",
-		"glob-parent": "^5.1.2"
+		"tslib": "^2"
 	},
 	"devDependencies": {
-		"@istanbuljs/nyc-config-typescript": "^1.0.1",
+		"@eslint/js": "^8.57",
 		"@oclif/plugin-help": "^5",
-		"@salesforce/cli-plugins-testkit": "^5.0.4",
-		"@salesforce/dev-config": "^4.1.0",
-		"@salesforce/ts-sinon": "^1.1.2",
-		"@types/chai": "^4",
-		"@types/cross-spawn": "^6.0.2",
-		"@types/eslint": "^8.56.5",
-		"@types/html-escaper": "^3.0.0",
-		"@types/json-schema": "^7.0.11",
-		"@types/mocha": "^9",
-		"@types/mustache": "^4.0.1",
-		"@types/normalize-path": "^3.0.0",
-		"@types/picomatch": "^2.3.0",
-		"@types/sarif": "^2.1.4",
-		"@types/semver": "^7.3.9",
-		"@types/sinon": "^17.0.3",
-		"@types/tmp": "^0.2.3",
-		"@types/uuid": "^8.3.4",
-		"chai": "^4",
-		"cross-env": "^7.0.3",
+		"@salesforce/cli-plugins-testkit": "^5.3.8",
+		"@types/jest": "^29.5.12",
+		"@typescript-eslint/eslint-plugin": "^7.2.0",
+		"@typescript-eslint/parser": "^7.2.0",
+		"eslint": "^8.57",
 		"eslint-plugin-sf-plugin": "^1.17.4",
-		"mocha": "^9",
-		"mocha-junit-reporter": "^2.0.0",
-		"nyc": "^15.0.0",
+		"jest": "^29.7.0",
 		"oclif": "^4.0.3",
-		"sinon": "^17",
-		"tildify": "^2.0.0",
-		"ts-mockito": "^2.6.1"
+		"ts-jest": "^29.1.4",
+		"typescript": "^5.4.5"
 	},
 	"engines": {
 		"node": ">=20.0.0"
 	},
 	"files": [
-		"/dist",
 		"/lib",
 		"/messages",
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json",
-		"/pmd-appexchange",
-		"/html-templates",
-		"/retire-js",
 		"/oclif.lock"
 	],
 	"homepage": "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview",
@@ -107,19 +46,8 @@
 		"commands": "./lib/commands",
 		"bin": "sf",
 		"topics": {
-			"scanner": {
-				"description": "Scan code to detect code quality issues and security vulnerabilities.",
-				"subtopics": {
-					"rule": {
-						"description": "View or add rules to scan code."
-					},
-					"run": {
-						"description": "Scan a codebase with a selection of rules."
-					}
-				}
-			},
-			"scanner:scannerCommand": {
-				"hidden": true
+			"code-analyzer": {
+				"description": "TODO"
 			}
 		},
 		"devPlugins": [
@@ -131,25 +59,36 @@
 		"topicSeparator": " ",
 		"flexibleTaxonomy": true
 	},
-	"nyc": {
-		"branches": "75",
-		"lines": "85",
-		"functions": "85",
-		"statements": "85"
+	"jest": {
+		"coverageThreshold": {
+			"global": {
+				"branches": 80,
+				"functions": 80,
+				"lines": 80,
+				"statements": 80
+			}
+		},
+		"preset": "ts-jest",
+		"testEnvironment": "node",
+		"testMatch": [
+			"/test/**/*.test.ts"
+		],
+		"testPathIgnorePatterns": [
+			"/node_modules/",
+			"/lib/",
+			"/dist/"
+		],
+		"collectCoverageFrom": [
+			"src/**/*.ts",
+			"!src/index.ts"
+		]
 	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
-		"build": "./gradlew build -x test",
 		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock && npm shrinkwrap",
 		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
-		"lint-typescript": "eslint ./src --ext .ts --max-warnings 0",
-		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
-		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
-		"test-cli-messaging": "./gradlew cli-messaging:test cli-messaging:jacocoTestCoverageVerification",
-		"test-pmd-cataloger": "./gradlew pmd-cataloger:test pmd-cataloger:jacocoTestCoverageVerification",
-		"test-sfge": "./gradlew sfge:test sfge:jacocoTestCoverageVerification",
-		"test-sfge-quiet": "cross-env SFGE_LOGGING=false ./gradlew sfge:test sfge:jacocoTestCoverageVerification",
-		"test-typescript": "tsc -b && nyc mocha --timeout 60000 \"./test/**/*.test.ts\"",
-		"version": "oclif readme && git add README.md"
+		"lint": "eslint ./src --max-warnings 0",
+		"version": "oclif readme && git add README.md",
+		"test": "tsc --build tsconfig.build.json && jest --coverage"
 	}
 }
