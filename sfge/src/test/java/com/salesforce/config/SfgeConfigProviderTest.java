@@ -9,6 +9,10 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 
 public class SfgeConfigProviderTest {
+
+    private static final String DUMMY_CACHE_DIR = "dummyCacheDir";
+    private static final String DUMMY_FILES_TO_ENTRIES_LOCATION = "dummyFilesToEntriesData";
+
     @Test
     public void testDefaultImplementation() {
         final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
@@ -56,6 +60,16 @@ public class SfgeConfigProviderTest {
                         public int getPathExpansionLimit() {
                             return -1 * EnvUtil.DEFAULT_PATH_EXPANSION_LIMIT;
                         }
+
+                        @Override
+                        public String getFilesToEntriesCacheLocation() {
+                            return DUMMY_FILES_TO_ENTRIES_LOCATION;
+                        }
+
+                        @Override
+                        public boolean isCachingDisabled() {
+                            return true;
+                        }
                     });
 
             final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
@@ -81,6 +95,8 @@ public class SfgeConfigProviderTest {
             MatcherAssert.assertThat(
                     sfgeConfig.getPathExpansionLimit(),
                     equalTo(-1 * EnvUtil.DEFAULT_PATH_EXPANSION_LIMIT));
+            MatcherAssert.assertThat(sfgeConfig.getFilesToEntriesCacheLocation(), equalTo(DUMMY_FILES_TO_ENTRIES_LOCATION));
+            MatcherAssert.assertThat(sfgeConfig.isCachingDisabled(), equalTo(true));
         } finally {
             SfgeConfigTestProvider.remove();
         }

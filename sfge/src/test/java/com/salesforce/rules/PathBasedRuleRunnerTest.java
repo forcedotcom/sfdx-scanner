@@ -3,10 +3,10 @@ package com.salesforce.rules;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.salesforce.TestUtil;
+import com.salesforce.cli.Result;
 import com.salesforce.graph.vertex.MethodVertex;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +33,7 @@ public class PathBasedRuleRunnerTest {
                         + "		}\n"
                         + "	}\n"
                         + "}";
-        TestUtil.buildGraph(g, sourceCode, true);
+        TestUtil.buildGraph(g, sourceCode, false);
 
         // Get the vertex corresponding to the method, and an instance of the FLS rule in a
         // singleton list.
@@ -44,7 +44,8 @@ public class PathBasedRuleRunnerTest {
         // Define a PathBasedRuleRunner to apply the rule against the method vertex.
         PathBasedRuleRunner runner = new PathBasedRuleRunner(g, rules, methodVertex);
 
-        Set<Violation> violations = runner.runRules();
+        Result result = runner.runRules();
+        List<Violation> violations = result.getOrderedViolations();
         MatcherAssert.assertThat(violations, hasSize(0));
     }
 }

@@ -2,6 +2,9 @@ package com.salesforce.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.graph.ops.registry.RegistryDataLimitCalculator;
+
+import java.io.File;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 public final class EnvUtil {
@@ -9,11 +12,12 @@ public final class EnvUtil {
     private static final String ENV_RULE_THREAD_TIMEOUT = "SFGE_RULE_THREAD_TIMEOUT";
     private static final String ENV_RULE_DISABLE_WARNING_VIOLATION =
             "SFGE_RULE_DISABLE_WARNING_VIOLATION";
-    private static final String ENV_IGNORE_PARSE_ERRORS = "SFGE_IGNORE_PARSE_ERRORS";
     private static final String ENV_LOG_WARNINGS_ON_VERBOSE = "SFGE_LOG_WARNINGS_ON_VERBOSE";
     private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
     private static final String ENV_STACK_DEPTH_LIMIT = "SFGE_STACK_DEPTH_LIMIT";
     private static final String ENV_PATH_EXPANSION_LIMIT = "SFGE_PATH_EXPANSION_LIMIT";
+    private static final String ENV_FILES_TO_ENTRIES_CACHE_LOCATION = "SFGE_FILES_TO_ENTRIES_CACHE_LOCATION";
+    private static final String ENV_DISABLE_CACHING = "SFGE_DISABLE_CACHING";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
     @VisibleForTesting
@@ -34,6 +38,11 @@ public final class EnvUtil {
     @VisibleForTesting
     static final int DEFAULT_PATH_EXPANSION_LIMIT =
             RegistryDataLimitCalculator.getApexPathExpanderRegistryLimit();
+
+    @VisibleForTesting static final String DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION = ".sfge-cache" + File.separator + "fileToEntryMapData.json";
+
+    @VisibleForTesting static final boolean DEFAULT_DISABLE_CACHING = false;
+
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -101,6 +110,14 @@ public final class EnvUtil {
         return getIntOrDefault(ENV_PATH_EXPANSION_LIMIT, DEFAULT_PATH_EXPANSION_LIMIT);
     }
 
+    static String getFilesToEntriesCacheLocation() {
+        return getStringOrDefault(ENV_FILES_TO_ENTRIES_CACHE_LOCATION, DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION);
+    }
+
+    static boolean isCachingDisabled() {
+        return getBoolOrDefault(ENV_DISABLE_CACHING, DEFAULT_DISABLE_CACHING);
+    }
+
     private static int getIntOrDefault(String name, int defaultValue) {
         String strVal = System.getProperty(name);
         return strVal == null ? defaultValue : Integer.parseInt(strVal);
@@ -114,6 +131,11 @@ public final class EnvUtil {
     private static boolean getBoolOrDefault(String name, boolean defaultValue) {
         String strVal = System.getProperty(name);
         return strVal == null ? defaultValue : Boolean.parseBoolean(strVal);
+    }
+
+    private static String getStringOrDefault(String name, String defaultValue) {
+        String strVal = System.getProperty(name);
+        return strVal == null ? defaultValue : strVal;
     }
 
     private EnvUtil() {}
