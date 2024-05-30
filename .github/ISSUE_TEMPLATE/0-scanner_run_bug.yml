@@ -77,7 +77,7 @@ body:
     description: |
       What do you get from the command "sf plugins"?
     placeholder: |
-      Example: @salesforce/sfdx-scanner 4.1.0 (latest-beta)
+      Example: @salesforce/sfdx-scanner 4.3.0 (latest)
   validations:
     required: true
 - type: textarea
