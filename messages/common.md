@@ -12,4 +12,4 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
 # upgradeTo4xRecommendation
 
-To use the most up-to-date Code Analyzer features including PMD 7.x, install Code Analyzer v4.x (Beta) by running this command: "sf plugins install @salesforce/sfdx-scanner@latest-beta". You are currently using Code Analyzer v3, which we plan to stop supporting soon.
+You are using Code Analyzer v3, which we no longer support. Update to v4 of Code Analyzer by running this command: "sf plugins install @salesforce/sfdx-scanner". Version 4 of Code Analyzer has the most up-to-date features, including PMD 7.x.
