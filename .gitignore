@@ -12,6 +12,7 @@
 /tmp
 node_modules
 /out
+/reports
 # Build folders
 /sample-code/pmd-example-rules/target
 

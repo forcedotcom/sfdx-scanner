@@ -7,11 +7,6 @@ on:
         required: false
         type: string
         default: "[{version: 'lts/*', artifact: 'lts'}]"
-      java-matrix:
-        description: "An array of java versions against which the tests should be run"
-        required: false
-        type: string
-        default: "['11']"
       target-branch:
         description: "What branch should be checked out?"
         required: false
@@ -20,7 +15,34 @@ on:
         default: ${{ github.sha }}
 
 jobs:
-  do-nothing:
-    runs-on: ubuntu-latest
+  unit-tests:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+      # to completion instead.
+      fail-fast: false
+      matrix:
+        node: ${{ fromJson(inputs.node-matrix) }}
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - run: echo DOING NOTHING FOR NOW
+      # Check out the code
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
+      # Make sure we're on the right version on Node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node.version }}
+      - run: yarn
+      - run: yarn build
+      - run: yarn test
+        id: jest-tests
+      - run: yarn lint
+      - name: Upload full artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-${{ runner.os }}-${{ matrix.node.artifact }}
+          path: |
+            ./reports
+            ./coverage
