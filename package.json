@@ -22,6 +22,7 @@
 		"eslint": "^8.57",
 		"eslint-plugin-sf-plugin": "^1.17.4",
 		"jest": "^29.7.0",
+		"jest-junit": "^16.0.0",
 		"oclif": "^4.0.3",
 		"ts-jest": "^29.1.4",
 		"typescript": "^5.4.5"
@@ -60,6 +61,14 @@
 		"flexibleTaxonomy": true
 	},
 	"jest": {
+		"collectCoverageFrom": [
+			"src/**/*.ts",
+			"!src/index.ts"
+		],
+		"coverageReporters": [
+			"lcov",
+			"json"
+		],
 		"coverageThreshold": {
 			"global": {
 				"branches": 80,
@@ -69,6 +78,23 @@
 			}
 		},
 		"preset": "ts-jest",
+		"reporters": [
+			"default",
+			[
+				"jest-junit",
+				{
+					"outputDirectory": "reports",
+					"outputName": "report.xml"
+				}
+			],
+			[
+				"github-actions",
+				{
+					"silent": false
+				},
+				"summary"
+			]
+		],
 		"testEnvironment": "node",
 		"testMatch": [
 			"<rootDir>/test/**/*.test.ts"
@@ -77,10 +103,6 @@
 			"/node_modules/",
 			"/lib/",
 			"/dist/"
-		],
-		"collectCoverageFrom": [
-			"src/**/*.ts",
-			"!src/index.ts"
 		]
 	},
 	"repository": "forcedotcom/sfdx-scanner",
