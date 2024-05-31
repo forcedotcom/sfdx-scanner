@@ -1,9 +1,0 @@
-# The compiled action is contained in the dist directory
-!dist/
-!build/
-
-# Typescript output
-lib/
-
-# npm output
-package-lock.json
