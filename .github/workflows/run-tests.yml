@@ -38,12 +38,6 @@ jobs:
       - run: yarn test
         id: jest-tests
       - run: yarn lint
-      - if: ${{ failure() && steps.jest-tests.outcome != 'success' }}
-        # Use bash for this to avoid any syntax nonsense
-        shell: bash
-        run: |
-          MSG="Jest tests failed. If no annotations were added, the most likely problem is insufficient code coverage."
-          echo "::error ::$MSG"
       - name: Upload full artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
