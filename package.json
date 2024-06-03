@@ -100,9 +100,9 @@
 			"<rootDir>/test/**/*.test.ts"
 		],
 		"testPathIgnorePatterns": [
-			"/node_modules/",
-			"/lib/",
-			"/dist/"
+			"<rootDir>/node_modules/",
+			"<rootDir>/lib/",
+			"<rootDir>/dist/"
 		]
 	},
 	"repository": "forcedotcom/sfdx-scanner",
