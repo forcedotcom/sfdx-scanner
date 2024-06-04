@@ -4,12 +4,15 @@
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:@typescript-eslint/recommended-requiring-type-checking",
-		"plugin:sf-plugin/migration"
+		"plugin:sf-plugin/recommended"
 	],
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
 		"project": "./tsconfig.json"
+	},
+	"rules": {
+		"@typescript-eslint/no-unused-vars": ["error", {"argsIgnorePattern": "^_"}]
 	},
 	"plugins": [
 		"@typescript-eslint"
