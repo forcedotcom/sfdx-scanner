@@ -53,7 +53,7 @@ export default class RunCommand extends SfCommand<void> {
 		}),
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.output-file.summary'),
-			char: 'o',
+			char: 'f',
 			multiple: true,
 			delimiter: ','
 		}),

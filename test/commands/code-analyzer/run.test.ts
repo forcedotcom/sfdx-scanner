@@ -325,9 +325,9 @@ describe('`code-analyzer run` tests', () => {
 			expect(receivedActionInput).toHaveProperty('output-file', [...inputValue1, ...inputValue2]);
 		});
 
-		it('Can be referenced by its shortname, -o', async () => {
+		it('Can be referenced by its shortname, -f', async () => {
 			const inputValue = './somefile.json';
-			await RunCommand.run(['-o', inputValue]);
+			await RunCommand.run(['-f', inputValue]);
 			expect(spy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('output-file', [inputValue]);
 		});
