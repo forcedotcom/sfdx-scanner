@@ -17,7 +17,7 @@ export default class RulesCommand extends SfCommand<void> {
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
-			default: ["recommended"]
+			default: ["Recommended"]
 		}),
 		'config-file': Flags.file({
 			summary: getMessage(BundleName.RulesCommand, 'flags.config-file.summary'),

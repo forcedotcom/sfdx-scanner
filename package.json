@@ -67,7 +67,8 @@
 		],
 		"coverageReporters": [
 			"lcov",
-			"json"
+			"json",
+			"text"
 		],
 		"coverageThreshold": {
 			"global": {

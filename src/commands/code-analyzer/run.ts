@@ -32,7 +32,7 @@ export default class RunCommand extends SfCommand<void> {
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
-			default: ["recommended"]
+			default: ["Recommended"]
 		}),
 		// === Flags pertaining to output ===
 		'severity-threshold': Flags.string({

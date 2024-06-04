@@ -36,35 +36,17 @@ describe('`code-analyzer init` tests', () => {
 
 		it('Rejects all other values', async () => {
 			const inputValue = "asdf";
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await InitCommand.run(['--template', inputValue]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`Expected --template=${inputValue} to be one of: empty, default`);
+			const executionPromise = InitCommand.run(['--template', inputValue]);
+			await expect(executionPromise).rejects.toThrow(`Expected --template=${inputValue} to be one of: empty, default`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('Can be supplied only once', async () => {
 			const inputValue1 = 'empty';
 			const inputValue2 = 'default';
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await InitCommand.run(['--template', inputValue1, '--template', inputValue2]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`Flag --template can only be specified once`);
-			expect(spy).not.toHaveBeenCalled()
+			const executionPromise = InitCommand.run(['--template', inputValue1, '--template', inputValue2]);
+			await expect(executionPromise).rejects.toThrow(`Flag --template can only be specified once`);
+			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('Can be referenced by its shortname, -t', async () => {

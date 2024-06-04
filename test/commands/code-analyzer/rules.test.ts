@@ -50,10 +50,10 @@ describe('`code-analyzer rules` tests', () => {
 			expect(receivedActionInput).toHaveProperty('rule-selector', [...inputValue1, ...inputValue2]);
 		});
 
-		it('Defaults to value of "recommended"', async () => {
+		it('Defaults to value of "Recommended"', async () => {
 			await RulesCommand.run([]);
 			expect(spy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('rule-selector', ["recommended"]);
+			expect(receivedActionInput).toHaveProperty('rule-selector', ["Recommended"]);
 		})
 
 		it('Can be referenced by its shortname, -r', async () => {
@@ -74,34 +74,16 @@ describe('`code-analyzer rules` tests', () => {
 
 		it('Rejects non-existent file', async () => {
 			const inputValue = 'definitelyFakeFile.json';
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await RulesCommand.run(['--config-file', inputValue]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`No file found at ${inputValue}`);
+			const executionPromise = RulesCommand.run(['--config-file', inputValue]);
+			await expect(executionPromise).rejects.toThrow(`No file found at ${inputValue}`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('Can only be supplied once', async () => {
 			const inputValue1 = 'package.json';
 			const inputValue2 = 'LICENSE';
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await RulesCommand.run(['--config-file', inputValue1, '--config-file', inputValue2]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`Flag --config-file can only be specified once`);
+			const executionPromise = RulesCommand.run(['--config-file', inputValue1, '--config-file', inputValue2]);
+			await expect(executionPromise).rejects.toThrow(`Flag --config-file can only be specified once`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
@@ -130,34 +112,16 @@ describe('`code-analyzer rules` tests', () => {
 
 		it('Rejects all other values', async () => {
 			const inputValue = 'beep';
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await RulesCommand.run(['--view', inputValue]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`Expected --view=${inputValue} to be one of:`);
+			const executionPromise = RulesCommand.run(['--view', inputValue]);
+			await expect(executionPromise).rejects.toThrow(`Expected --view=${inputValue} to be one of:`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('Can be supplied only once', async () => {
 			const inputValue1 = 'detail';
 			const inputValue2 = 'table';
-			let errorThrown: boolean;
-			let message: string = '';
-			try {
-				await RulesCommand.run(['--view', inputValue1, '--view', inputValue2]);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).toBe(true);
-			expect(message).toContain(`Flag --view can only be specified once`);
+			const executionPromise = RulesCommand.run(['--view', inputValue1, '--view', inputValue2]);
+			await expect(executionPromise).rejects.toThrow(`Flag --view can only be specified once`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
