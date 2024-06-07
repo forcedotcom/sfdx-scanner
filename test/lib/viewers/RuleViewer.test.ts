@@ -31,14 +31,17 @@ describe('RuleDetailViewer', () => {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `1. ${rule.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT,
+			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
 			data: JSON.stringify({
-				engine: rule.getEngineName(),
-				severity: rule.getFormattedSeverity(),
-				type: rule.getFormattedType(),
-				tags: rule.getFormattedTags(),
-				url: rule.getFormattedResourceUrls(),
-				description: rule.getDescription()
+				obj: {
+					engine: rule.getEngineName(),
+					severity: rule.getFormattedSeverity(),
+					type: rule.getFormattedType(),
+					tags: rule.getFormattedTags(),
+					url: rule.getFormattedResourceUrls(),
+					description: rule.getDescription()
+				},
+				keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
 			})
 		}]);
 	});
@@ -61,27 +64,33 @@ describe('RuleDetailViewer', () => {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `1. ${rule1.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT,
+			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
 			data: JSON.stringify({
-				engine: rule1.getEngineName(),
-				severity: rule1.getFormattedSeverity(),
-				type: rule1.getFormattedType(),
-				tags: rule1.getFormattedTags(),
-				url: rule1.getFormattedResourceUrls(),
-				description: rule1.getDescription()
+				obj: {
+					engine: rule1.getEngineName(),
+					severity: rule1.getFormattedSeverity(),
+					type: rule1.getFormattedType(),
+					tags: rule1.getFormattedTags(),
+					url: rule1.getFormattedResourceUrls(),
+					description: rule1.getDescription()
+				},
+				keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
 			})
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `2. ${rule2.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT,
+			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
 			data: JSON.stringify({
-				engine: rule2.getEngineName(),
-				severity: rule2.getFormattedSeverity(),
-				type: rule2.getFormattedType(),
-				tags: rule2.getFormattedTags(),
-				url: rule2.getFormattedResourceUrls(),
-				description: rule2.getDescription()
+				obj: {
+					engine: rule2.getEngineName(),
+					severity: rule2.getFormattedSeverity(),
+					type: rule2.getFormattedType(),
+					tags: rule2.getFormattedTags(),
+					url: rule2.getFormattedResourceUrls(),
+					description: rule2.getDescription()
+				},
+				keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
 			})
 		}]);
 	});

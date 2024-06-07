@@ -27,14 +27,14 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 				const rule = rules[i];
 				this.display.displayStyledHeader(getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]));
 				const severity = rule.getSeverityLevel();
-				this.display.displayStyledObject({
+				this.display.displayStyledObjectInOrder({
 					engine: rule.getEngineName(),
 					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
 					type: RuleType[rule.getType()],
 					tags: rule.getTags().join(', '),
 					url: rule.getResourceUrls().join(', '),
 					description: rule.getDescription()
-				});
+				}, ['engine', 'severity', 'type', 'tags', 'url', 'description']);
 			}
 		}
 	}

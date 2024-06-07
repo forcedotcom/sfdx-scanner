@@ -13,6 +13,12 @@ export interface Display {
 	displayStyledHeader(headerText: string): void;
 
 	/**
+	 * Output object to stdout with keys matching the provided order, only if the "--json" flag is
+	 * not present.
+	 */
+	displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void;
+
+	/**
 	 * Output object to stdout only if the "--json" flag is not present.
 	 */
 	displayStyledObject(obj: AnyJson): void;
@@ -36,6 +42,17 @@ export class UxDisplay implements Display {
 
 	public displayStyledHeader(headerText: string): void {
 		this.displayable.styledHeader(headerText);
+	}
+
+	public displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void {
+		if (obj == null) {
+			return;
+		}
+		for (const key of keys) {
+			this.displayStyledObject({
+				[key]: obj[key]
+			})
+		}
 	}
 
 	public displayStyledObject(obj: AnyJson): void {

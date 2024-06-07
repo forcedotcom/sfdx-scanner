@@ -5,6 +5,9 @@ import {AnyJson} from "@salesforce/ts-types";
 export class StubDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
+	/**
+	 * Track that the provided message was displayed as an Info-level output.
+	 */
 	public displayInfo(message: string): void {
 		this.displayEvents.push({
 			type: DisplayEventType.INFO,
@@ -13,7 +16,7 @@ export class StubDisplay implements Display {
 	}
 
 	/**
-	 * Output styled header to stdout only if the "--json" flag is not present.
+	 * Track that the provided text was displayed as a header.
 	 */
 	public displayStyledHeader(headerText: string): void {
 		this.displayEvents.push({
@@ -23,7 +26,17 @@ export class StubDisplay implements Display {
 	}
 
 	/**
-	 * Output object to stdout only if the "--json" flag is not present.
+	 * Track that the provided object was displayed with the provided keys.
+	 */
+	public displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void {
+		this.displayEvents.push({
+			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
+			data: JSON.stringify({obj, keys})
+		});
+	}
+
+	/**
+	 * Track that the provided object was displayed with the provided keys.
 	 */
 	public displayStyledObject(obj: AnyJson): void {
 		this.displayEvents.push({
@@ -33,7 +46,7 @@ export class StubDisplay implements Display {
 	}
 
 	/**
-	 * Output table to stdout only if the "--json" flag is not present.
+	 * Track that the provided table data was displayed.
 	 */
 	public displayTable<R extends Ux.Table.Data>(data: R[], _columns: Ux.Table.Columns<R>): void {
 		this.displayEvents.push({
@@ -42,6 +55,10 @@ export class StubDisplay implements Display {
 		});
 	}
 
+	/**
+	 * Verify that the provided {@link DisplayEvent}s were actually displayed in the expected order.
+	 * @param expectedDisplayEvents
+	 */
 	public expectDisplayEvents(expectedDisplayEvents: DisplayEvent[]): void {
 		expect(this.displayEvents).toHaveLength(expectedDisplayEvents.length);
 		for (let i = 0; i < this.displayEvents.length; i++) {
@@ -53,6 +70,7 @@ export class StubDisplay implements Display {
 export enum DisplayEventType {
 	INFO,
 	STYLED_HEADER,
+	STYLED_OBJECT_IN_ORDER,
 	STYLED_OBJECT,
 	TABLE
 }
