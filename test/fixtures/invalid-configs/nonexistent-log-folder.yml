@@ -1,0 +1,14 @@
+# The config file is invalid because this folder doesn't exist anywhere.
+log_folder: test\test-data\nonExistentLogFolder
+
+rules:
+  stubEngine1:
+    stub1RuleB:
+      severity: 1
+    stub1RuleD:
+      severity: "Info"
+      tags: ["Recommended", "CodeStyle"]
+
+  stubEngine2:
+    stub2RuleA:
+      tags: ["Security", "SomeNewTag"]
