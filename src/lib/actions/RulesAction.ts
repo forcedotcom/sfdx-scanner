@@ -16,28 +16,24 @@ export type RulesInput = {
 }
 
 export class RulesAction {
-	public execute(dependencies: RulesDependencies, input: RulesInput): void {
-		// Step 1: Get the config.
-		const config: CodeAnalyzerConfig = dependencies.configLoader.loadConfig(input['config-file']);
+	private readonly dependencies: RulesDependencies;
 
-		// Step 2: Get a Core instance.
+	public constructor(dependencies: RulesDependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public execute(input: RulesInput): void {
+		const config: CodeAnalyzerConfig = this.dependencies.configLoader.loadConfig(input['config-file']);
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
-		// Step 3: Load our engines.
-		const enginePlugins = dependencies.engineLoader.loadEngines();
-
-		// Step 4: Add the engines to Core.
+		const enginePlugins = this.dependencies.engineLoader.loadEngines();
 		for (const enginePlugin of enginePlugins) {
 			core.addEnginePlugin(enginePlugin);
 		}
 
-		// Step 5: Select the rules.
 		const ruleSelection: RuleSelection = core.selectRules(...input["rule-selector"]);
+		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
-		// Step 6: Convert the rule selection into a list.
-		const rules: Rule[] = core.getEngineNames().map(name => ruleSelection.getRulesFor(name)).reduce((all, next) => [...all, ...next], []);
-
-		// Step 7: Show the rules to the user.
-		dependencies.viewer.view(rules);
+		this.dependencies.viewer.view(rules);
 	}
 }

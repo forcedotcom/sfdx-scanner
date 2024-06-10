@@ -1,25 +1,27 @@
 import {RulesAction, RulesDependencies} from '../../../src/lib/actions/RulesAction';
 import {StubDefaultConfigLoader} from '../../stubs/StubConfigLoader';
 import * as StubEngineLoaders from '../../stubs/StubEngineLoaders';
-import {StubRuleViewer} from '../../stubs/StubRuleViewer';
+import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
 
 describe('RulesAction tests', () => {
 
 	it('Submitting the all-selector returns all rules', () => {
-		const action = new RulesAction();
-		const viewer = new StubRuleViewer();
+		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configLoader: new StubDefaultConfigLoader(),
 			engineLoader: new StubEngineLoaders.StubEngineLoader_withFunctionalStubEngine(),
 			viewer
 		};
+		const action = new RulesAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		};
 
-		action.execute(dependencies, input);
+		action.execute(input);
 
-		viewer.expectViewedRules([
+		const viewerCallHistory = viewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(1);
+		expect(viewerCallHistory[0].map(rule => rule.getName())).toEqual([
 			'stub1RuleA',
 			'stub1RuleB',
 			'stub1RuleC',
@@ -32,20 +34,22 @@ describe('RulesAction tests', () => {
 	});
 
 	it('Submitting a filtering selector returns only matching rules', () => {
-		const action = new RulesAction();
-		const viewer = new StubRuleViewer();
+		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configLoader: new StubDefaultConfigLoader(),
 			engineLoader: new StubEngineLoaders.StubEngineLoader_withFunctionalStubEngine(),
 			viewer
 		};
+		const action = new RulesAction(dependencies);
 		const input = {
 			'rule-selector': ['CodeStyle']
 		};
 
-		action.execute(dependencies, input);
+		action.execute(input);
 
-		viewer.expectViewedRules([
+		const viewerCallHistory = viewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(1);
+		expect(viewerCallHistory[0].map(rule => rule.getName())).toEqual([
 			'stub1RuleA',
 			'stub1RuleD'
 		]);
@@ -57,34 +61,36 @@ describe('RulesAction tests', () => {
 	 * test will help us do that.
 	 */
 	it('When no engines are registered, empty results are displayed', () => {
-		const action = new RulesAction();
-		const viewer = new StubRuleViewer();
+		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configLoader: new StubDefaultConfigLoader(),
 			engineLoader: new StubEngineLoaders.StubEngineLoader_withNoPlugins(),
 			viewer
 		};
+		const action = new RulesAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		}
 
-		action.execute(dependencies, input);
+		action.execute(input);
 
-		viewer.expectViewedRules([]);
+		const viewerCallHistory = viewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(1);
+		expect(viewerCallHistory[0]).toEqual([]);
 	});
 
 	it('Throws an error when an engine throws an error', () => {
-		const action = new RulesAction();
-		const viewer = new StubRuleViewer();
+		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configLoader: new StubDefaultConfigLoader(),
 			engineLoader: new StubEngineLoaders.StubEngineLoader_withThrowingStubPlugin(),
 			viewer
 		};
+		const action = new RulesAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		};
 
-		expect(() => action.execute(dependencies, input)).toThrow('SomeErrorFromGetAvailableEngineNames');
+		expect(() => action.execute(input)).toThrow('SomeErrorFromGetAvailableEngineNames');
 	});
 });

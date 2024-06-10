@@ -5,7 +5,7 @@ import {AnyJson} from "@salesforce/ts-types";
 /**
  * Implementation of {@link Display} that tracks every call in an array and allows assertions against them.
  */
-export class StubDisplay implements Display {
+export class SpyDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
 	/**
@@ -46,6 +46,10 @@ export class StubDisplay implements Display {
 			type: DisplayEventType.TABLE,
 			data: JSON.stringify(data)
 		});
+	}
+
+	public getDisplayEvents(): DisplayEvent[] {
+		return this.displayEvents;
 	}
 
 	/**

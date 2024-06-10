@@ -43,11 +43,10 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		const dependencies: RulesDependencies = {
 			configLoader: new ConfigLoaderImpl(),
 			engineLoader: new EngineLoaderImpl(),
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison -- We know `parsedFlags.view` is a valid value.
-			viewer: parsedFlags.view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
+			viewer: (parsedFlags.view as View) === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
 		}
-		const action: RulesAction = new RulesAction();
-		action.execute(dependencies, parsedFlags);
+		const action: RulesAction = new RulesAction(dependencies);
+		action.execute(parsedFlags);
 	}
 }
 

@@ -1,18 +1,16 @@
 import {stubSfCommandUx} from '@salesforce/sf-plugins-core';
 import {TestContext} from '@salesforce/core/lib/testSetup';
 import RulesCommand from '../../../src/commands/code-analyzer/rules';
-import {RulesAction, RulesDependencies, RulesInput} from '../../../src/lib/actions/RulesAction';
+import {RulesAction, RulesInput} from '../../../src/lib/actions/RulesAction';
 
 describe('`code-analyzer rules` tests', () => {
 	const $$ = new TestContext();
 
 	let spy: jest.SpyInstance;
-	let receivedActionDependencies: RulesDependencies;
 	let receivedActionInput: RulesInput;
 	beforeEach(() => {
 		stubSfCommandUx($$.SANDBOX);
-		spy = jest.spyOn(RulesAction.prototype, 'execute').mockImplementation((dependencies, input) => {
-			receivedActionDependencies = dependencies;
+		spy = jest.spyOn(RulesAction.prototype, 'execute').mockImplementation((input) => {
 			receivedActionInput = input;
 		});
 	});
@@ -103,7 +101,8 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run(['--view', inputValue]);
 			expect(spy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableViewer');
+			// TODO: Janky workaround. Can we replace with actual mockup of constructor or similar?
+			expect(spy.mock.contexts[0].dependencies.viewer.constructor.name).toEqual('RuleTableViewer');
 		});
 
 		it('Accepts the value, "detail"', async () => {
@@ -111,7 +110,8 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run(['--view', inputValue]);
 			expect(spy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailViewer');
+			// TODO: Janky workaround. Can we replace with actual mockup of constructor or similar?
+			expect(spy.mock.contexts[0].dependencies.viewer.constructor.name).toEqual('RuleDetailViewer');
 		});
 
 		it('Rejects all other values', async () => {
@@ -125,7 +125,8 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run([]);
 			expect(spy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', 'table');
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableViewer');
+			// TODO: Janky workaround. Can we replace with actual mockup of constructor or similar?
+			expect(spy.mock.contexts[0].dependencies.viewer.constructor.name).toEqual('RuleTableViewer');
 		});
 
 		it('Can be supplied only once', async () => {
@@ -141,7 +142,8 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run(['-v', inputValue]);
 			expect(spy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableViewer');
+			// TODO: Janky workaround. Can we replace with actual mockup of constructor or similar?
+			expect(spy.mock.contexts[0].dependencies.viewer.constructor.name).toEqual('RuleTableViewer');
 		});
 	});
 });

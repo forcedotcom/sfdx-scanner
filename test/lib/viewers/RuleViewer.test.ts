@@ -1,22 +1,24 @@
 import {RuleDetailViewer} from '../../../src/lib/viewers/RuleViewer';
-import {DisplayEventType, StubDisplay} from '../../stubs/StubDisplay';
+import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
 
 describe('RuleDetailViewer', () => {
 	it('When given no rules, outputs summary and nothing else', () => {
-		const display = new StubDisplay();
+		const display = new SpyDisplay();
 		const viewer = new RuleDetailViewer(display);
 
 		viewer.view([]);
 
-		display.expectDisplayEvents([{
+		const displayEvents = display.getDisplayEvents();
+		expect(displayEvents).toHaveLength(1);
+		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
 			data: 'Found 0 rules.'
 		}]);
 	});
 
 	it('When given one rule, outputs correct summary and rule data', () => {
-		const display = new StubDisplay();
+		const display = new SpyDisplay();
 		const viewer = new RuleDetailViewer(display);
 		const rule = new StubRules.StubRule1();
 
@@ -24,7 +26,9 @@ describe('RuleDetailViewer', () => {
 			rule
 		]);
 
-		display.expectDisplayEvents([{
+		const displayEvents = display.getDisplayEvents();
+		expect(displayEvents).toHaveLength(3);
+		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
 			data: 'Found 1 rules:'
 		}, {
@@ -47,7 +51,7 @@ describe('RuleDetailViewer', () => {
 	});
 
 	it('When given multiple rules, outputs correct summary and rule data', () => {
-		const display = new StubDisplay();
+		const display = new SpyDisplay();
 		const viewer = new RuleDetailViewer(display);
 		const rule1 = new StubRules.StubRule1();
 		const rule2 = new StubRules.StubRule2();
@@ -57,7 +61,9 @@ describe('RuleDetailViewer', () => {
 			rule2
 		]);
 
-		display.expectDisplayEvents([{
+		const displayEvents = display.getDisplayEvents();
+		expect(displayEvents).toHaveLength(5);
+		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
 			data: 'Found 2 rules:'
 		}, {
