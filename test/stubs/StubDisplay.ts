@@ -31,20 +31,10 @@ export class StubDisplay implements Display {
 	/**
 	 * Track that the provided object was displayed with the provided keys.
 	 */
-	public displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void {
-		this.displayEvents.push({
-			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
-			data: JSON.stringify({obj, keys})
-		});
-	}
-
-	/**
-	 * Track that the provided object was displayed with the provided keys.
-	 */
-	public displayStyledObject(obj: AnyJson): void {
+	public displayStyledObject(obj: AnyJson, keys?: string[]): void {
 		this.displayEvents.push({
 			type: DisplayEventType.STYLED_OBJECT,
-			data: JSON.stringify(obj)
+			data: JSON.stringify({obj, keys})
 		});
 	}
 
@@ -73,7 +63,6 @@ export class StubDisplay implements Display {
 export enum DisplayEventType {
 	INFO,
 	STYLED_HEADER,
-	STYLED_OBJECT_IN_ORDER,
 	STYLED_OBJECT,
 	TABLE
 }

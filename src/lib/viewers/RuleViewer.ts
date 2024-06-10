@@ -27,7 +27,7 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 				const rule = rules[i];
 				this.display.displayStyledHeader(getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]));
 				const severity = rule.getSeverityLevel();
-				this.display.displayStyledObjectInOrder({
+				this.display.displayStyledObject({
 					engine: rule.getEngineName(),
 					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
 					type: RuleType[rule.getType()],

@@ -19,15 +19,9 @@ export interface Display {
 	displayStyledHeader(headerText: string): void;
 
 	/**
-	 * Output object to stdout with keys matching the provided order, only if the "--json" flag is
-	 * not present.
-	 */
-	displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void;
-
-	/**
 	 * Output object to stdout only if the "--json" flag is not present.
 	 */
-	displayStyledObject(obj: AnyJson): void;
+	displayStyledObject(obj: AnyJson, keys?: string[]): void;
 
 	/**
 	 * Output table to stdout only if the "--json" flag is not present.
@@ -50,23 +44,23 @@ export class UxDisplay implements Display {
 		this.displayable.styledHeader(headerText);
 	}
 
-	public displayStyledObjectInOrder(obj: AnyJson, keys: string[]): void {
-		if (obj == null) {
+	public displayStyledObject(obj: AnyJson, keys?: string[]): void {
+		if (obj == null || (keys != null && keys.length === 0)) {
 			return;
 		}
-		// At time of writing (June 2024), the UX's underlying `displayStyledObject()` method prints the keys
-		// in alphabetical order, which is oftentimes an undesirable behavior for us. Hence, this workaround
-		// where the keys are isolated into separate objects and logged one-at-a-time.
-		for (const key of keys) {
-			this.displayStyledObject({
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- We know the key's value is JSON-compatible.
-				[key]: obj[key]
-			})
+		if (keys) {
+			// At time of writing (June 2024), the UX's underlying `styledObject()` method prints the keys
+			// in alphabetical order, which is oftentimes an undesirable behavior for us. Hence, this workaround
+			// where the keys are isolated into separate objects and logged one-at-a-time.
+			for (const key of keys) {
+				this.displayable.styledObject({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- We know the key's value is JSON-compatible.
+					[key]: obj[key]
+				})
+			}
+		} else {
+			this.displayable.styledObject(obj);
 		}
-	}
-
-	public displayStyledObject(obj: AnyJson): void {
-		this.displayable.styledObject(obj);
 	}
 
 	public displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void {

@@ -31,7 +31,7 @@ describe('RuleDetailViewer', () => {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `1. ${rule.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
+			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({
 				obj: {
 					engine: rule.getEngineName(),
@@ -64,7 +64,7 @@ describe('RuleDetailViewer', () => {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `1. ${rule1.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
+			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({
 				obj: {
 					engine: rule1.getEngineName(),
@@ -80,7 +80,7 @@ describe('RuleDetailViewer', () => {
 			type: DisplayEventType.STYLED_HEADER,
 			data: `2. ${rule2.getName()}`
 		}, {
-			type: DisplayEventType.STYLED_OBJECT_IN_ORDER,
+			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({
 				obj: {
 					engine: rule2.getEngineName(),
