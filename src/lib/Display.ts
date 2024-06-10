@@ -59,6 +59,7 @@ export class UxDisplay implements Display {
 		// where the keys are isolated into separate objects and logged one-at-a-time.
 		for (const key of keys) {
 			this.displayStyledObject({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- We know the key's value is JSON-compatible.
 				[key]: obj[key]
 			})
 		}
