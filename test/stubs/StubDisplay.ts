@@ -2,6 +2,9 @@ import {Display} from '../../src/lib/Display';
 import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from "@salesforce/ts-types";
 
+/**
+ * Implementation of {@link Display} that tracks every call in an array and allows assertions against them.
+ */
 export class StubDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
