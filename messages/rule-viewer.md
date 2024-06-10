@@ -4,9 +4,9 @@ Found 0 rules.
 
 # summary.found-rules
 
-Found %s rules:
+Found %d rules:
 
 # summary.detail.header
 
-%s. %s
+%d. %s
 
