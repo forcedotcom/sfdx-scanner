@@ -1,6 +1,12 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 
+/**
+ * Interface for objects that display output information to users. E.g., a class that prints to the CLI would implement
+ * this interface.
+ * Contrast with a {@code Viewer} implementation, e.g. {@link RuleViewer}, which is responsible for arranging data and
+ * handing it off to an underlying {@code Display} implementation.
+ */
 export interface Display {
 	/**
 	 * Output message to stdout (non-blocking) only if the "--json" flag is not present.
@@ -48,6 +54,9 @@ export class UxDisplay implements Display {
 		if (obj == null) {
 			return;
 		}
+		// At time of writing (June 2024), the UX's underlying `displayStyledObject()` method prints the keys
+		// in alphabetical order, which is oftentimes an undesirable behavior for us. Hence, this workaround
+		// where the keys are isolated into separate objects and logged one-at-a-time.
 		for (const key of keys) {
 			this.displayStyledObject({
 				[key]: obj[key]

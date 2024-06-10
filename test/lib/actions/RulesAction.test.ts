@@ -5,7 +5,7 @@ import {StubRuleViewer} from '../../stubs/StubRuleViewer';
 
 describe('RulesAction tests', () => {
 
-	it('When rules match selectors, they are returned', () => {
+	it('Submitting the all-selector returns all rules', () => {
 		const action = new RulesAction();
 		const viewer = new StubRuleViewer();
 		const dependencies: RulesDependencies = {
@@ -28,6 +28,26 @@ describe('RulesAction tests', () => {
 			'stub2RuleA',
 			'stub2RuleB',
 			'stub2RuleC'
+		]);
+	});
+
+	it('Submitting a filtering selector returns only matching rules', () => {
+		const action = new RulesAction();
+		const viewer = new StubRuleViewer();
+		const dependencies: RulesDependencies = {
+			configLoader: new StubDefaultConfigLoader(),
+			engineLoader: new StubEngineLoaders.StubEngineLoader_withFunctionalStubEngine(),
+			viewer
+		};
+		const input = {
+			'rule-selector': ['CodeStyle']
+		};
+
+		action.execute(dependencies, input);
+
+		viewer.expectViewedRules([
+			'stub1RuleA',
+			'stub1RuleD'
 		]);
 	});
 
@@ -66,9 +86,5 @@ describe('RulesAction tests', () => {
 		};
 
 		expect(() => action.execute(dependencies, input)).toThrow('SomeErrorFromGetAvailableEngineNames');
-	});
-
-	it('Throws an error when selectors are invalid', () => {
-
 	});
 });
