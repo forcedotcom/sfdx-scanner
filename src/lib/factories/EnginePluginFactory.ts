@@ -1,12 +1,12 @@
 import {EnginePlugin} from '@salesforce/code-analyzer-engine-api';
 import {SampleEnginePlugin} from '../../tmp/SampleEnginePlugin';
 
-export interface EngineLoader {
-	loadEngines(): EnginePlugin[];
+export interface EnginePluginFactory {
+	create(): EnginePlugin[];
 }
 
-export class EngineLoaderImpl implements EngineLoader {
-	public loadEngines(): EnginePlugin[] {
+export class EnginePluginFactoryImpl implements EnginePluginFactory {
+	public create(): EnginePlugin[] {
 		return [
 			new SampleEnginePlugin()
 		];

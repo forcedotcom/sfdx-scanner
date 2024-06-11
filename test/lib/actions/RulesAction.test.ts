@@ -1,6 +1,6 @@
 import {RulesAction, RulesDependencies} from '../../../src/lib/actions/RulesAction';
-import {StubDefaultConfigLoader} from '../../stubs/StubConfigLoader';
-import * as StubEngineLoaders from '../../stubs/StubEngineLoaders';
+import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
+import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginFactories';
 import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
 
 describe('RulesAction tests', () => {
@@ -8,8 +8,8 @@ describe('RulesAction tests', () => {
 	it('Submitting the all-selector returns all rules', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
-			configLoader: new StubDefaultConfigLoader(),
-			engineLoader: new StubEngineLoaders.StubEngineLoader_withFunctionalStubEngine(),
+			configFactory: new StubDefaultConfigFactory(),
+			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = new RulesAction(dependencies);
@@ -36,8 +36,8 @@ describe('RulesAction tests', () => {
 	it('Submitting a filtering selector returns only matching rules', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
-			configLoader: new StubDefaultConfigLoader(),
-			engineLoader: new StubEngineLoaders.StubEngineLoader_withFunctionalStubEngine(),
+			configFactory: new StubDefaultConfigFactory(),
+			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = new RulesAction(dependencies);
@@ -63,8 +63,8 @@ describe('RulesAction tests', () => {
 	it('When no engines are registered, empty results are displayed', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
-			configLoader: new StubDefaultConfigLoader(),
-			engineLoader: new StubEngineLoaders.StubEngineLoader_withNoPlugins(),
+			configFactory: new StubDefaultConfigFactory(),
+			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withNoPlugins(),
 			viewer
 		};
 		const action = new RulesAction(dependencies);
@@ -82,8 +82,8 @@ describe('RulesAction tests', () => {
 	it('Throws an error when an engine throws an error', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
-			configLoader: new StubDefaultConfigLoader(),
-			engineLoader: new StubEngineLoaders.StubEngineLoader_withThrowingStubPlugin(),
+			configFactory: new StubDefaultConfigFactory(),
+			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withThrowingStubPlugin(),
 			viewer
 		};
 		const action = new RulesAction(dependencies);

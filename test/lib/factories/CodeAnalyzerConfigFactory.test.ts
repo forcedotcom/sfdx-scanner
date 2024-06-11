@@ -1,23 +1,23 @@
 import * as path from 'node:path';
 
 import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
-import {ConfigLoaderImpl} from '../../../src/lib/loaders/ConfigLoader';
+import {CodeAnalyzerConfigFactoryImpl} from '../../../src/lib/factories/CodeAnalyzerConfigFactory';
 
 
-describe('ConfigLoaderImpl', () => {
+describe('CodeAnalyzerConfigFactoryImpl', () => {
 	it('When not provided a config file path, returns default config', () => {
-		const loader = new ConfigLoaderImpl();
+		const factory = new CodeAnalyzerConfigFactoryImpl();
 		const expectedConfig = CodeAnalyzerConfig.withDefaults();
 
-		const testedConfig = loader.loadConfig();
+		const testedConfig = factory.create();
 
 		expect(testedConfig).toEqual(expectedConfig);
 	});
 
 	it('When provided path to a valid config file, returns corresponding config', () => {
-		const loader = new ConfigLoaderImpl();
+		const factory = new CodeAnalyzerConfigFactoryImpl();
 		const configPath = path.resolve('test', 'fixtures', 'valid-configs', 'sample-config-file.yml');
-		const testedConfig = loader.loadConfig(configPath);
+		const testedConfig = factory.create(configPath);
 		expect(testedConfig.getRuleOverridesFor('stubEngine1')).toEqual({
 			stub1RuleB: {
 				severity: 1
@@ -35,12 +35,12 @@ describe('ConfigLoaderImpl', () => {
 	});
 
 	it('When provided path to invalid config file, throws helpful error', () => {
-		const loader = new ConfigLoaderImpl();
+		const factory = new CodeAnalyzerConfigFactoryImpl();
 		// Specify a config file that specifies a non-existent log_folder property.
 		const configPath = path.resolve('test', 'fixtures', 'invalid-configs', 'nonexistent-log-folder.yml');
 		// Attempt to load the config, and assert that the error message mentions the bad log folder.
 		// From that, we can reasonably surmise that the log folder was the cause of the error, and be satisfied
 		// that the user was informed of this problem.
-		expect(() => loader.loadConfig(configPath)).toThrow('nonExistentLogFolder');
+		expect(() => factory.create(configPath)).toThrow('nonExistentLogFolder');
 	});
 });
