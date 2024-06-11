@@ -18,7 +18,7 @@ export type RulesInput = {
 export class RulesAction {
 	private readonly dependencies: RulesDependencies;
 
-	public constructor(dependencies: RulesDependencies) {
+	private constructor(dependencies: RulesDependencies) {
 		this.dependencies = dependencies;
 	}
 
@@ -35,5 +35,9 @@ export class RulesAction {
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
 		this.dependencies.viewer.view(rules);
+	}
+
+	public static createAction(dependencies: RulesDependencies): RulesAction {
+		return new RulesAction(dependencies);
 	}
 }

@@ -39,14 +39,18 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
+		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
+		const action: RulesAction = RulesAction.createAction(dependencies);
+		action.execute(parsedFlags);
+	}
+
+	protected createDependencies(view: View): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this);
-		const dependencies: RulesDependencies = {
+		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			engineFactory: new EnginePluginFactoryImpl(),
-			viewer: (parsedFlags.view as View) === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
-		}
-		const action: RulesAction = new RulesAction(dependencies);
-		action.execute(parsedFlags);
+			viewer: view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
+		};
 	}
 }
 

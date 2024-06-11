@@ -12,7 +12,7 @@ describe('RulesAction tests', () => {
 			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
 			viewer
 		};
-		const action = new RulesAction(dependencies);
+		const action = RulesAction.createAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		};
@@ -40,7 +40,7 @@ describe('RulesAction tests', () => {
 			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
 			viewer
 		};
-		const action = new RulesAction(dependencies);
+		const action = RulesAction.createAction(dependencies);
 		const input = {
 			'rule-selector': ['CodeStyle']
 		};
@@ -67,7 +67,7 @@ describe('RulesAction tests', () => {
 			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withNoPlugins(),
 			viewer
 		};
-		const action = new RulesAction(dependencies);
+		const action = RulesAction.createAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		}
@@ -86,7 +86,7 @@ describe('RulesAction tests', () => {
 			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withThrowingStubPlugin(),
 			viewer
 		};
-		const action = new RulesAction(dependencies);
+		const action = RulesAction.createAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		};
