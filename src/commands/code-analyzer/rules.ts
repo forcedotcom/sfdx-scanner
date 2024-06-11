@@ -1,7 +1,7 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {View} from '../../Constants';
-import {ConfigLoaderImpl} from '../../lib/loaders/ConfigLoader';
-import {EngineLoaderImpl} from '../../lib/loaders/EngineLoader';
+import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
+import {EnginePluginFactoryImpl} from '../../lib/factories/EnginePluginFactory';
 import {RuleDetailViewer, RuleTableViewer} from '../../lib/viewers/RuleViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage} from '../../lib/messages';
@@ -39,14 +39,18 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		const uxDisplay: UxDisplay = new UxDisplay(this);
-		const dependencies: RulesDependencies = {
-			configLoader: new ConfigLoaderImpl(),
-			engineLoader: new EngineLoaderImpl(),
-			viewer: (parsedFlags.view as View) === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
-		}
-		const action: RulesAction = new RulesAction(dependencies);
+		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
+		const action: RulesAction = RulesAction.createAction(dependencies);
 		action.execute(parsedFlags);
+	}
+
+	protected createDependencies(view: View): RulesDependencies {
+		const uxDisplay: UxDisplay = new UxDisplay(this);
+		return {
+			configFactory: new CodeAnalyzerConfigFactoryImpl(),
+			engineFactory: new EnginePluginFactoryImpl(),
+			viewer: view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
+		};
 	}
 }
 

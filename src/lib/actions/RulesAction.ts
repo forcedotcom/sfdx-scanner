@@ -1,12 +1,12 @@
 import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
 
-import {ConfigLoader} from '../loaders/ConfigLoader';
-import {EngineLoader} from '../loaders/EngineLoader';
+import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
+import {EnginePluginFactory} from '../factories/EnginePluginFactory';
 import {RuleViewer} from '../viewers/RuleViewer';
 
 export type RulesDependencies = {
-	configLoader: ConfigLoader;
-	engineLoader: EngineLoader;
+	configFactory: CodeAnalyzerConfigFactory;
+	engineFactory: EnginePluginFactory;
 	viewer: RuleViewer;
 }
 
@@ -18,15 +18,15 @@ export type RulesInput = {
 export class RulesAction {
 	private readonly dependencies: RulesDependencies;
 
-	public constructor(dependencies: RulesDependencies) {
+	private constructor(dependencies: RulesDependencies) {
 		this.dependencies = dependencies;
 	}
 
 	public execute(input: RulesInput): void {
-		const config: CodeAnalyzerConfig = this.dependencies.configLoader.loadConfig(input['config-file']);
+		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
-		const enginePlugins = this.dependencies.engineLoader.loadEngines();
+		const enginePlugins = this.dependencies.engineFactory.create();
 		for (const enginePlugin of enginePlugins) {
 			core.addEnginePlugin(enginePlugin);
 		}
@@ -35,5 +35,9 @@ export class RulesAction {
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
 		this.dependencies.viewer.view(rules);
+	}
+
+	public static createAction(dependencies: RulesDependencies): RulesAction {
+		return new RulesAction(dependencies);
 	}
 }
