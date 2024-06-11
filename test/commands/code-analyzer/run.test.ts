@@ -301,6 +301,12 @@ describe('`code-analyzer run` tests', () => {
 			expect(spy).not.toHaveBeenCalled();
 		});
 
+		it('Defaults to value of "table"', async () => {
+			await RunCommand.run([]);
+			expect(spy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('view', 'table');
+		});
+
 		it('Can be supplied only once', async () => {
 			const inputValue1 = 'detail';
 			const inputValue2 = 'table';

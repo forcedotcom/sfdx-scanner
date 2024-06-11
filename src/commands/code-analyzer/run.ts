@@ -1,5 +1,6 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {RunAction} from '../../lib/actions/RunAction';
+import {View} from '../../Constants';
 import {BundleName, getMessage} from '../../lib/messages';
 
 export default class RunCommand extends SfCommand<void> {
@@ -49,7 +50,8 @@ export default class RunCommand extends SfCommand<void> {
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
 			char: 'v',
-			options: ['table', 'detail'] // TODO: Should probably be enum?
+			default: View.TABLE,
+			options: Object.values(View)
 		}),
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.output-file.summary'),
