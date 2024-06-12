@@ -148,42 +148,22 @@ describe('`code-analyzer run` tests', () => {
 	});
 
 	describe('--severity-threshold', () => {
-		for (let i = 1; i <= 5; i++) {
-			it(`Accepts integers between 1 and 5 (inclusive); i = ${i}`, async () => {
-				const inputValue = `${i}`
-				await RunCommand.run(['--severity-threshold', inputValue]);
-				expect(spy).toHaveBeenCalled();
-				expect(receivedActionInput).toHaveProperty('severity-threshold', inputValue);
-			});
-		}
-
-		it('Rejects integer below 1', async () => {
-			const inputValue = '0';
-			const executionPromise = RunCommand.run(['--severity-threshold', inputValue]);
-			await expect(executionPromise).rejects.toThrow(`Expected --severity-threshold=${inputValue} to be one of:`);
-			expect(spy).not.toHaveBeenCalled();
+		it.each([
+			{sev: '1'}, {sev: '2'}, {sev: '3'}, {sev: '4'}, {sev: '5'},
+			{sev: 'critical'}, {sev: 'high'}, {sev: 'moderate'}, {sev: 'low'} , {sev: 'info'}
+		])('Accepts valid severity value: $sev', async ({sev}) => {
+			await RunCommand.run(['--severity-threshold', sev]);
+			expect(spy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('severity-threshold', sev);
 		});
 
-		it('Rejects integer above 5', async () => {
-			const inputValue = '7';
-			const executionPromise = RunCommand.run(['--severity-threshold', inputValue]);
-			await expect(executionPromise).rejects.toThrow(`Expected --severity-threshold=${inputValue} to be one of:`);
-			expect(spy).not.toHaveBeenCalled();
-		});
-
-		const severities = ["critical", "high", "moderate", "low", "info"];
-		for (let sev of severities) {
-			it(`Accepts severity level names; name = ${sev}`, async () => {
-				await RunCommand.run(['--severity-threshold', sev]);
-				expect(spy).toHaveBeenCalled();
-				expect(receivedActionInput).toHaveProperty('severity-threshold', sev);
-			});
-		}
-
-		it('Rejects unknown severity name', async () => {
-			const inputValue = 'beep';
-			const executionPromise = RunCommand.run(['--severity-threshold', inputValue]);
-			await expect(executionPromise).rejects.toThrow(`Expected --severity-threshold=${inputValue} to be one of:`);
+		it.each([
+			{invalidSev: '0', reason: 'it is integer < 1'},
+			{invalidSev: '7', reason: 'it is integer > 5'},
+			{invalidSev: 'beep', reason: 'it is not a valid severity string'}
+		])('Rejects invalid severity $invalidSev because $reason', async ({invalidSev}) => {
+			const executionPromise = RunCommand.run(['--severity-threshold', invalidSev]);
+			await expect(executionPromise).rejects.toThrow(`Expected --severity-threshold=${invalidSev} to be one of:`);
 			expect(spy).not.toHaveBeenCalled();
 		});
 
