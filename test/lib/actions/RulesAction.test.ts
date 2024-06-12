@@ -5,7 +5,7 @@ import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
 
 describe('RulesAction tests', () => {
 
-	it('Submitting the all-selector returns all rules', () => {
+	it('Submitting the all-selector returns all rules', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
@@ -17,7 +17,7 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['all']
 		};
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
@@ -33,7 +33,7 @@ describe('RulesAction tests', () => {
 		]);
 	});
 
-	it('Submitting a filtering selector returns only matching rules', () => {
+	it('Submitting a filtering selector returns only matching rules', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
@@ -45,7 +45,7 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['CodeStyle']
 		};
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
@@ -60,7 +60,7 @@ describe('RulesAction tests', () => {
 	 * hard-coded engines. But in the future we may want to have dynamic engine loading, and this
 	 * test will help us do that.
 	 */
-	it('When no engines are registered, empty results are displayed', () => {
+	it('When no engines are registered, empty results are displayed', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
@@ -72,14 +72,14 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['all']
 		}
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
 		expect(viewerCallHistory[0]).toEqual([]);
 	});
 
-	it('Throws an error when an engine throws an error', () => {
+	it('Throws an error when an engine throws an error', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
@@ -90,7 +90,8 @@ describe('RulesAction tests', () => {
 		const input = {
 			'rule-selector': ['all']
 		};
+		const executionPromise = action.execute(input);
 
-		expect(() => action.execute(input)).toThrow('SomeErrorFromGetAvailableEngineNames');
+		await expect(executionPromise).rejects.toThrow('SomeErrorFromGetAvailableEngineNames');
 	});
 });

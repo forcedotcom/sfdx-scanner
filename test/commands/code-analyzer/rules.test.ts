@@ -14,6 +14,7 @@ describe('`code-analyzer rules` tests', () => {
 		stubSfCommandUx($$.SANDBOX);
 		executeSpy = jest.spyOn(RulesAction.prototype, 'execute').mockImplementation((input) => {
 			receivedActionInput = input;
+			return Promise.resolve();
 		});
 		const originalCreateAction = RulesAction.createAction;
 		createActionSpy = jest.spyOn(RulesAction, 'createAction').mockImplementation((dependencies) => {

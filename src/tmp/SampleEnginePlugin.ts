@@ -42,8 +42,8 @@ export class SampleEngine1 extends EngineApi.Engine {
 		return 'SampleEngine1';
 	}
 
-	describeRules(): EngineApi.RuleDescription[] {
-		return [
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
@@ -84,10 +84,10 @@ export class SampleEngine1 extends EngineApi.Engine {
 				description: "Some description for stub1RuleE",
 				resourceUrls: ["https://example.com/stub1RuleE", "https://example.com/stub1RuleE_2"]
 			}
-		];
+		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): EngineApi.EngineRunResults {
+	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
@@ -106,7 +106,7 @@ export class SampleEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 100
 		});
-		return this.resultsToReturn;
+		return Promise.resolve(this.resultsToReturn);
 	}
 }
 
@@ -127,8 +127,8 @@ export class SampleEngine2 extends EngineApi.Engine {
 		return "SampleEngine2";
 	}
 
-	describeRules(): EngineApi.RuleDescription[] {
-		return [
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
 			{
 				name: "stub2RuleA",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
@@ -153,10 +153,10 @@ export class SampleEngine2 extends EngineApi.Engine {
 				description: "Some description for stub2RuleC",
 				resourceUrls: [] // Purposely putting in nothing here
 			}
-		];
+		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): EngineApi.EngineRunResults {
+	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
@@ -171,6 +171,6 @@ export class SampleEngine2 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 63
 		});
-		return this.resultsToReturn;
+		return Promise.resolve(this.resultsToReturn);
 	}
 }

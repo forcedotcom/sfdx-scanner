@@ -41,7 +41,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
 		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
 		const action: RulesAction = RulesAction.createAction(dependencies);
-		action.execute(parsedFlags);
+		await action.execute(parsedFlags);
 	}
 
 	protected createDependencies(view: View): RulesDependencies {
