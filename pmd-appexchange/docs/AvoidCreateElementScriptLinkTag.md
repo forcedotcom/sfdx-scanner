@@ -1,23 +1,23 @@
-LoadCSSLinkHref[](#loadcsslinkhref)
+AvoidCreateElementScriptLinkTag[](#avoidcreateelementscriptlinktag)
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Violation:**
 
-   Load CSS only from static resources.
+   Load JavaScript/CSS only from static resources.
 
 
 **Priority:** High (2)
 
 **Description:**
 
-   Determines where CSS must be loaded as a static resource
+   Detects dynamic creation of script or link tags
 
 **Example(s):**
 
    
 
 ```
-<link rel="stylesheet" src="{!$Resource.mycustomcss}"/>
+<script src="{!$Resource.jquery}"/>
 ```
 
 See more examples on properly using static resources here: https://developer.salesforce.com/docs/atlas.en-us.236.0.secure_coding_guide.meta/secure_coding_guide/secure_coding_cross_site_scripting.htm

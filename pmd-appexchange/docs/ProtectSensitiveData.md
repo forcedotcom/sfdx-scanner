@@ -10,42 +10,7 @@ ProtectSensitiveData[](#protectsensitivedata)
 
 **Description:**
 
-   Detects where sensitive data must be stored with Protected Custom metadata or Protected Custom settings.
+   Detects where sensitive data must be stored with Protected Custom metadata or Protected Custom settings. Protected custom setttings or protected custom metadata should be used to store secrets. Refer to the [Protect Secrets Using Platform Features](https://trailhead.salesforce.com/content/learn/modules/secure-secrets-storage/protect-secrets-using-platform-features) Trailhead module for more guidance.
 
 **Example(s):**
-
-   
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>API_Key__c</fullName>
-    <externalId>false</externalId>
-    <label>API Key</label>
-    <length>64</length>
-    <required>true</required>
-    <trackTrending>false</trackTrending>
-    <type>Text</type>
-    <unique>false</unique>
-</CustomField>
-
-	Or
-
-
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Scientific_Name__c</fullName>
-    <externalId>false</externalId>
-    <label>Social Security Number</label>
-    <length>128</length>
-    <required>true</required>
-    <trackTrending>false</trackTrending>
-    <type>Text</type>
-    <unique>false</unique>
-</CustomField>
-```
-
-
-
-        
 

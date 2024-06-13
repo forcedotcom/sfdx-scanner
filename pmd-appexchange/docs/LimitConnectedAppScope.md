@@ -10,8 +10,8 @@ LimitConnectedAppScope[](#limitconnectedappscope)
 
 **Description:**
 
-   Detects if a connected app uses full scope. Explain this
-		use case in your AppExchange security review submission.
+   Detects if a connected app uses full scope. Explain this use case in your AppExchange security review submission.
+		
 
 **Example(s):**
 

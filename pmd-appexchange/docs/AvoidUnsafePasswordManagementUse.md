@@ -1,9 +1,9 @@
-AvoidUnsafeSystemSetPassword[](#avoidunsafesystemsetpassword)
+AvoidUnsafePasswordManagementUse[](#avoidunsafepasswordmanagementuse)
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Violation:**
 
-   Before calling System.setPassword() in Apex, perform necessary authorization checks.
+   Before invoking password related methods in Apex, perform necessary authorization checks.
 
 
 **Priority:** Critical (1)
