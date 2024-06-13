@@ -2,7 +2,7 @@ import {PMD7_LIB, PMD7_VERSION} from "../../Constants";
 import * as path from 'path';
 
 const PMD7_CLI_CLASS = 'net.sourceforge.pmd.cli.PmdCli';
-const HEAP_SIZE = '-Xmx1024m';
+const HEAP_SIZE = '-Xmx1280m'; // Have to increase it to be more than 1024m. See https://github.com/pmd/pmd/issues/5066
 
 export interface PmdCommandInfo {
 	getVersion(): string
