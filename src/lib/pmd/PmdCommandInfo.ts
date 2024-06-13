@@ -2,7 +2,6 @@ import {PMD7_LIB, PMD7_VERSION} from "../../Constants";
 import * as path from 'path';
 
 const PMD7_CLI_CLASS = 'net.sourceforge.pmd.cli.PmdCli';
-const HEAP_SIZE = '-Xmx1024m';
 
 export interface PmdCommandInfo {
 	getVersion(): string
@@ -25,7 +24,7 @@ export class Pmd7CommandInfo implements PmdCommandInfo {
 
 	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string): string[] {
 		const classpath =  classPathsForExternalRules.concat([`${PMD7_LIB}/*`]).join(path.delimiter);
-		const args = ['-cp', classpath, HEAP_SIZE, PMD7_CLI_CLASS, 'check', '--file-list', fileList,
+		const args = ['-cp', classpath, PMD7_CLI_CLASS, 'check', '--file-list', fileList,
 			'--format', 'xml'];
 		if (rulesets.length > 0) {
 			args.push('--rulesets', rulesets);
@@ -35,7 +34,7 @@ export class Pmd7CommandInfo implements PmdCommandInfo {
 
 	constructJavaCommandArgsForCpd(fileList: string, minimumTokens: number, language: string): string[] {
 		const classpath = `${PMD7_LIB}/*`;
-		return ['-cp', classpath, HEAP_SIZE, PMD7_CLI_CLASS, 'cpd', '--file-list', fileList, '--format', 'xml',
+		return ['-cp', classpath, PMD7_CLI_CLASS, 'cpd', '--file-list', fileList, '--format', 'xml',
 			'--minimum-tokens', minimumTokens.toString(), '--language', language, '--skip-lexical-errors'];
 	}
 }
