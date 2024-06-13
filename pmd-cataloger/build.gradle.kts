@@ -63,7 +63,7 @@ tasks.register<Delete>("deletePmdCatalogerDist") {
 
 // ======== DEFINE/UPDATE PMD7 DIST RELATED TASKS  =====================================================================
 val pmd7DistDir = "$distDir/pmd7"
-val pmd7Version = "7.1.0"
+val pmd7Version = "7.2.0"
 val pmd7File = "pmd-dist-$pmd7Version-bin.zip"
 
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd7") {
@@ -76,12 +76,26 @@ tasks.register<Copy>("installPmd7") {
   dependsOn("downloadPmd7")
   from(zipTree("$buildDir/$pmd7File"))
 
-  // I went to https://github.com/pmd/pmd/tree/pmd_releases/7.1.0 and for each of the languages that we support
+  // TO KEEP THE BELOW MODULE DEPENDENCIES LIST CORRECT AND UP TO DATE:
+  // I went to https://github.com/pmd/pmd/tree/pmd_releases/7.2.0 and for each of the languages that we support
   // (apex, java, visualforce, xml), I took a look at its direct and indirect dependencies at
   //     https://central.sonatype.com/artifact/net.sourceforge.pmd/pmd-apex/dependencies
-  // by selecting the 7.1.0 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
+  // by selecting the 7.2.0 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
   // For completeness, I listed the modules and all their compile time dependencies (direct and indirect).
   // Duplicates don't matter since we use setOf.
+  //
+  // A tip when we upgrade to see if there are any differences between minor releases of a given module:
+  //  1) Open the following in two different tabs (using pmd-core as an example):
+  //     * Go to https://mvnrepository.com/artifact/net.sourceforge.pmd/pmd-core/7.1.0
+  //     * Go to https://mvnrepository.com/artifact/net.sourceforge.pmd/pmd-core/7.2.0
+  //     Then compare the compile dependencies and their versions to see if there are any changes.
+  //     Do this will all modules we care about. Obviously the pmd-core dependency version will change but if nothing else
+  //     changes then this means no updates are needed for that module. If there are changes to pmd-core's dependencies...
+  //     then all modules that depend on pmd-core should be updated below with their new indirect dependencies.
+  //  2) As a sanity check it is also worth comparing the versions of the jars that are bundled between the two release
+  //     zip files to spot any version differences.
+  //     * https://github.com/pmd/pmd/archive/refs/tags/pmd_releases/7.2.0.zip
+  //     * https://github.com/pmd/pmd/archive/refs/tags/pmd_releases/7.1.0.zip
   val pmd7ModulesToInclude = setOf(
     // LANGUAGE MODULE     DEPENDENCIES (direct and indirect)
     "pmd-apex",            "Saxon-HE", "annotations", "antlr4-runtime", "apex-parser", "apexlink", "asm", "checker-compat-qual", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "flogger", "flogger-system-backend", "geny_2.13", "gson", "gson-extras", "guava", "j2objc-annotations", "jsr250-api", "jsr305", "jul-to-slf4j", "kotlin-stdlib", "kotlin-stdlib-common", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "summit-ast", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13", "xmlresolver",
@@ -91,7 +105,7 @@ tasks.register<Copy>("installPmd7") {
     "pmd-visualforce",     "Saxon-HE", "antlr4-runtime", "apex-parser", "apexlink", "asm", "checker-compat-qual", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "flogger", "flogger-system-backend", "geny_2.13", "gson", "gson-extras", "guava", "j2objc-annotations", "jsr250-api", "jsr305", "jul-to-slf4j", "kotlin-stdlib", "kotlin-stdlib-common", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-apex", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "summit-ast", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13", "xmlresolver",
     "pmd-xml",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jul-to-slf4j", "nice-xml-messages", "pcollections", "pmd-core", "slf4j-api", "xmlresolver",
     // MAIN CLI MODULE     DEPENDENCIES (direct and indirect)
-    "pmd-cli",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jline", "jul-to-slf4j", "nice-xml-messages", "pcollections", "picocli", "pmd-core", "progressbar", "slf4j-api", "slf4j-simple", "xmlresolver",
+    "pmd-cli",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jline", "jul-to-slf4j", "nice-xml-messages", "pcollections", "picocli", "pmd-core", "progressbar", "slf4j-api", "slf4j-simple", "xmlresolver", // Do not include pmd-designer since we don't use it
   )
   val pmd7JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
   pmd7ModulesToInclude.forEach {
