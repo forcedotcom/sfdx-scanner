@@ -3,7 +3,7 @@ AvoidChangeProtectionUnprotected[](#avoidchangeprotectionunprotected)
 
 **Violation:**
 
-   Update your code to avoid using FeatureManagement.changeProtection called by an UnProtected argument.
+   Ensure appropriate authorization checks are in-place before invoking FeatureManagement.changeProtection called with 'UnProtected' argument.
 
 
 **Priority:** Critical (1)

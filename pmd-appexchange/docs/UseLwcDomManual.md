@@ -14,16 +14,12 @@ UseLwcDomManual[](#uselwcdommanual)
 
 **Example(s):**
 
-   
-
 ```
 <template>
         <div class="chart slds-var-m-around_medium slds-theme_default cursor" lwc:dom="manual"></div> 
     </template>
-
-    & 
-    If template has a direct user input. Then XSS is possible.
 ```
+If template has a direct user input. Then XSS is possible.
 
 
 
