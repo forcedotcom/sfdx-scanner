@@ -12,6 +12,11 @@ import path = require('path');
 import StreamZip = require('node-stream-zip');
 import {CUSTOM_CONFIG} from '../../Constants';
 
+// Note that we don't want to call npx retire from this file since we don't want to accidentally have npx pick up
+// another version on the users machine. Instead, we want to call the command directly from the node_modules/.bin
+// folder (which always shows up when you install the retire dependency).
+const RETIRE_JS_COMMAND = path.resolve(__dirname, '..', '..', '..', 'node_modules', '.bin', 'retire');
+
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
 const INSECURE_BUNDLED_DEPS = 'insecure-bundled-dependencies';
@@ -199,7 +204,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 	private async executeRetireJs(invocation: RetireJsInvocation, verboseViolations: boolean): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
-			const cp = cspawn('npx', ['retire'].concat(invocation.args));
+			const cp = cspawn(RETIRE_JS_COMMAND, invocation.args);
 
 			// Initialize both stdout and stderr as empty strings to which we can append data as we receive it.
 			let stdout = '';
