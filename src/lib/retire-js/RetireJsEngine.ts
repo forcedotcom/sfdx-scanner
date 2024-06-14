@@ -199,7 +199,9 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 	private async executeRetireJs(invocation: RetireJsInvocation, verboseViolations: boolean): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
-			const cp = cspawn('npx', ['retire'].concat(invocation.args));
+            const retirePackagePath = require.resolve('retire/package.json');
+            const retireBinPath = path.join(path.dirname(retirePackagePath), require(retirePackagePath).bin.retire);
+            const cp = cspawn(retireBinPath, invocation.args);
 
 			// Initialize both stdout and stderr as empty strings to which we can append data as we receive it.
 			let stdout = '';
