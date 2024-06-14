@@ -42,7 +42,7 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 
 export class RuleTableViewer extends AbstractRuleViewer {
 	public view(_rules: Rule[]): void {
-
+		throw new Error(`TODO: Table-formatted output is not supported yet, but the rules were ${_rules.map(r => r.getName()).join(',')}`);
 	}
 }
 
