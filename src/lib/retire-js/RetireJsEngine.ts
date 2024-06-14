@@ -11,11 +11,12 @@ import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
 import {CUSTOM_CONFIG} from '../../Constants';
+import * as fs from "node:fs";
 
 // Note that we don't want to call npx retire from this file since we don't want to accidentally have npx pick up
 // another version on the users machine. Instead, we want to call the command directly from the node_modules/.bin
 // folder (which always shows up when you install the retire dependency).
-const RETIRE_JS_COMMAND = path.resolve(__dirname, '..', '..', '..', 'node_modules', '.bin', 'retire');
+const RETIRE_JS_COMMAND = findCommand('retire');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -547,4 +548,18 @@ export class RetireJsEngine extends AbstractRuleEngine {
 				.map(([zipSrc, zipDst]) => {return this.extractZip(zipSrc, zipDst)})
 		);
 	}
+}
+
+
+/**
+ * Finds the command location (symlink) for a command that is pulled in from this package's dependencies.
+ * We need to look up the location since the node_modules or .bin can change locations in various scenarios.
+ */
+export function findCommand(commandName: string): string {
+	for (let dir = __dirname; dir !== path.resolve(dir, '..'); dir = path.resolve(dir, '..')) {
+		const commandPath = path.join(dir, 'node_modules', '.bin', commandName);
+		if (fs.existsSync(commandPath)) return commandPath;
+	}
+	/* istanbul ignore next */
+	throw new Error(`Could not find file for command: ${commandName}`);
 }
