@@ -10,6 +10,18 @@ export class StubEnginePluginFactory_withFunctionalStubEngine implements EngineP
 	}
 }
 
+export class StubEnginePluginFactory_withPreconfiguredStubEngines implements EnginePluginFactory {
+	private readonly enginePlugins: EnginePlugin[] = [];
+
+	public addPreconfiguredEnginePlugin(plugin: EnginePlugin): void {
+		this.enginePlugins.push(plugin);
+	}
+
+	public create(): EnginePlugin[] {
+		return this.enginePlugins;
+	}
+}
+
 export class StubEnginePluginFactory_withNoPlugins implements EnginePluginFactory {
 	public create(): EnginePlugin[] {
 		return [];

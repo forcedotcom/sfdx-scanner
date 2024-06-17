@@ -10,6 +10,7 @@ export enum BundleName {
 	ResultsViewer = 'results-viewer',
 	RuleViewer = 'rule-viewer',
 	RulesCommand = 'rules-command',
+	RunAction = 'run-action',
 	RunCommand = 'run-command'
 }
 

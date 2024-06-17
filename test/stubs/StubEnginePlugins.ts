@@ -2,7 +2,7 @@ import * as EngineApi from "@salesforce/code-analyzer-engine-api"
 import {LogLevel} from "@salesforce/code-analyzer-engine-api"
 
 /**
- * StubEnginePlugin - A plugin stub with preconfigured outputs to help with testing
+ * FunctionalStubEnginePlugin1 - A plugin stub with preconfigured outputs to help with testing
  */
 export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
@@ -27,6 +27,30 @@ export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 			return this.createdEngines.get(engineName) as EngineApi.Engine;
 		}
 		throw new Error(`Engine with name ${engineName} has not yet been created`);
+	}
+}
+
+/**
+ * ConfigurableStubEnginePlugin1 - A plugin that can accept pre-created engines in place of calling {@link createEngine} on hard-coded engines.
+ */
+export class ConfigurableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
+	private createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	addEngine(engine: EngineApi.Engine): void {
+		this.createdEngines.set(engine.getName(), engine);
+	}
+
+	getAvailableEngineNames(): string[] {
+		// Return the names of whatever engines we've been configured with.
+		return [...this.createdEngines.keys()];
+	}
+
+	createEngine(engineName: string, _config: EngineApi.ConfigObject): EngineApi.Engine {
+		// The engines have already been created, so just check whether we have it.
+		if (!this.createdEngines.has(engineName)) {
+			throw new Error(`Plugin not preconfigured with engine ${engineName}`);
+		}
+		return this.createdEngines.get(engineName) as EngineApi.Engine;
 	}
 }
 
@@ -181,7 +205,7 @@ export class StubEngine2 extends EngineApi.Engine {
 }
 
 /**
- * ThrowingPlugin1 - A plugin that throws an exception during a call to getAvailableEngineNames
+ * ThrowingStubPlugin1 - A plugin that throws an exception during a call to getAvailableEngineNames
  */
 export class ThrowingStubPlugin1 extends EngineApi.EnginePluginV1 {
 	getAvailableEngineNames(): string[] {
