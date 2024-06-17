@@ -1,3 +1,5 @@
+import * as fs from 'node:fs/promises';
+import path from 'node:path';
 import * as EngineApi from '@salesforce/code-analyzer-engine-api';
 
 export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
@@ -29,9 +31,6 @@ export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
 export class SampleEngine1 extends EngineApi.Engine {
 	readonly config: EngineApi.ConfigObject;
 	readonly runRulesCallHistory: {ruleNames: string[], runOptions: EngineApi.RunOptions}[] = [];
-	resultsToReturn: EngineApi.EngineRunResults = {
-		violations: []
-	};
 
 	constructor(config: EngineApi.ConfigObject) {
 		super();
@@ -87,7 +86,7 @@ export class SampleEngine1 extends EngineApi.Engine {
 		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
@@ -106,7 +105,29 @@ export class SampleEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 100
 		});
-		return Promise.resolve(this.resultsToReturn);
+		// Create violations for every rule-target pairing.
+		const violations: EngineApi.Violation[] = [];
+		for (const ruleName of ruleNames) {
+			for (const target of runOptions.workspaceFiles) {
+				const firstEligibleFile = await resolveToTargetableFile(target);
+				if (!firstEligibleFile) {
+					throw new Error(`no files in ${target}`);
+				}
+				violations.push({
+					ruleName,
+					message: 'Fake Rule Fakily Violated',
+					codeLocations: [{
+						file: firstEligibleFile,
+						startLine: 1,
+						startColumn: 1
+					}],
+					primaryLocationIndex: 0
+				});
+			}
+		}
+		return {
+			violations
+		};
 	}
 }
 
@@ -116,7 +137,6 @@ export class SampleEngine1 extends EngineApi.Engine {
 export class SampleEngine2 extends EngineApi.Engine {
 	readonly config: EngineApi.ConfigObject;
 	readonly runRulesCallHistory: {ruleNames: string[], runOptions: EngineApi.RunOptions}[] = [];
-	resultsToReturn: EngineApi.EngineRunResults = { violations: [] }
 
 	constructor(config: EngineApi.ConfigObject) {
 		super();
@@ -156,7 +176,7 @@ export class SampleEngine2 extends EngineApi.Engine {
 		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
@@ -171,6 +191,46 @@ export class SampleEngine2 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 63
 		});
-		return Promise.resolve(this.resultsToReturn);
+		// Create violations for every rule-target pairing.
+		const violations: EngineApi.Violation[] = [];
+		for (const ruleName of ruleNames) {
+			for (const target of runOptions.workspaceFiles) {
+				const firstEligibleFile = await resolveToTargetableFile(target);
+				if (!firstEligibleFile) {
+					throw new Error(`no files in ${target}`);
+				}
+				violations.push({
+					ruleName,
+					message: 'Fake Rule Fakily Violated',
+					codeLocations: [{
+						file: firstEligibleFile,
+						startLine: 1,
+						startColumn: 1
+					}],
+					primaryLocationIndex: 0
+				});
+			}
+		}
+		return {
+			violations
+		};
 	}
+}
+
+async function resolveToTargetableFile(fileOrDir: string): Promise<string> {
+	if ((await fs.stat(fileOrDir)).isFile()) {
+		return fileOrDir;
+	}
+
+	const dirContents = await fs.readdir(fileOrDir);
+	for (const file of dirContents) {
+		if ((await fs.stat(path.join(fileOrDir, file))).isFile()) {
+			return path.join(fileOrDir, file);
+		}
+		const recursiveResult = resolveToTargetableFile(path.join(fileOrDir, file));
+		if (recursiveResult) {
+			return recursiveResult;
+		}
+	}
+	return '';
 }

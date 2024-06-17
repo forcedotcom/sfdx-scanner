@@ -8,6 +8,11 @@ export class SpyOutputFileWriter implements OutputFileWriter {
 		this.callHistory.push(results);
 	}
 
+	public getOutputFiles(): string[] {
+		// NO-OP;
+		return [];
+	}
+
 	public getCallHistory(): RunResults[] {
 		return this.callHistory;
 	}

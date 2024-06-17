@@ -17,6 +17,15 @@ describe('OutputFileWriterImpl', () => {
 		jest.restoreAllMocks();
 	});
 
+	it('Does a no-op when there are no files to write to', () => {
+		const outputFileWriter = new OutputFileWriterImpl([]);
+		const stubbedResults = new StubRunResults.StubNonEmptyResults();
+
+		outputFileWriter.writeToFiles(stubbedResults);
+
+		expect(writeFileSpy).not.toHaveBeenCalled();
+	});
+
 	it.each([
 		{ext: '.csv', expectedOutput: `Results formatted as ${OutputFormat.CSV}`},
 		//{ext: '.html', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},

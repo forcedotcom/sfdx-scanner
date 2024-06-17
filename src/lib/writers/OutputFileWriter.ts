@@ -4,6 +4,7 @@ import {BundleName, getMessage} from '../messages';
 
 export interface OutputFileWriter {
 	writeToFiles(results: RunResults): void;
+	getOutputFiles(): string[];
 }
 
 export class OutputFileWriterImpl implements OutputFileWriter {
@@ -29,6 +30,10 @@ export class OutputFileWriterImpl implements OutputFileWriter {
 				throw new Error(getMessage(BundleName.OutputFileWriter, 'error.unrecognized-file-format', [file]));
 			}
 		}
+	}
+
+	public getOutputFiles(): string[] {
+		return [...this.outputFilesToFileFormat.keys()];
 	}
 
 	public writeToFiles(results: RunResults): void {

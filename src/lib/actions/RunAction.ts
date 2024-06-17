@@ -1,3 +1,4 @@
+import {SfError} from '@salesforce/core';
 import {CodeAnalyzer, CodeAnalyzerConfig, RuleSelection, RunOptions, RunResults, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginFactory} from '../factories/EnginePluginFactory';
@@ -49,12 +50,20 @@ export class RunAction {
 		if (input['severity-threshold']) {
 			const thresholdValue = input['severity-threshold'];
 			let exceedingCount = 0;
+			let mostIntenseSeverity = 0;
 			for (let i = 1; i <= thresholdValue; i++) {
-				exceedingCount += results.getViolationCountOfSeverity(i);
+				let sevCount = results.getViolationCountOfSeverity(i);
+				if (sevCount > 0) {
+					exceedingCount += sevCount;
+					if (mostIntenseSeverity === 0) {
+						mostIntenseSeverity = i;
+					}
+				}
 			}
 			if (exceedingCount > 0) {
-				throw new ThresholdExceededError(
+				throw new SfError(
 					getMessage(BundleName.RunAction, 'error.severity-threshold-exceeded', [exceedingCount, SeverityLevel[thresholdValue]]),
+					'', [],
 					thresholdValue);
 			}
 		}
@@ -62,18 +71,5 @@ export class RunAction {
 
 	public static createAction(dependencies: RunDependencies): RunAction {
 		return new RunAction(dependencies);
-	}
-}
-
-class ThresholdExceededError extends Error {
-	private readonly threshold: SeverityLevel;
-
-	public constructor(message: string, threshold: SeverityLevel) {
-		super(message);
-		this.threshold = threshold;
-	}
-
-	public getThreshold(): SeverityLevel {
-		return this.threshold;
 	}
 }
