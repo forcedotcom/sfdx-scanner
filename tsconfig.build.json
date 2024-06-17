@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
 		"module": "NodeNext",
-		"target": "es2021",
-		"lib": ["es2021"],
+		"target": "ESNext",
+		"lib": ["ESNext"],
 		"sourceMap": true,
 		"declaration": true,
 		"moduleResolution": "NodeNext",
