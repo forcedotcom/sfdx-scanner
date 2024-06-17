@@ -227,7 +227,7 @@ async function resolveToTargetableFile(fileOrDir: string): Promise<string> {
 		if ((await fs.stat(path.join(fileOrDir, file))).isFile()) {
 			return path.join(fileOrDir, file);
 		}
-		const recursiveResult = resolveToTargetableFile(path.join(fileOrDir, file));
+		const recursiveResult = await resolveToTargetableFile(path.join(fileOrDir, file));
 		if (recursiveResult) {
 			return recursiveResult;
 		}

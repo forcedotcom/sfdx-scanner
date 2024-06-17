@@ -58,7 +58,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 				if (typeof sev !== 'string') {
 					continue;
 				}
-				const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev]);
+				const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
 				if (sevCount > 0) {
 					this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
 				}

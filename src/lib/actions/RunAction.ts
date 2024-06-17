@@ -51,8 +51,8 @@ export class RunAction {
 			const thresholdValue = input['severity-threshold'];
 			let exceedingCount = 0;
 			let mostIntenseSeverity = 0;
-			for (let i = 1; i <= thresholdValue; i++) {
-				let sevCount = results.getViolationCountOfSeverity(i);
+			for (let i = 1; i <= thresholdValue.valueOf(); i++) {
+				const sevCount = results.getViolationCountOfSeverity(i);
 				if (sevCount > 0) {
 					exceedingCount += sevCount;
 					if (mostIntenseSeverity === 0) {
