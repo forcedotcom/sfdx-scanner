@@ -83,7 +83,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace']
 		};
-		const possibleThreshold = this.convertThresholdToEnum(parsedFlags['severity-threshold']);
+		const possibleThreshold = convertThresholdToEnum(parsedFlags['severity-threshold']);
 		if (possibleThreshold) {
 			runInput['severity-threshold'] = possibleThreshold;
 		}
@@ -101,32 +101,30 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 				: new ResultsDetailViewer(uxDisplay)
 		};
 	}
+}
 
-	private convertThresholdToEnum(threshold: string|undefined): SeverityLevel|undefined {
-		// We could do all sorts of complicated conversion logic, but honestly it's just easier
-		// to do a switch-statement.
-		switch (threshold) {
-			case undefined:
-				return undefined;
-			case '1':
-			case 'critical':
-				return SeverityLevel.Critical;
-			case '2':
-			case 'high':
-				return SeverityLevel.High;
-			case '3':
-			case 'moderate':
-				return SeverityLevel.Moderate;
-			case '4':
-			case 'low':
-				return SeverityLevel.Low;
-			case '5':
-			case 'info':
-				return SeverityLevel.Info;
-			default:
-				// This should never happen, so the error doesn't need to be polished.
-				throw new Error(`Developer error: Unexpected severity ${threshold}`);
-		}
+function convertThresholdToEnum(threshold: string|undefined): SeverityLevel|undefined {
+	// We could do all sorts of complicated conversion logic, but honestly it's just easier
+	// to do a switch-statement.
+	switch (threshold) {
+		case '1':
+		case 'critical':
+			return SeverityLevel.Critical;
+		case '2':
+		case 'high':
+			return SeverityLevel.High;
+		case '3':
+		case 'moderate':
+			return SeverityLevel.Moderate;
+		case '4':
+		case 'low':
+			return SeverityLevel.Low;
+		case '5':
+		case 'info':
+			return SeverityLevel.Info;
+		default:
+			// By process of elimination, the only possible option is `undefined`, so give `undefined` right back.
+			return undefined;
 	}
 }
 
