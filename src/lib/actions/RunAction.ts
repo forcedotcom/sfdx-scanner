@@ -10,13 +10,13 @@ import {
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
-import {OutputFileWriter} from '../writers/OutputFileWriter';
+import {ResultsWriter} from '../writers/ResultsWriter';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
-	outputFileWriter: OutputFileWriter;
+	writer: ResultsWriter;
 	viewer: ResultsViewer;
 }
 
@@ -51,7 +51,7 @@ export class RunAction {
 
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 
-		this.dependencies.outputFileWriter.writeToFiles(results);
+		this.dependencies.writer.write(results);
 		this.dependencies.viewer.view(results);
 
 		if (input['severity-threshold']) {

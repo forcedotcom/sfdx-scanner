@@ -4,7 +4,7 @@ import {RunAction, RunDependencies, RunInput} from '../../lib/actions/RunAction'
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
-import {OutputFileWriterImpl} from '../../lib/writers/OutputFileWriter';
+import {CompositeResultsFileWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -95,7 +95,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
-			outputFileWriter: new OutputFileWriterImpl(outputFiles),
+			writer: CompositeResultsFileWriter.getWriter(outputFiles),
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)
 				: new ResultsDetailViewer(uxDisplay)

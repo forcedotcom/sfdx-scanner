@@ -2,7 +2,7 @@ import path from 'node:path';
 import {SfError} from '@salesforce/core';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
-import {SpyOutputFileWriter} from '../../stubs/SpyOutputFileWriter';
+import {SpyResultsWriter} from '../../stubs/SpyResultsWriter';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
 import {ConfigurableStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
 import {RunAction, RunInput, RunDependencies} from '../../../src/lib/actions/RunAction';
@@ -17,7 +17,7 @@ describe('RunAction tests', () => {
 	let engine1: StubEngine1;
 	let stubEnginePlugin: ConfigurableStubEnginePlugin1;
 	let pluginsFactory: StubEnginePluginsFactory_withPreconfiguredStubEngines;
-	let outputFileWriter: SpyOutputFileWriter;
+	let writer: SpyResultsWriter;
 	let viewer: SpyResultsViewer;
 	let dependencies: RunDependencies;
 	let action: RunAction;
@@ -31,14 +31,14 @@ describe('RunAction tests', () => {
 		pluginsFactory.addPreconfiguredEnginePlugin(stubEnginePlugin);
 
 		// Set up the writer and viewer.
-		outputFileWriter = new SpyOutputFileWriter();
+		writer = new SpyResultsWriter();
 		viewer = new SpyResultsViewer();
 
 		// Initialize our dependency object.
 		dependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: pluginsFactory,
-			outputFileWriter,
+			writer,
 			viewer
 		};
 		// Create the action.
@@ -82,8 +82,8 @@ describe('RunAction tests', () => {
 		const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspaceFiles;
 		expect(actualTargetFiles).toEqual([path.resolve('.')]);
 		// Verify that the expected results were passed into the Viewer and Writer.
-		expect(outputFileWriter.getCallHistory()[0].getViolationCount()).toEqual(1);
-		expect(outputFileWriter.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
+		expect(writer.getCallHistory()[0].getViolationCount()).toEqual(1);
+		expect(writer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 		expect(viewer.getCallHistory()[0].getViolationCount()).toEqual(1);
 		expect(viewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 	});
@@ -170,7 +170,7 @@ describe('RunAction tests', () => {
 			configFactory: new StubDefaultConfigFactory(),
 			// Use an engine plugin factory that returns an engine guaranteed to fail during initialization
 			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
-			outputFileWriter,
+			writer,
 			viewer
 		};
 		// Instantiate our action, intentionally using a different instance than the one set up in
