@@ -198,9 +198,9 @@ describe('ResultsViewer implementations', () => {
 						severity: formattedSeverity,
 						message: violation.message,
 						location: primaryLocationString,
-						docs: rule.resourceUrls.join(',')
+						resources: rule.resourceUrls.join(',')
 					},
-					keys: ['engine', 'severity', 'message', 'location', 'docs']
+					keys: ['engine', 'severity', 'message', 'location', 'resources']
 				})
 			}];
 		}

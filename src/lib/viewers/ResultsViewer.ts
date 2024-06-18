@@ -41,7 +41,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 		violations.forEach(v => {
 			const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
 			const file = primaryLocation.getFile();
-			if (typeof file === 'string') {
+			if (file) {
 				fileSet.add(file);
 			}
 		});
@@ -54,7 +54,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			const v1Sev = v1.getRule().getSeverityLevel();
 			const v2Sev = v2.getRule().getSeverityLevel();
 			if (v1Sev !== v2Sev) {
-				return v1Sev < v2Sev ? -1 : 1;
+				return v1Sev - v2Sev;
 			}
 			// Next, compare file names.
 			const v1PrimaryLocation = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
@@ -105,8 +105,8 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
 				message: violation.getMessage(),
 				location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
-				docs: violation.getResourceUrls().join(',')
-			}, ['engine', 'severity', 'message', 'location', 'docs']);
+				resources: violation.getResourceUrls().join(',')
+			}, ['engine', 'severity', 'message', 'location', 'resources']);
 		}
 		if (omittedResultsCount > 0) {
 			this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [omittedResultsCount]));
