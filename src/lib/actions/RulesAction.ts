@@ -1,12 +1,12 @@
 import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
 
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
-import {EnginePluginFactory} from '../factories/EnginePluginFactory';
+import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {RuleViewer} from '../viewers/RuleViewer';
 
 export type RulesDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
-	engineFactory: EnginePluginFactory;
+	pluginsFactory: EnginePluginsFactory;
 	viewer: RuleViewer;
 }
 
@@ -26,7 +26,7 @@ export class RulesAction {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
-		const enginePlugins = this.dependencies.engineFactory.create();
+		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const addEnginePromises: Promise<void>[] = enginePlugins.map(e => core.addEnginePlugin(e));
 		await Promise.all(addEnginePromises);
 

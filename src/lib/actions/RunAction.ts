@@ -1,14 +1,14 @@
 import {SfError} from '@salesforce/core';
 import {CodeAnalyzer, CodeAnalyzerConfig, RuleSelection, RunOptions, RunResults, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
-import {EnginePluginFactory} from '../factories/EnginePluginFactory';
+import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {OutputFileWriter} from '../writers/OutputFileWriter';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
-	engineFactory: EnginePluginFactory;
+	pluginsFactory: EnginePluginsFactory;
 	outputFileWriter: OutputFileWriter;
 	viewer: ResultsViewer;
 }
@@ -32,7 +32,7 @@ export class RunAction {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
-		const enginePlugins = this.dependencies.engineFactory.create();
+		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const addEnginePromises: Promise<void>[] = enginePlugins.map(e => core.addEnginePlugin(e));
 		await Promise.all(addEnginePromises);
 

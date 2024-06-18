@@ -3,7 +3,7 @@ import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {RunAction, RunDependencies, RunInput} from '../../lib/actions/RunAction';
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
-import {EnginePluginFactoryImpl} from '../../lib/factories/EnginePluginFactory';
+import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {OutputFileWriterImpl} from '../../lib/writers/OutputFileWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
@@ -94,7 +94,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		const uxDisplay: UxDisplay = new UxDisplay(this);
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
-			engineFactory: new EnginePluginFactoryImpl(),
+			pluginsFactory: new EnginePluginsFactoryImpl(),
 			outputFileWriter: new OutputFileWriterImpl(outputFiles),
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)

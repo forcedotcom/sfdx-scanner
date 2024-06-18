@@ -1,8 +1,8 @@
 import {EnginePlugin} from '@salesforce/code-analyzer-engine-api';
-import {EnginePluginFactory} from '../../src/lib/factories/EnginePluginFactory';
+import {EnginePluginsFactory} from '../../src/lib/factories/EnginePluginsFactory';
 import {FunctionalStubEnginePlugin1, ThrowingStubPlugin1} from './StubEnginePlugins';
 
-export class StubEnginePluginFactory_withFunctionalStubEngine implements EnginePluginFactory {
+export class StubEnginePluginsFactory_withFunctionalStubEngine implements EnginePluginsFactory {
 	public create(): EnginePlugin[] {
 		return [
 			new FunctionalStubEnginePlugin1()
@@ -10,7 +10,7 @@ export class StubEnginePluginFactory_withFunctionalStubEngine implements EngineP
 	}
 }
 
-export class StubEnginePluginFactory_withPreconfiguredStubEngines implements EnginePluginFactory {
+export class StubEnginePluginsFactory_withPreconfiguredStubEngines implements EnginePluginsFactory {
 	private readonly enginePlugins: EnginePlugin[] = [];
 
 	public addPreconfiguredEnginePlugin(plugin: EnginePlugin): void {
@@ -22,13 +22,13 @@ export class StubEnginePluginFactory_withPreconfiguredStubEngines implements Eng
 	}
 }
 
-export class StubEnginePluginFactory_withNoPlugins implements EnginePluginFactory {
+export class StubEnginePluginsFactory_withNoPlugins implements EnginePluginsFactory {
 	public create(): EnginePlugin[] {
 		return [];
 	}
 }
 
-export class StubEnginePluginFactory_withThrowingStubPlugin implements EnginePluginFactory {
+export class StubEnginePluginsFactory_withThrowingStubPlugin implements EnginePluginsFactory {
 	public create(): EnginePlugin[] {
 		return [
 			new ThrowingStubPlugin1()

@@ -6,16 +6,16 @@ import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactor
 import {ConfigurableStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
 import {RunAction, RunInput, RunDependencies} from '../../../src/lib/actions/RunAction';
 import {
-	StubEnginePluginFactory_withPreconfiguredStubEngines,
-	StubEnginePluginFactory_withThrowingStubPlugin
-} from '../../stubs/StubEnginePluginFactories';
+	StubEnginePluginsFactory_withPreconfiguredStubEngines,
+	StubEnginePluginsFactory_withThrowingStubPlugin
+} from '../../stubs/StubEnginePluginsFactories';
 
 const PATH_TO_FILE_A = path.resolve('test', 'sample-code', 'fileA.cls');
 
 describe('RunAction tests', () => {
 	let engine1: StubEngine1;
 	let stubEnginePlugin: ConfigurableStubEnginePlugin1;
-	let engineFactory: StubEnginePluginFactory_withPreconfiguredStubEngines;
+	let pluginsFactory: StubEnginePluginsFactory_withPreconfiguredStubEngines;
 	let outputFileWriter: SpyOutputFileWriter;
 	let viewer: SpyResultsViewer;
 	let dependencies: RunDependencies;
@@ -26,8 +26,8 @@ describe('RunAction tests', () => {
 		engine1 = new StubEngine1({});
 		stubEnginePlugin = new ConfigurableStubEnginePlugin1();
 		stubEnginePlugin.addEngine(engine1);
-		engineFactory = new StubEnginePluginFactory_withPreconfiguredStubEngines();
-		engineFactory.addPreconfiguredEnginePlugin(stubEnginePlugin);
+		pluginsFactory = new StubEnginePluginsFactory_withPreconfiguredStubEngines();
+		pluginsFactory.addPreconfiguredEnginePlugin(stubEnginePlugin);
 
 		// Set up the writer and viewer.
 		outputFileWriter = new SpyOutputFileWriter();
@@ -36,7 +36,7 @@ describe('RunAction tests', () => {
 		// Initialize our dependency object.
 		dependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory,
+			pluginsFactory: pluginsFactory,
 			outputFileWriter,
 			viewer
 		};
@@ -161,7 +161,7 @@ describe('RunAction tests', () => {
 		const dependencies: RunDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			// Use an engine plugin factory that returns an engine guaranteed to fail during initialization
-			engineFactory: new StubEnginePluginFactory_withThrowingStubPlugin(),
+			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
 			outputFileWriter,
 			viewer
 		};

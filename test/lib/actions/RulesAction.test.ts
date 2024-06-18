@@ -1,6 +1,6 @@
 import {RulesAction, RulesDependencies} from '../../../src/lib/actions/RulesAction';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
-import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginFactories';
+import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginsFactories';
 import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
 
 describe('RulesAction tests', () => {
@@ -9,7 +9,7 @@ describe('RulesAction tests', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -37,7 +37,7 @@ describe('RulesAction tests', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -64,7 +64,7 @@ describe('RulesAction tests', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withNoPlugins(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withNoPlugins(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -83,7 +83,7 @@ describe('RulesAction tests', () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withThrowingStubPlugin(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withThrowingStubPlugin(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
