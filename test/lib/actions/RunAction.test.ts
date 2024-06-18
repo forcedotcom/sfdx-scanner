@@ -1,4 +1,5 @@
 import path from 'node:path';
+import {SfError} from '@salesforce/core';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
 import {SpyOutputFileWriter} from '../../stubs/SpyOutputFileWriter';
@@ -116,10 +117,17 @@ describe('RunAction tests', () => {
 		};
 
 		// ==== TESTED BEHAVIOR ====
-		const executionPromise = action.execute(input);
-
-		// ==== ASSERTIONS ====
-		await expect(executionPromise).rejects.toThrow(SeverityLevel[sev]);
+		// Typically we'd use Jest's `expect().toThrow()` method, but since we need to assert specific things
+		// about the error, we're doing this instead.
+		let thrownError: Error|null = null;
+		try {
+			await action.execute(input);
+		} catch (e) {
+			thrownError = e;
+		}
+		expect(thrownError).toBeInstanceOf(SfError);
+		expect((thrownError as SfError).message).toContain(SeverityLevel[sev]);
+		expect((thrownError as SfError).exitCode).toEqual(SeverityLevel.High);
 	});
 
 	it('When severity threshold is NOT met, an error is not thrown', async () => {

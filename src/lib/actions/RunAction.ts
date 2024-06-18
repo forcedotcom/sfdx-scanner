@@ -1,5 +1,12 @@
 import {SfError} from '@salesforce/core';
-import {CodeAnalyzer, CodeAnalyzerConfig, RuleSelection, RunOptions, RunResults, SeverityLevel} from '@salesforce/code-analyzer-core';
+import {
+	CodeAnalyzer,
+	CodeAnalyzerConfig,
+	RuleSelection,
+	RunOptions,
+	RunResults,
+	SeverityLevel
+} from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
@@ -49,27 +56,28 @@ export class RunAction {
 
 		if (input['severity-threshold']) {
 			const thresholdValue = input['severity-threshold'];
-			let exceedingCount = 0;
-			let mostIntenseSeverity = 0;
-			for (let i = 1; i <= thresholdValue.valueOf(); i++) {
-				const sevCount = results.getViolationCountOfSeverity(i);
-				if (sevCount > 0) {
-					exceedingCount += sevCount;
-					if (mostIntenseSeverity === 0) {
-						mostIntenseSeverity = i;
-					}
-				}
-			}
-			if (exceedingCount > 0) {
-				throw new SfError(
-					getMessage(BundleName.RunAction, 'error.severity-threshold-exceeded', [exceedingCount, SeverityLevel[thresholdValue]]),
-					'', [],
-					thresholdValue);
-			}
+			throwErrorIfSevThresholdExceeded(thresholdValue, results);
 		}
 	}
 
 	public static createAction(dependencies: RunDependencies): RunAction {
 		return new RunAction(dependencies);
+	}
+}
+
+function throwErrorIfSevThresholdExceeded(threshold: SeverityLevel, results: RunResults): void {
+	let exceedingCount = 0;
+	let mostIntenseSeverity = Number.MAX_SAFE_INTEGER;
+	for (let i: number = threshold; i > 0; i--) {
+		const sevCount = results.getViolationCountOfSeverity(i);
+		if (sevCount > 0) {
+			exceedingCount += sevCount;
+			mostIntenseSeverity = i;
+		}
+	}
+	if (exceedingCount > 0) {
+		const message = getMessage(BundleName.RunAction, 'error.severity-threshold-exceeded', [exceedingCount, SeverityLevel[threshold]]);
+		// Use an SfError because we can easily set an exit code, and it will know what to do with that.
+		throw new SfError(message, 'ThresholdExceeded', [], mostIntenseSeverity);
 	}
 }
