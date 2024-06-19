@@ -6,8 +6,11 @@ Messages.importMessagesDirectory(__dirname);
 
 export enum BundleName {
 	InitCommand = 'init-command',
+	OutputFileWriter = 'output-file-writer',
+	ResultsViewer = 'results-viewer',
 	RuleViewer = 'rule-viewer',
 	RulesCommand = 'rules-command',
+	RunAction = 'run-action',
 	RunCommand = 'run-command'
 }
 

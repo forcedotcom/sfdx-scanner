@@ -1,7 +1,7 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
-import {EnginePluginFactoryImpl} from '../../lib/factories/EnginePluginFactory';
+import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {RuleDetailViewer, RuleTableViewer} from '../../lib/viewers/RuleViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage} from '../../lib/messages';
@@ -41,14 +41,14 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
 		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
 		const action: RulesAction = RulesAction.createAction(dependencies);
-		action.execute(parsedFlags);
+		await action.execute(parsedFlags);
 	}
 
 	protected createDependencies(view: View): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this);
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
-			engineFactory: new EnginePluginFactoryImpl(),
+			pluginsFactory: new EnginePluginsFactoryImpl(),
 			viewer: view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
 		};
 	}

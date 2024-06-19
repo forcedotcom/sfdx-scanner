@@ -1,12 +1,12 @@
 import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
 
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
-import {EnginePluginFactory} from '../factories/EnginePluginFactory';
+import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {RuleViewer} from '../viewers/RuleViewer';
 
 export type RulesDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
-	engineFactory: EnginePluginFactory;
+	pluginsFactory: EnginePluginsFactory;
 	viewer: RuleViewer;
 }
 
@@ -22,14 +22,13 @@ export class RulesAction {
 		this.dependencies = dependencies;
 	}
 
-	public execute(input: RulesInput): void {
+	public async execute(input: RulesInput): Promise<void> {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
-		const enginePlugins = this.dependencies.engineFactory.create();
-		for (const enginePlugin of enginePlugins) {
-			core.addEnginePlugin(enginePlugin);
-		}
+		const enginePlugins = this.dependencies.pluginsFactory.create();
+		const addEnginePromises: Promise<void>[] = enginePlugins.map(e => core.addEnginePlugin(e));
+		await Promise.all(addEnginePromises);
 
 		const ruleSelection: RuleSelection = core.selectRules(...input["rule-selector"]);
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));

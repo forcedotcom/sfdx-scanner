@@ -13,7 +13,7 @@ describe('RuleDetailViewer', () => {
 		expect(displayEvents).toHaveLength(1);
 		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
-			data: 'Found 0 rules.'
+			data: '*DRAFT*: Found 0 rules.'
 		}]);
 	});
 
@@ -30,10 +30,10 @@ describe('RuleDetailViewer', () => {
 		expect(displayEvents).toHaveLength(3);
 		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
-			data: 'Found 1 rules:'
+			data: '*DRAFT*: Found 1 rules:'
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
-			data: `1. ${rule.getName()}`
+			data: `*DRAFT*: 1. ${rule.getName()}`
 		}, {
 			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({
@@ -65,10 +65,10 @@ describe('RuleDetailViewer', () => {
 		expect(displayEvents).toHaveLength(5);
 		expect(displayEvents).toEqual([{
 			type: DisplayEventType.INFO,
-			data: 'Found 2 rules:'
+			data: '*DRAFT*: Found 2 rules:'
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
-			data: `1. ${rule1.getName()}`
+			data: `*DRAFT*: 1. ${rule1.getName()}`
 		}, {
 			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({
@@ -84,7 +84,7 @@ describe('RuleDetailViewer', () => {
 			})
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
-			data: `2. ${rule2.getName()}`
+			data: `*DRAFT*: 2. ${rule2.getName()}`
 		}, {
 			type: DisplayEventType.STYLED_OBJECT,
 			data: JSON.stringify({

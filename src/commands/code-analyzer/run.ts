@@ -1,8 +1,15 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
-import {RunAction} from '../../lib/actions/RunAction';
+import {SeverityLevel} from '@salesforce/code-analyzer-core';
+import {RunAction, RunDependencies, RunInput} from '../../lib/actions/RunAction';
+import {View} from '../../Constants';
+import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
+import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
+import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
+import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
+import {Displayable, UxDisplay} from '../../lib/Display';
 
-export default class RunCommand extends SfCommand<void> {
+export default class RunCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
 	public static readonly enableJsonFlag = false;
 	public static readonly summary = getMessage(BundleName.RunCommand, 'command.summary');
@@ -49,7 +56,8 @@ export default class RunCommand extends SfCommand<void> {
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
 			char: 'v',
-			options: ['table', 'detail'] // TODO: Should probably be enum?
+			default: View.TABLE,
+			options: Object.values(View)
 		}),
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.output-file.summary'),
@@ -67,8 +75,53 @@ export default class RunCommand extends SfCommand<void> {
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RunCommand)).flags;
-		const action: RunAction = new RunAction();
-		action.execute(parsedFlags);
+		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View, parsedFlags['output-file']);
+		const action: RunAction = RunAction.createAction(dependencies);
+		const runInput: RunInput = {
+			'config-file': parsedFlags['config-file'],
+			'path-start': parsedFlags['path-start'],
+			'rule-selector': parsedFlags['rule-selector'],
+			'workspace': parsedFlags['workspace'],
+			'severity-threshold': convertThresholdToEnum(parsedFlags['severity-threshold'])
+		};
+		await action.execute(runInput);
+	}
+
+	protected createDependencies(view: View, outputFiles: string[] = []): RunDependencies {
+		const uxDisplay: UxDisplay = new UxDisplay(this);
+		return {
+			configFactory: new CodeAnalyzerConfigFactoryImpl(),
+			pluginsFactory: new EnginePluginsFactoryImpl(),
+			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			viewer: view === View.TABLE
+				? new ResultsTableViewer(uxDisplay)
+				: new ResultsDetailViewer(uxDisplay)
+		};
+	}
+}
+
+function convertThresholdToEnum(threshold: string|undefined): SeverityLevel|undefined {
+	// We could do all sorts of complicated conversion logic, but honestly it's just easier
+	// to do a switch-statement.
+	switch (threshold) {
+		case '1':
+		case 'critical':
+			return SeverityLevel.Critical;
+		case '2':
+		case 'high':
+			return SeverityLevel.High;
+		case '3':
+		case 'moderate':
+			return SeverityLevel.Moderate;
+		case '4':
+		case 'low':
+			return SeverityLevel.Low;
+		case '5':
+		case 'info':
+			return SeverityLevel.Info;
+		default:
+			// By process of elimination, the only possible option is `undefined`, so give `undefined` right back.
+			return undefined;
 	}
 }
 

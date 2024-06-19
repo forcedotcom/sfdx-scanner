@@ -1,15 +1,15 @@
 import {RulesAction, RulesDependencies} from '../../../src/lib/actions/RulesAction';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
-import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginFactories';
+import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginsFactories';
 import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
 
 describe('RulesAction tests', () => {
 
-	it('Submitting the all-selector returns all rules', () => {
+	it('Submitting the all-selector returns all rules', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -17,7 +17,7 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['all']
 		};
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
@@ -33,11 +33,11 @@ describe('RulesAction tests', () => {
 		]);
 	});
 
-	it('Submitting a filtering selector returns only matching rules', () => {
+	it('Submitting a filtering selector returns only matching rules', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withFunctionalStubEngine(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -45,7 +45,7 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['CodeStyle']
 		};
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
@@ -60,11 +60,11 @@ describe('RulesAction tests', () => {
 	 * hard-coded engines. But in the future we may want to have dynamic engine loading, and this
 	 * test will help us do that.
 	 */
-	it('When no engines are registered, empty results are displayed', () => {
+	it('When no engines are registered, empty results are displayed', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withNoPlugins(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withNoPlugins(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -72,25 +72,26 @@ describe('RulesAction tests', () => {
 			'rule-selector': ['all']
 		}
 
-		action.execute(input);
+		await action.execute(input);
 
 		const viewerCallHistory = viewer.getCallHistory();
 		expect(viewerCallHistory).toHaveLength(1);
 		expect(viewerCallHistory[0]).toEqual([]);
 	});
 
-	it('Throws an error when an engine throws an error', () => {
+	it('Throws an error when an engine throws an error', async () => {
 		const viewer = new SpyRuleViewer();
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
-			engineFactory: new StubEnginePluginFactories.StubEnginePluginFactory_withThrowingStubPlugin(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withThrowingStubPlugin(),
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input = {
 			'rule-selector': ['all']
 		};
+		const executionPromise = action.execute(input);
 
-		expect(() => action.execute(input)).toThrow('SomeErrorFromGetAvailableEngineNames');
+		await expect(executionPromise).rejects.toThrow('SomeErrorFromGetAvailableEngineNames');
 	});
 });

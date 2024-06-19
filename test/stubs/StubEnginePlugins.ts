@@ -2,7 +2,7 @@ import * as EngineApi from "@salesforce/code-analyzer-engine-api"
 import {LogLevel} from "@salesforce/code-analyzer-engine-api"
 
 /**
- * StubEnginePlugin - A plugin stub with preconfigured outputs to help with testing
+ * FunctionalStubEnginePlugin1 - A plugin stub with preconfigured outputs to help with testing
  */
 export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
@@ -31,6 +31,30 @@ export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 }
 
 /**
+ * ConfigurableStubEnginePlugin1 - A plugin that can accept pre-created engines in place of calling {@link createEngine} on hard-coded engines.
+ */
+export class ConfigurableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
+	private createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	addEngine(engine: EngineApi.Engine): void {
+		this.createdEngines.set(engine.getName(), engine);
+	}
+
+	getAvailableEngineNames(): string[] {
+		// Return the names of whatever engines we've been configured with.
+		return [...this.createdEngines.keys()];
+	}
+
+	createEngine(engineName: string, _config: EngineApi.ConfigObject): EngineApi.Engine {
+		// The engines have already been created, so just check whether we have it.
+		if (!this.createdEngines.has(engineName)) {
+			throw new Error(`Plugin not preconfigured with engine ${engineName}`);
+		}
+		return this.createdEngines.get(engineName) as EngineApi.Engine;
+	}
+}
+
+/**
  * StubEngine1 - A sample engine stub with preconfigured outputs to help with testing
  */
 export class StubEngine1 extends EngineApi.Engine {
@@ -47,8 +71,8 @@ export class StubEngine1 extends EngineApi.Engine {
 		return "stubEngine1";
 	}
 
-	describeRules(): EngineApi.RuleDescription[] {
-		return [
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
@@ -89,10 +113,10 @@ export class StubEngine1 extends EngineApi.Engine {
 				description: "Some description for stub1RuleE",
 				resourceUrls: ["https://example.com/stub1RuleE", "https://example.com/stub1RuleE_2"]
 			}
-		];
+		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): EngineApi.EngineRunResults {
+	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
@@ -111,7 +135,7 @@ export class StubEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 100
 		});
-		return this.resultsToReturn;
+		return Promise.resolve(this.resultsToReturn);
 	}
 }
 
@@ -132,8 +156,8 @@ export class StubEngine2 extends EngineApi.Engine {
 		return "stubEngine2";
 	}
 
-	describeRules(): EngineApi.RuleDescription[] {
-		return [
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
 			{
 				name: "stub2RuleA",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
@@ -158,10 +182,10 @@ export class StubEngine2 extends EngineApi.Engine {
 				description: "Some description for stub2RuleC",
 				resourceUrls: [] // Purposely putting in nothing here
 			}
-		];
+		]);
 	}
 
-	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): EngineApi.EngineRunResults {
+	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
@@ -176,12 +200,12 @@ export class StubEngine2 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 63
 		});
-		return this.resultsToReturn;
+		return Promise.resolve(this.resultsToReturn);
 	}
 }
 
 /**
- * ThrowingPlugin1 - A plugin that throws an exception during a call to getAvailableEngineNames
+ * ThrowingStubPlugin1 - A plugin that throws an exception during a call to getAvailableEngineNames
  */
 export class ThrowingStubPlugin1 extends EngineApi.EnginePluginV1 {
 	getAvailableEngineNames(): string[] {
