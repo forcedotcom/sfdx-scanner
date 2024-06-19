@@ -4,7 +4,7 @@ import {RunAction, RunDependencies, RunInput} from '../../lib/actions/RunAction'
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
-import {CompositeResultsFileWriter} from '../../lib/writers/ResultsWriter';
+import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -81,12 +81,9 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			'config-file': parsedFlags['config-file'],
 			'path-start': parsedFlags['path-start'],
 			'rule-selector': parsedFlags['rule-selector'],
-			'workspace': parsedFlags['workspace']
+			'workspace': parsedFlags['workspace'],
+			'severity-threshold': convertThresholdToEnum(parsedFlags['severity-threshold'])
 		};
-		const possibleThreshold = convertThresholdToEnum(parsedFlags['severity-threshold']);
-		if (possibleThreshold) {
-			runInput['severity-threshold'] = possibleThreshold;
-		}
 		await action.execute(runInput);
 	}
 
@@ -95,7 +92,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
-			writer: CompositeResultsFileWriter.getWriter(outputFiles),
+			writer: CompositeResultsWriter.fromFiles(outputFiles),
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)
 				: new ResultsDetailViewer(uxDisplay)

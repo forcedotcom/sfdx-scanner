@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {OutputFormat} from '@salesforce/code-analyzer-core';
-import {ResultsFileWriter, CompositeResultsFileWriter} from '../../../src/lib/writers/ResultsWriter';
+import {ResultsFileWriter, CompositeResultsWriter} from '../../../src/lib/writers/ResultsWriter';
 import * as StubRunResults from '../../stubs/StubRunResults';
 
 describe('ResultsWriter implementations', () => {
@@ -80,9 +80,9 @@ describe('ResultsWriter implementations', () => {
 		});
 	});
 
-	describe('CompositeResultsFileWriter', () => {
+	describe('CompositeResultsWriter', () => {
 		it('Does a no-op when there are no files to write to', () => {
-			const outputFileWriter = CompositeResultsFileWriter.getWriter([]);
+			const outputFileWriter = CompositeResultsWriter.fromFiles([]);
 			const stubbedResults = new StubRunResults.StubNonEmptyResults();
 
 			outputFileWriter.write(stubbedResults);
@@ -101,7 +101,7 @@ describe('ResultsWriter implementations', () => {
 				file: 'beep.json',
 				contents: `Results formatted as ${OutputFormat.JSON}`
 			}];
-			const outputFileWriter = CompositeResultsFileWriter.getWriter(expectations.map(i => i.file));
+			const outputFileWriter = CompositeResultsWriter.fromFiles(expectations.map(i => i.file));
 			const stubbedResults = new StubRunResults.StubNonEmptyResults();
 
 			outputFileWriter.write(stubbedResults);

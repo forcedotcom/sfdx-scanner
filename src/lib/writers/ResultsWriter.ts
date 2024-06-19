@@ -7,21 +7,19 @@ export interface ResultsWriter {
 	write(results: RunResults): void;
 }
 
-export class CompositeResultsFileWriter implements ResultsWriter {
-	private readonly writers: ResultsFileWriter[] = [];
+export class CompositeResultsWriter implements ResultsWriter {
+	private readonly writers: ResultsWriter[] = [];
 
-	private constructor(files: string[]) {
-		for (const file of files) {
-			this.writers.push(new ResultsFileWriter(file));
-		}
+	private constructor(writers: ResultsWriter[]) {
+		this.writers = writers;
 	}
 
 	public write(results: RunResults): void {
 		this.writers.forEach(w => w.write(results));
 	}
 
-	public static getWriter(files: string[]): CompositeResultsFileWriter {
-		return new CompositeResultsFileWriter(files);
+	public static fromFiles(files: string[]): CompositeResultsWriter {
+		return new CompositeResultsWriter(files.map(f => new ResultsFileWriter(f)));
 	}
 }
 
@@ -31,20 +29,20 @@ export class ResultsFileWriter implements ResultsWriter {
 
 	public constructor(file: string) {
 		this.file = file;
-
-		if (path.extname(file).toLowerCase() === '.csv') {
+		const ext = path.extname(file).toLowerCase();
+		if (ext === '.csv') {
 			this.format = OutputFormat.CSV;
-		} else if (['.html', '.htm'].includes(path.extname(file).toLowerCase())) {
+		} else if (['.html', '.htm'].includes(ext)) {
 			throw new Error('TODO: Support HTML-type output');
-		} else if (file.toLowerCase().endsWith('.sarif') || file.toLowerCase().endsWith('.sarif.json')) {
+		} else if (ext === '.sarif' || file.toLowerCase().endsWith('.sarif.json')) {
 			throw new Error('TODO: Support SARIF-type output');
 		// Check for `.json` AFTER checking for `.sarif.json`!
-		} else if (path.extname(file).toLowerCase() === '.json') {
+		} else if (ext === '.json') {
 			this.format = OutputFormat.JSON;
-		} else if (file.toLowerCase().endsWith('.junit') || file.toLowerCase().endsWith('.junit.xml')) {
+		} else if (ext === '.junit' || file.toLowerCase().endsWith('.junit.xml')) {
 			throw new Error('TODO: Support JUNIT-type output');
 		// Check for `.xml` AFTER checking for `.junit.xml`!
-		} else if (path.extname(file).toLowerCase() === '.xml') {
+		} else if (ext === '.xml') {
 			this.format = OutputFormat.XML;
 		} else {
 			throw new Error(getMessage(BundleName.OutputFileWriter, 'error.unrecognized-file-format', [file]));

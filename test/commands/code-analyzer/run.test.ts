@@ -2,7 +2,7 @@ import {stubSfCommandUx} from '@salesforce/sf-plugins-core';
 import {TestContext} from '@salesforce/core/lib/testSetup';
 import RunCommand from '../../../src/commands/code-analyzer/run';
 import {RunAction, RunDependencies, RunInput} from '../../../src/lib/actions/RunAction';
-import {CompositeResultsFileWriter} from '../../../src/lib/writers/ResultsWriter';
+import {CompositeResultsWriter} from '../../../src/lib/writers/ResultsWriter';
 
 describe('`code-analyzer run` tests', () => {
 	const $$ = new TestContext();
@@ -188,7 +188,7 @@ describe('`code-analyzer run` tests', () => {
 		it('Is unused if not directly specified', async () => {
 			await RunCommand.run([]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).not.toHaveProperty('severity-threshold');
+			expect(receivedActionInput['severity-threshold']).toBeUndefined();
 		});
 
 		it('Can be referenced by its shortname, -t', async () => {
@@ -231,14 +231,14 @@ describe('`code-analyzer run` tests', () => {
 	});
 
 	describe('--output-file', () => {
-		let getWriterSpy: jest.SpyInstance;
+		let fromFilesSpy: jest.SpyInstance;
 		let receivedFiles: string[];
 
 		beforeEach(() => {
-			const originalGetWriter = CompositeResultsFileWriter.getWriter;
-			getWriterSpy = jest.spyOn(CompositeResultsFileWriter, 'getWriter').mockImplementation(files => {
+			const originalFromFiles = CompositeResultsWriter.fromFiles;
+			fromFilesSpy = jest.spyOn(CompositeResultsWriter, 'fromFiles').mockImplementation(files => {
 				receivedFiles = files;
-				return originalGetWriter(files);
+				return originalFromFiles(files);
 			})
 		});
 
@@ -247,7 +247,7 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['--output-file', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(getWriterSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue]);
 		});
 
@@ -256,7 +256,7 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['--output-file', inputValue.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(getWriterSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual(inputValue);
 		});
 
@@ -266,7 +266,7 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(getWriterSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue1, inputValue2]);
 		});
 
@@ -276,7 +276,7 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['--output-file', inputValue1.join(','), '--output-file', inputValue2.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(getWriterSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([...inputValue1, ...inputValue2]);
 		});
 
@@ -285,7 +285,7 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['-f', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(getWriterSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue]);
 		});
 	});
