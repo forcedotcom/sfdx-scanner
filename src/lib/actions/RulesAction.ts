@@ -27,7 +27,12 @@ export class RulesAction {
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
 		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const addEnginePromises: Promise<void>[] = enginePlugins.map(e => core.addEnginePlugin(e));
+		const enginePluginModules = config.getCustomEnginePluginModules()
+			.map(pluginModule => require.resolve(pluginModule, {paths: [process.cwd()]})); // TODO: Remove this line as soon as it is moved to the core module.
+		const addEnginePromises: Promise<void>[] = [
+			...enginePlugins.map(enginePlugin => core.addEnginePlugin(enginePlugin)),
+			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
+		];
 		await Promise.all(addEnginePromises);
 
 		const ruleSelection: RuleSelection = core.selectRules(...input["rule-selector"]);
