@@ -48,19 +48,42 @@ export class SpyDisplay implements Display {
 		});
 	}
 
-	public getDisplayEvents(): DisplayEvent[] {
-		return this.displayEvents;
+	/**
+	 * Track that the spinner was started with the provided message, and optionally status.
+	 */
+	public spinnerStart(msg: string, status?: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_START,
+			data: JSON.stringify({
+				msg,
+				status
+			})
+		});
 	}
 
 	/**
-	 * Verify that the provided {@link DisplayEvent}s were actually displayed in the expected order.
-	 * @param expectedDisplayEvents
+	 * Track that the spinner was updated to the provided status.
 	 */
-	public expectDisplayEvents(expectedDisplayEvents: DisplayEvent[]): void {
-		expect(this.displayEvents).toHaveLength(expectedDisplayEvents.length);
-		for (let i = 0; i < this.displayEvents.length; i++) {
-			expect(this.displayEvents[i]).toEqual(expectedDisplayEvents[i]);
-		}
+	public spinnerUpdate(status: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_UPDATE,
+			data: status
+		});
+	}
+
+	/**
+	 * Track that the spinner was stopped with the provided status.
+	 * @param status
+	 */
+	public spinnerStop(status: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_STOP,
+			data: status
+		});
+	}
+
+	public getDisplayEvents(): DisplayEvent[] {
+		return this.displayEvents;
 	}
 }
 
@@ -68,7 +91,10 @@ export enum DisplayEventType {
 	INFO,
 	STYLED_HEADER,
 	STYLED_OBJECT,
-	TABLE
+	TABLE,
+	SPINNER_START,
+	SPINNER_UPDATE,
+	SPINNER_STOP
 }
 
 export type DisplayEvent = {

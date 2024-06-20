@@ -1,4 +1,4 @@
-import {Ux} from '@salesforce/sf-plugins-core';
+import {Ux, Spinner} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 
 /**
@@ -27,13 +27,21 @@ export interface Display {
 	 * Output table to stdout only if the "--json" flag is not present.
 	 */
 	displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void;
+
+	spinnerStart(msg: string, status?: string): void;
+
+	spinnerUpdate(status: string): void;
+
+	spinnerStop(status: string): void;
 }
 
 export class UxDisplay implements Display {
 	private readonly displayable: Displayable;
+	private readonly spinner: Spinner;
 
-	public constructor(displayable: Displayable) {
+	public constructor(displayable: Displayable, spinner: Spinner) {
 		this.displayable = displayable;
+		this.spinner = spinner;
 	}
 
 	public displayInfo(message: string): void {
@@ -65,6 +73,18 @@ export class UxDisplay implements Display {
 
 	public displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void {
 		this.displayable.table(data, columns);
+	}
+
+	public spinnerStart(msg: string, status?: string): void {
+		this.spinner.start(msg, status);
+	}
+
+	public spinnerUpdate(status: string): void {
+		this.spinner.status = status;
+	}
+
+	public spinnerStop(status: string): void {
+		this.spinner.stop(status);
 	}
 }
 

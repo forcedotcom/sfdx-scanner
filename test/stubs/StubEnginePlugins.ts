@@ -216,3 +216,88 @@ export class ThrowingStubPlugin1 extends EngineApi.EnginePluginV1 {
 		throw new Error('Should not be called');
 	}
 }
+
+/**
+ * TimeabbleStubEnginePlugin1 - A plugin whose associated engine can be given a time to wait between engine update events.
+ */
+export class TimeableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
+	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	getAvailableEngineNames(): string[] {
+		return ["timeableEngine1"];
+	}
+
+	createEngine(engineName: string, config: EngineApi.ConfigObject): EngineApi.Engine {
+		if (engineName == "timeableEngine1") {
+			this.createdEngines.set(engineName, new TimeableEngine1(config));
+		} else {
+			throw new Error(`Unsupported engine name: ${engineName}`)
+		}
+		return this.getCreatedEngine(engineName);
+	}
+
+	getCreatedEngine(engineName: string): EngineApi.Engine {
+		if (this.createdEngines.has(engineName)) {
+			return this.createdEngines.get(engineName) as EngineApi.Engine;
+		}
+		throw new Error(`Engine with name ${engineName} has not yet been created`);
+	}
+}
+
+/**
+ * TimeableEngine1 - An engine with a {@code setWaitTime()} method allowing a delay to be added between update events.
+ */
+export class TimeableEngine1 extends EngineApi.Engine {
+	private waitTime: number;
+
+	constructor(config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	getName(): string {
+		return "timeableEngine1";
+	}
+
+	setWaitTime(waitTime: number) {
+		this.waitTime = waitTime;
+	}
+
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
+			{
+				name: "stub1RuleA",
+				severityLevel: EngineApi.SeverityLevel.Low,
+				type: EngineApi.RuleType.Standard,
+				tags: ["Recommended", "CodeStyle"],
+				description: "Some description for stub1RuleA",
+				resourceUrls: ["https://example.com/stub1RuleA"]
+			}
+		]);
+	}
+
+	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		await new Promise(res => setTimeout(res, this.waitTime));
+		this.emitEvent<EngineApi.ProgressEvent>({
+			type: EngineApi.EventType.ProgressEvent,
+			percentComplete: 0
+		});
+		await new Promise(res => setTimeout(res, this.waitTime));
+		this.emitEvent<EngineApi.LogEvent>({
+			type: EngineApi.EventType.LogEvent,
+			message: "someMiscFineMessageFromStubEngine1",
+			logLevel: LogLevel.Fine
+		});
+		await new Promise(res => setTimeout(res, this.waitTime));
+		this.emitEvent<EngineApi.ProgressEvent>({
+			type: EngineApi.EventType.ProgressEvent,
+			percentComplete: 50
+		});
+		await new Promise(res => setTimeout(res, this.waitTime));
+		this.emitEvent<EngineApi.ProgressEvent>({
+			type: EngineApi.EventType.ProgressEvent,
+			percentComplete: 100
+		});
+		await new Promise(res => setTimeout(res, this.waitTime));
+		return Promise.resolve({violations: []});
+	}
+}

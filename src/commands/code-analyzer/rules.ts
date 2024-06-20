@@ -45,7 +45,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	}
 
 	protected createDependencies(view: View): RulesDependencies {
-		const uxDisplay: UxDisplay = new UxDisplay(this);
+		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),

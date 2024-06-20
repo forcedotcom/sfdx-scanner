@@ -7,6 +7,7 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
+import {SpinnerProgressListener} from '../../lib/listeners/EngineProgressListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class RunCommand extends SfCommand<void> implements Displayable {
@@ -88,11 +89,12 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	}
 
 	protected createDependencies(view: View, outputFiles: string[] = []): RunDependencies {
-		const uxDisplay: UxDisplay = new UxDisplay(this);
+		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			progressListeners: [new SpinnerProgressListener(uxDisplay)],
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)
 				: new ResultsDetailViewer(uxDisplay)
