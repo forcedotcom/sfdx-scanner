@@ -33,6 +33,9 @@ public class CacheCreatorTest {
             public String getFilesToEntriesCacheLocation() {
                 return DUMMY_FILE_NAME;
             }
+            public boolean isCachingDisabled() {
+                return false;
+            }
         });
     }
 
