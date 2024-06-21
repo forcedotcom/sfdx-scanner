@@ -1,7 +1,7 @@
-import {CodeAnalyzer, CodeAnalyzerConfig} from "@salesforce/code-analyzer-core";
+import {CodeAnalyzer, CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 import {SpinnerProgressListener} from '../../../src/lib/listeners/EngineProgressListener';
 import {SpyDisplay, DisplayEvent, DisplayEventType} from '../../stubs/SpyDisplay';
-import {TimeableStubEnginePlugin1, TimeableEngine1} from "../../stubs/StubEnginePlugins";
+import {TimeableStubEnginePlugin1, TimeableEngine1} from '../../stubs/StubEnginePlugins';
 import {StubEnginePluginsFactory_withFunctionalStubEngine} from '../../stubs/StubEnginePluginsFactories';
 
 describe('EngineProgressListener implementations', () => {

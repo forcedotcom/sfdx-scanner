@@ -1,7 +1,6 @@
 import {
 	CodeAnalyzer,
 	EngineProgressEvent,
-	EngineResultsEvent,
 	EventType,
 	RuleSelection
 } from '@salesforce/code-analyzer-core';
@@ -15,14 +14,15 @@ export interface EngineProgressListener {
 
 export class SpinnerProgressListener implements EngineProgressListener {
 	private readonly display: Display;
-	private readonly tickTime: number;
 	/**
 	 * Mapping from each engine's name to a number indicating its completion percentage.
 	 * @private
 	 */
 	private readonly progressMap: Map<string, number>;
 	private startTime: number;
-	private intervalId: NodeJS.Timeout;
+	private readonly tickTime: number;
+	private tickIntervalId: NodeJS.Timeout;
+	private isTicking: boolean;
 
 	/**
 	 *
@@ -33,18 +33,21 @@ export class SpinnerProgressListener implements EngineProgressListener {
 		this.display = display;
 		this.tickTime = tickTime;
 		this.progressMap = new Map();
+		this.isTicking = false;
 	}
 
 	public listen(codeAnalyzer: CodeAnalyzer, ruleSelection: RuleSelection): void {
 		this.startTime = Date.now();
 		this.startSpinning(ruleSelection);
-		codeAnalyzer.onEvent(EventType.EngineProgressEvent, e => this.updateCorrespondingEngine(e as EngineProgressEvent));
-		codeAnalyzer.onEvent(EventType.EngineResultsEvent, e => this.completeCorrespondingEngine(e as EngineResultsEvent));
+		codeAnalyzer.onEvent(EventType.EngineProgressEvent, (e: EngineProgressEvent) => this.updateCorrespondingEngine(e));
 	}
 
 	public stopListening(): void {
 		// Stop ticking.
-		clearInterval(this.intervalId);
+		if (this.isTicking) {
+			clearInterval(this.tickIntervalId);
+			this.isTicking = false;
+		}
 		this.display.spinnerStop(getMessage(BundleName.SpinnerProgressListener, 'spinner.done'));
 	}
 
@@ -69,19 +72,15 @@ export class SpinnerProgressListener implements EngineProgressListener {
 	 * @private
 	 */
 	private spinnerTick(timeToNextTick: number): void {
-		this.intervalId = setTimeout(() => {
+		// `setInterval` means the callback will be called repeatedly.
+		this.tickIntervalId = setInterval(() => {
 			this.display.spinnerUpdate(this.createSpinnerStatus());
-			this.spinnerTick(timeToNextTick);
-		}, timeToNextTick)
+		}, timeToNextTick);
+		this.isTicking = true;
 	}
 
 	private updateCorrespondingEngine(event: EngineProgressEvent): void {
 		this.progressMap.set(event.engineName, event.percentComplete);
-		this.display.spinnerUpdate(this.createSpinnerStatus());
-	}
-
-	private completeCorrespondingEngine(event: EngineResultsEvent): void {
-		this.progressMap.set(event.results.getEngineName(), 100);
 		this.display.spinnerUpdate(this.createSpinnerStatus());
 	}
 
