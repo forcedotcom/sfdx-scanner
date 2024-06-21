@@ -38,6 +38,7 @@ describe('RunAction tests', () => {
 		dependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: pluginsFactory,
+			logEventListeners: [],
 			progressListeners: [],
 			writer,
 			viewer
@@ -171,6 +172,7 @@ describe('RunAction tests', () => {
 			configFactory: new StubDefaultConfigFactory(),
 			// Use an engine plugin factory that returns an engine guaranteed to fail during initialization
 			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
+			logEventListeners: [],
 			progressListeners: [],
 			writer,
 			viewer

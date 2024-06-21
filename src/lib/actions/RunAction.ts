@@ -11,12 +11,14 @@ import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory'
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
+import {LogEventListener} from '../listeners/LogEventListener';
 import {EngineProgressListener} from '../listeners/EngineProgressListener';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
+	logEventListeners: LogEventListener[];
 	progressListeners: EngineProgressListener[];
 	writer: ResultsWriter;
 	viewer: ResultsViewer;
@@ -56,6 +58,7 @@ export class RunAction {
 			pathStartPoints: input['path-start']
 		};
 		this.dependencies.progressListeners.forEach(listener => listener.listen(core, ruleSelection));
+		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);

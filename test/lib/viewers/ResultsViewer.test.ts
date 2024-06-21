@@ -56,7 +56,7 @@ describe('ResultsViewer implementations', () => {
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.found-no-results')
 			}]);
 		});
@@ -80,7 +80,7 @@ describe('ResultsViewer implementations', () => {
 			// ==== ASSERTIONS ====
 			// Assert against our messages.
 			const expectedDisplayEvents: DisplayEvent[] = [{
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [DETAIL_RESULTS_CUTOFF, 1])
 			}];
 			expectedDisplayEvents.push(...repeatDetailExpectation(rule1, engine1, violations[0], DETAIL_RESULTS_CUTOFF));
@@ -112,13 +112,13 @@ describe('ResultsViewer implementations', () => {
 			// ==== ASSERTIONS ====
 			// Assert against our messages.
 			const expectedDisplayEvents: DisplayEvent[] = [{
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [DETAIL_RESULTS_CUTOFF * 2, 1])
 			}];
 			// Expect results to have been cut off after the threshold.
 			expectedDisplayEvents.push(...repeatDetailExpectation(rule1, engine1, violations[0], DETAIL_RESULTS_CUTOFF));
 			expectedDisplayEvents.push({
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [DETAIL_RESULTS_CUTOFF])
 			});
 			expectedDisplayEvents.push(...createBreakdownExpectations(DETAIL_RESULTS_CUTOFF * 2, [{
@@ -158,7 +158,7 @@ describe('ResultsViewer implementations', () => {
 			// ==== ASSERTIONS ====
 			// Assert against our messages.
 			const expectedDisplayEvents: DisplayEvent[] = [{
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [4, 2])
 			},
 				// Violation 4 has the highest severity, so it goes first.
@@ -218,12 +218,12 @@ describe('ResultsViewer implementations', () => {
 				type: DisplayEventType.STYLED_HEADER,
 				data: getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header')
 			}, {
-				type: DisplayEventType.INFO,
+				type: DisplayEventType.LOG,
 				data: getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [total])
 			}];
 			for (const {sev, count} of severityCounts) {
 				expectations.push({
-					type: DisplayEventType.INFO,
+					type: DisplayEventType.LOG,
 					data: getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [count, SeverityLevel[sev]])
 				});
 			}

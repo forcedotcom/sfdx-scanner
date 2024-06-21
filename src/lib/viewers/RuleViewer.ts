@@ -20,9 +20,9 @@ abstract class AbstractRuleViewer implements RuleViewer {
 export class RuleDetailViewer extends AbstractRuleViewer {
 	public view(rules: Rule[]): void {
 		if (rules.length === 0) {
-			this.display.displayInfo(getMessage(BundleName.RuleViewer, 'summary.found-no-rules'));
+			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-no-rules'));
 		} else {
-			this.display.displayInfo(getMessage(BundleName.RuleViewer, 'summary.found-rules', [rules.length]));
+			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-rules', [rules.length]));
 			for (let i = 0; i < rules.length; i++) {
 				const rule = rules[i];
 				this.display.displayStyledHeader(getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]));

@@ -7,6 +7,7 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
+import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {SpinnerProgressListener} from '../../lib/listeners/EngineProgressListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
@@ -94,6 +95,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new SpinnerProgressListener(uxDisplay)],
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)

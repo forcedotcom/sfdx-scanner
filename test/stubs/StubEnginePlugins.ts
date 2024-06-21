@@ -218,7 +218,7 @@ export class ThrowingStubPlugin1 extends EngineApi.EnginePluginV1 {
 }
 
 /**
- * TimeabbleStubEnginePlugin1 - A plugin whose associated engine can be given a time to wait between engine update events.
+ * TimeableStubEnginePlugin1 - A plugin whose associated engine can be given a time to wait between engine update events.
  */
 export class TimeableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
@@ -298,6 +298,49 @@ export class TimeableEngine1 extends EngineApi.Engine {
 			percentComplete: 100
 		});
 		await new Promise(res => setTimeout(res, this.waitTime));
+		return Promise.resolve({violations: []});
+	}
+}
+
+/**
+ * EventConfigurableEngine1 - An engine with a {@code setWaitTime()} method allowing a delay to be added between update events.
+ */
+export class EventConfigurableEngine1 extends EngineApi.Engine {
+	private events: {logLevel: LogLevel, message: string}[] = [];
+
+	constructor(config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	getName(): string {
+		return "eventConfigurableEngine1";
+	}
+
+	addEvents(...events: {logLevel: LogLevel, message: string}[]): void {
+		this.events = [...this.events, ...events];
+	}
+
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
+			{
+				name: "stub1RuleA",
+				severityLevel: EngineApi.SeverityLevel.Low,
+				type: EngineApi.RuleType.Standard,
+				tags: ["Recommended", "CodeStyle"],
+				description: "Some description for stub1RuleA",
+				resourceUrls: ["https://example.com/stub1RuleA"]
+			}
+		]);
+	}
+
+	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		for (const {logLevel, message} of this.events) {
+			this.emitEvent<EngineApi.LogEvent>({
+				type: EngineApi.EventType.LogEvent,
+				message,
+				logLevel
+			});
+		}
 		return Promise.resolve({violations: []});
 	}
 }

@@ -9,9 +9,19 @@ import {AnyJson} from '@salesforce/ts-types';
  */
 export interface Display {
 	/**
-	 * Output message to stdout (non-blocking) only if the "--json" flag is not present.
+	 * Output message to stdout at warning-level (non-blocking) only if the "--json" flag is not present.
+	 */
+	displayWarning(msg: string): void;
+
+	/**
+	 * Output message to stdout at info-level (non-blocking) only if the "--json" flag is not present.
 	 */
 	displayInfo(msg: string): void;
+
+	/**
+	 * Output message to stdout at log-level (non-blocking) only if the "--json" flag is not present.
+	 */
+	displayLog(msg: string): void;
 
 	/**
 	 * Output styled header to stdout only if the "--json" flag is not present.
@@ -44,7 +54,15 @@ export class UxDisplay implements Display {
 		this.spinner = spinner;
 	}
 
+	public displayWarning(msg: string): void {
+		this.displayable.warn(msg);
+	}
+
 	public displayInfo(message: string): void {
+		this.displayable.info(message);
+	}
+
+	public displayLog(message: string): void {
 		this.displayable.log(message);
 	}
 
@@ -89,15 +107,21 @@ export class UxDisplay implements Display {
 }
 
 export interface Displayable {
-	// Output message to stdout (non-blocking) only when "--json" flag is not present.      [Implemented by Command]
+	// Output message to stdout at warning-level (non-blocking) only when "--json" flag is not present. [Implemented by SfCommand]
+	warn(message: string): void;
+
+	// Output message to stdout at info-level (non-blocking) only when "--json" flag is not present. [Implemented by SfCommand]
+	info(message: string): void;
+
+	// Output message to stdout at log-level (non-blocking) only when "--json" flag is not present.  [Implemented by Command]
 	log(message?: string): void;
 
-	// Output stylized header to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
+	// Output stylized header to stdout only when "--json" flag is not present.                      [Implemented by SfCommand]
 	styledHeader(headerText: string): void;
 
-	// Output stylized object to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
+	// Output stylized object to stdout only when "--json" flag is not present.                      [Implemented by SfCommand]
 	styledObject(obj: AnyJson): void;
 
-	// Output table to stdout only when "--json" flag is not present.                       [Implemented by SfCommand]
+	// Output table to stdout only when "--json" flag is not present.                                [Implemented by SfCommand]
 	table<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>, options?: Ux.Table.Options): void;
 }

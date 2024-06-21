@@ -26,7 +26,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 
 	public view(results: RunResults): void {
 		if (results.getViolationCount() === 0) {
-			this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
+			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
 		} else {
 			const violations = this.sortViolations(results.getViolations());
 
@@ -82,7 +82,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 	private displaySummary(violations: Violation[]): void {
 		const violationCount = violations.length;
 		const fileCount = this.countUniqueFiles(violations);
-		this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.found-results', [violationCount, fileCount]));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-results', [violationCount, fileCount]));
 	}
 
 	private displayDetails(violations: Violation[]): void {
@@ -109,13 +109,13 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			}, ['engine', 'severity', 'message', 'location', 'resources']);
 		}
 		if (omittedResultsCount > 0) {
-			this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [omittedResultsCount]));
+			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [omittedResultsCount]));
 		}
 	}
 
 	private displayBreakdown(results: RunResults): void {
 		this.display.displayStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header'));
-		this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
 		for (const sev of Object.values(SeverityLevel)) {
 			// Some of the keys will be numbers, since the enum is numerical. Skip those.
 			if (typeof sev !== 'string') {
@@ -123,7 +123,7 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			}
 			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
 			if (sevCount > 0) {
-				this.display.displayInfo(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
+				this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
 			}
 		}
 	}

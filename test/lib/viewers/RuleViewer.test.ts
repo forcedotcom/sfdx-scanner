@@ -12,7 +12,7 @@ describe('RuleDetailViewer', () => {
 		const displayEvents = display.getDisplayEvents();
 		expect(displayEvents).toHaveLength(1);
 		expect(displayEvents).toEqual([{
-			type: DisplayEventType.INFO,
+			type: DisplayEventType.LOG,
 			data: '*DRAFT*: Found 0 rules.'
 		}]);
 	});
@@ -29,7 +29,7 @@ describe('RuleDetailViewer', () => {
 		const displayEvents = display.getDisplayEvents();
 		expect(displayEvents).toHaveLength(3);
 		expect(displayEvents).toEqual([{
-			type: DisplayEventType.INFO,
+			type: DisplayEventType.LOG,
 			data: '*DRAFT*: Found 1 rules:'
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
@@ -64,7 +64,7 @@ describe('RuleDetailViewer', () => {
 		const displayEvents = display.getDisplayEvents();
 		expect(displayEvents).toHaveLength(5);
 		expect(displayEvents).toEqual([{
-			type: DisplayEventType.INFO,
+			type: DisplayEventType.LOG,
 			data: '*DRAFT*: Found 2 rules:'
 		}, {
 			type: DisplayEventType.STYLED_HEADER,
