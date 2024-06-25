@@ -41,7 +41,7 @@ public final class EnvUtil {
 
     @VisibleForTesting static final String DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION = ".sfge-cache" + File.separator + "fileToEntryMapData.json";
 
-    @VisibleForTesting static final boolean DEFAULT_DISABLE_CACHING = false;
+    @VisibleForTesting static final boolean DEFAULT_DISABLE_CACHING = true;
 
 
     /**
