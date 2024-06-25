@@ -1,5 +1,6 @@
 import {CodeAnalyzer, EngineLogEvent, EventType, LogEvent, LogLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
+import {LogWriter} from '../writers/LogWriter';
 
 export interface LogEventListener {
 	listen(codeAnalyzer: CodeAnalyzer): void;
@@ -36,6 +37,26 @@ export class LogEventDisplayer implements LogEventListener {
 				this.display.displayInfo(formattedMessage);
 				return;
 		}
+	}
+}
+
+export class LogEventLogger implements LogEventListener {
+	private logWriter: LogWriter;
+
+	public constructor(logWriter: LogWriter) {
+		this.logWriter = logWriter;
+	}
+
+	public listen(codeAnalyzer: CodeAnalyzer): void {
+		codeAnalyzer.onEvent(EventType.LogEvent, (e: LogEvent) => this.handleEvent('Core', e));
+		codeAnalyzer.onEvent(EventType.EngineLogEvent, (e: EngineLogEvent) => this.handleEvent(e.engineName, e));
+	}
+
+	private handleEvent(source: string, event: LogEvent|EngineLogEvent): void {
+		// For now, we've decided to log every event type. If it turns out that we're flooding the logs with useless noise,
+		// we can change that. And regardless, at some point we'll want this to be configurable.
+		const formattedMessage = `[${event.timestamp.toISOString()}] ${LogLevel[event.logLevel]} ${source} - ${event.message}\n`;
+		this.logWriter.writeToLog(formattedMessage);
 	}
 }
 

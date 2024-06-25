@@ -1,7 +1,10 @@
-import {CodeAnalyzer, CodeAnalyzerConfig, LogLevel} from '@salesforce/code-analyzer-core';
+import {CodeAnalyzer, CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
+import {LogLevel} from '@salesforce/code-analyzer-engine-api';
 import {LogEventDisplayer} from '../../../src/lib/listeners/LogEventListener';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
+import {SpyLogWriter} from '../../stubs/SpyLogWriter';
 import {EventConfigurableEngine1, ConfigurableStubEnginePlugin1} from "../../stubs/StubEnginePlugins";
+import {LogEventLogger} from "../../../src/lib/listeners/LogEventListener";
 
 describe('LogEventListener implementations', () => {
 	let spyDisplay: SpyDisplay;
@@ -55,7 +58,7 @@ describe('LogEventListener implementations', () => {
 
 		it.each([
 			{levelName: "Debug", logLevel: LogLevel.Debug},
-			{LevelName: 'Fine', logLevel: LogLevel.Fine}
+			{levelName: 'Fine', logLevel: LogLevel.Fine}
 		])('Does NOT display events of type $levelName', async ({logLevel}) => {
 			// ==== TEST SETUP ====
 			const messages = ['message1', 'message2', 'message3'];
@@ -71,9 +74,44 @@ describe('LogEventListener implementations', () => {
 				workspaceFiles: ['package.json']
 			});
 
-			// ==== ASSERIONTS ====
+			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(0);
+		});
+	});
+
+	describe('LogEventLogger', () => {
+
+		it.each([
+			{levelName: 'Error', logLevel: LogLevel.Error},
+			{levelName: 'Warn', logLevel: LogLevel.Warn},
+			{levelName: 'Info', logLevel: LogLevel.Info},
+			{levelName: 'Debug', logLevel: LogLevel.Debug},
+			{levelName: 'Fine', logLevel: LogLevel.Fine}
+		])(`Writes to logfile for events of level $levelName`, async ({levelName, logLevel}) => {
+			// ==== TEST SETUP ====
+			const expectedMessages = ['message1', 'message2', 'message3'];
+			for (const expectedMessage of expectedMessages) {
+				engine1.addEvents({logLevel, message: expectedMessage});
+			}
+			const ruleSelection = core.selectRules('all');
+
+			const spyLogWriter = new SpyLogWriter();
+			const logListener = new LogEventLogger(spyLogWriter);
+
+			// ==== TESTED BEHAVIOR ====
+			logListener.listen(core);
+			await core.run(ruleSelection, {
+				// This does not matter.
+				workspaceFiles: ['package.json']
+			});
+
+			// ==== ASSERTIONS ====
+			// Verify that the right messages were logged.
+			const logContents = spyLogWriter.getWrittenLog();
+			for (const expectedMessage of expectedMessages) {
+				expect(logContents).toMatch(new RegExp(`${levelName}.+${expectedMessage}`));
+			}
 		});
 	});
 })

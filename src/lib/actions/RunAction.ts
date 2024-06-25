@@ -11,7 +11,8 @@ import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory'
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
-import {LogEventListener} from '../listeners/LogEventListener';
+import {LogFileWriter} from '../writers/LogWriter';
+import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {EngineProgressListener} from '../listeners/EngineProgressListener';
 import {BundleName, getMessage} from '../messages';
 
@@ -41,6 +42,9 @@ export class RunAction {
 
 	public async execute(input: RunInput): Promise<void> {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
+		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
+		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
+		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
 
 		const enginePlugins = this.dependencies.pluginsFactory.create();
