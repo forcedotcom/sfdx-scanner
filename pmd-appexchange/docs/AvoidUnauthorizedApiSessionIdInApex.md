@@ -3,14 +3,14 @@ AvoidUnauthorizedApiSessionIdInApex[](#avoidunauthorizedapisessionidinapex)
 
 **Violation:**
 
-   Use of API.Session_ID might not be authorized.
+   Use of Session Id might not be authorized.
 
 
-**Priority:** High (2)
+**Priority:** Medium (3)
 
 **Description:**
 
-   Detects use of Api.Session_ID to retrieve a session ID.
+   Detects use of ${API.Session_Id} to retrieve a session ID. For more guidance on approved use cases, read the [Session Id Guidance][https://partners.salesforce.com/sfc/servlet.shepherd/version/download/0684V00000O83jT?asPdf=false&operationContext=CHATTER] document.
 
 **Example(s):**
 

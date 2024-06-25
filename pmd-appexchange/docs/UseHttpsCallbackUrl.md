@@ -10,8 +10,7 @@ UseHttpsCallbackUrl[](#usehttpscallbackurl)
 
 **Description:**
 
-   Detects instances of an OAuth callback URL that uses HTTP.
-		Use HTTPS instead.
+   Detects instances of an OAuth callback URL that uses HTTP.Use HTTPS instead.
 
 **Example(s):**
 

@@ -159,3 +159,7 @@ pmd-cataloger/bin
 sfge*.log.gz
 
 npm-shrinkwrap.json
+/cli-messaging/out/
+
+# Cache file(s)
+/.sfge-cache/fileToEntryMapData.json

@@ -10,7 +10,7 @@ LoadCSSLinkHref[](#loadcsslinkhref)
 
 **Description:**
 
-   Determines where CSS must be loaded as a static resources.
+   Determines where CSS must be loaded as a static resource
 
 **Example(s):**
 

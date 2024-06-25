@@ -39,8 +39,7 @@ public class ThreadableRuleExecutor {
         try {
             // Create a threadpool and a completion service to monitor it.
             ExecutorService pool = Executors.newWorkStealingPool(THREAD_COUNT);
-            CompletionService<Set<Violation>> completionService =
-                    new ExecutorCompletionService(pool);
+            CompletionService<Result> completionService = new ExecutorCompletionService(pool);
 
             // Submit an appropriate amount of callables into the completion service.
             int submissionCount = submitRunners(completionService, submissions);
@@ -51,15 +50,15 @@ public class ThreadableRuleExecutor {
                     LOGGER.info("Beginning wait #" + (completedCount + 1));
                 }
                 // Get the next set of results.
-                Set<Violation> violations = waitForCallable(completionService);
-                int priorSize = result.getViolations().size();
-                result.addViolations(violations);
+                result.merge(waitForCallable(completionService));
+                int priorSize = result.getOrderedViolations().size();
+
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info(
                             "Wait #"
                                     + (completedCount + 1)
                                     + " finished, adding "
-                                    + (result.getViolations().size() - priorSize)
+                                    + (result.getOrderedViolations().size() - priorSize)
                                     + " new entries");
                 }
                 completedCount += 1;
@@ -88,7 +87,7 @@ public class ThreadableRuleExecutor {
      * points and rules. Returns the number of new runners submitted to the pool.
      */
     private static int submitRunners(
-            CompletionService<Set<Violation>> completionService,
+            CompletionService<Result> completionService,
             List<ThreadableRuleSubmission> submissions) {
         int submissionCount = 0;
         final ProgressListener progressListener = ProgressListenerProvider.get();
@@ -109,11 +108,10 @@ public class ThreadableRuleExecutor {
      *
      * @throws ThreadableRuleExecutorException - Thrown when a runner is unable to complete.
      */
-    private static Set<Violation> waitForCallable(
-            CompletionService<Set<Violation>> completionService) {
+    private static Result waitForCallable(CompletionService<Result> completionService) {
         try {
             long startTime = System.currentTimeMillis();
-            Future<Set<Violation>> future = completionService.take();
+            Future<Result> future = completionService.take();
             long endTime = System.currentTimeMillis();
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Future returned after " + (endTime - startTime) + " ms");
@@ -124,7 +122,7 @@ public class ThreadableRuleExecutor {
         }
     }
 
-    private static class CallableExecutor implements Callable<Set<Violation>> {
+    private static class CallableExecutor implements Callable<Result> {
         private final ThreadableRuleSubmission submission;
         private boolean timedOut;
 
@@ -133,9 +131,9 @@ public class ThreadableRuleExecutor {
             this.submission = submission;
         }
 
-        public Set<Violation> call() {
+        public Result call() {
             Timer timer = new Timer(this.getClass().getSimpleName() + " Timer");
-            TreeSet<Violation> violations = new TreeSet<>();
+            Result result = new Result();
             try (CloseableThreadContext.Instance closeable = LogUtil.startRuleRun()) {
                 submission.initializeThreadLocals();
                 submission.beforeRun();
@@ -163,7 +161,7 @@ public class ThreadableRuleExecutor {
                             }
                         };
                 timer.schedule(task, TIMEOUT);
-                violations.addAll(
+                result.merge(
                         runRules(
                                 submission.getGraph(),
                                 submission.getRules(),
@@ -177,7 +175,7 @@ public class ThreadableRuleExecutor {
                 if (timedOut) {
                     // If the thread timed out, we should create a violation indicating that this
                     // occurred.
-                    violations.add(
+                    result.addViolation(
                             new Violation.TimeoutViolation(
                                     "Path evaluation timed out after " + TIMEOUT + " ms",
                                     submission.getPathEntry()));
@@ -201,7 +199,7 @@ public class ThreadableRuleExecutor {
                                     + ex.getMessage()
                                     + ": "
                                     + frameString;
-                    violations.add(
+                    result.addViolation(
                             new Violation.InternalErrorViolation(
                                     details, submission.getPathEntry()));
                     if (LOGGER.isErrorEnabled()) {
@@ -215,25 +213,26 @@ public class ThreadableRuleExecutor {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Finished. method=" + submission.getPathEntry().toSimpleString());
             }
-            submission.afterRun(violations);
-            return violations;
+            submission.afterRun(result);
+            return result;
         }
 
-        private Set<Violation> runRules(
+        private Result runRules(
                 GraphTraversalSource graph,
                 List<AbstractPathBasedRule> rules,
                 MethodVertex pathEntry) {
-            Set<Violation> violations = new HashSet<>();
+            final Result result = new Result();
             final PathBasedRuleRunner pathBasedRuleRunner =
                     new PathBasedRuleRunner(graph, rules, pathEntry);
             try {
-                violations.addAll(pathBasedRuleRunner.runRules());
+                result.merge(pathBasedRuleRunner.runRules());
             } catch (PathExpansionLimitReachedException ex) {
-                violations.add(new Violation.LimitReachedViolation(ex.getMessage(), pathEntry));
+                result.addViolation(
+                        new Violation.LimitReachedViolation(ex.getMessage(), pathEntry));
             } catch (UserActionException ex) {
-                violations.add(new Violation.UserActionViolation(ex.getMessage(), pathEntry));
+                result.addViolation(new Violation.UserActionViolation(ex.getMessage(), pathEntry));
             }
-            return violations;
+            return result;
         }
     }
 
@@ -271,10 +270,10 @@ public class ThreadableRuleExecutor {
         /**
          * Invoked in a Callable after the rules are evaluated
          *
-         * @param violations - All violations that were created by this execution. TreeSet
-         *     guarantees proper ordering.
+         * @param result - All violations that were created by this execution. TreeSet guarantees
+         *     proper ordering.
          */
-        default void afterRun(TreeSet<Violation> violations) {
+        default void afterRun(Result result) {
             // NO OP
         }
     }

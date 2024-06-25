@@ -23,6 +23,9 @@ dependencies {
 	implementation("com.google.code.gson:gson:2.10.1")
 	implementation("com.google.guava:guava:26.0-jre")
 	implementation("com.google.code.findbugs:jsr305:3.0.2")
+	implementation ("com.googlecode.json-simple:json-simple:1.1.1") {
+		exclude("junit")
+	}
 	implementation("org.reflections:reflections:0.9.12")
 	implementation("org.ow2.asm:asm:9.2")
 	implementation(files("lib/apex-jorje-lsp-sfge.jar"))

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.google.common.collect.Lists;
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
+import com.salesforce.cli.Result;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
@@ -274,7 +275,8 @@ public class BaseUnusedMethodTest {
                 TestUtil.getMethodVertex(g, entryDefiningType, entryMethod);
         PathBasedRuleRunner runner =
                 new PathBasedRuleRunner(g, Lists.newArrayList(rule), entryMethodVertex);
-        List<Violation> violations = new ArrayList<>(runner.runRules());
+        Result result = runner.runRules();
+        List<Violation> violations = new ArrayList<>(result.getOrderedViolations());
         violations.addAll(
                 rule.postProcess(
                         g)); // Important! This is where the violations are created for this rule

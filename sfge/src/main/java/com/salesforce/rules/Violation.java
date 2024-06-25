@@ -143,13 +143,27 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
     public int compareTo(Violation o) {
         // First, compare the attributes that are common to all violation types.
         final int baseComparison =
-                Comparator.comparing(Violation::getSourceFileName)
-                        .thenComparing(Violation::getSourceDefiningType)
-                        .thenComparing(Violation::getSourceLineNumber)
-                        .thenComparing(Violation::getSourceColumnNumber)
-                        .thenComparing(Violation::getSourceVertexName)
-                        .thenComparing(Violation::getRuleName)
-                        .thenComparing(Violation::getMessage)
+                Comparator.comparing(
+                                Violation::getSourceFileName,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getSourceDefiningType,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getSourceLineNumber,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getSourceColumnNumber,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getSourceVertexName,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getRuleName,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(
+                                Violation::getMessage,
+                                Comparator.nullsLast(Comparator.naturalOrder()))
                         .compare(this, o);
 
         // If comparison of the base attributes revealed a definitive ordering, then we should use

@@ -44,3 +44,4 @@ sfge*.log.*
 
 # Informational file when generating sObject lists
 /src/main/resources/sObjects/sObjectNotFoundList.txt
+/out/

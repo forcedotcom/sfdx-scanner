@@ -1,9 +1,8 @@
 package com.salesforce.cli;
 
 import com.salesforce.rules.Violation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /** Represents the result of an SFGE execution. */
 public class Result {
@@ -17,15 +16,20 @@ public class Result {
     /** Indicates if the execution completed successfully * */
     private boolean completedSuccessfully;
 
+    /** Mapping of file names to entry points that lead to paths that traverse these paths * */
+    private final FilesToEntriesMap filesToEntriesMap;
+
     public Result() {
         this.violations = new ArrayList<>();
         this.errorsThrown = new ArrayList<>();
         this.completedSuccessfully = false;
+        this.filesToEntriesMap = new FilesToEntriesMap();
     }
 
     public void merge(Result result) {
-        this.addViolations(result.getViolations());
-        this.addThrowable(result.getErrorsThrown());
+        this.addViolations(result.violations);
+        this.addThrowable(result.errorsThrown);
+        this.filesToEntriesMap.merge(result.filesToEntriesMap);
     }
 
     public void addViolations(Collection<Violation> violations) {
@@ -48,8 +52,14 @@ public class Result {
         this.errorsThrown.add(ex);
     }
 
-    public List<Violation> getViolations() {
-        return violations;
+    public void addFileToEntryPoint(String filename, String entryFile, String entryMethod) {
+        this.filesToEntriesMap.put(filename, entryFile, entryMethod);
+    }
+
+    public List<Violation> getOrderedViolations() {
+        final TreeSet<Violation> orderedViolations = new TreeSet<>();
+        orderedViolations.addAll(violations);
+        return orderedViolations.stream().collect(Collectors.toList());
     }
 
     public boolean isCompletedSuccessfully() {
@@ -58,5 +68,9 @@ public class Result {
 
     public List<Throwable> getErrorsThrown() {
         return errorsThrown;
+    }
+
+    public FilesToEntriesMap getFilesToEntriesMap() {
+        return this.filesToEntriesMap;
     }
 }

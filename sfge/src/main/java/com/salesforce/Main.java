@@ -1,6 +1,7 @@
 package com.salesforce;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.salesforce.cli.CacheCreator;
 import com.salesforce.cli.CliArgParser;
 import com.salesforce.cli.OutputFormatter;
 import com.salesforce.cli.Result;
@@ -184,7 +185,7 @@ public class Main {
             // No matter the outcome, share the results found so far
             dependencies.printOutput(CliMessager.getInstance().getAllMessagesWithFormatting());
 
-            final List<Violation> violations = result.getViolations();
+            final List<Violation> violations = result.getOrderedViolations();
             OutputFormatter formatter = new OutputFormatter();
             dependencies.printOutput(formatter.formatViolationJsons(violations));
 
@@ -193,6 +194,10 @@ public class Main {
             for (Throwable throwable : errorsThrown) {
                 dependencies.printError(formatError(throwable));
             }
+
+            // Create cache data, if any
+            final CacheCreator cacheCreator = new CacheCreator();
+            cacheCreator.create(result);
 
             if (!errorsThrown.isEmpty()) {
                 return violations.isEmpty()
