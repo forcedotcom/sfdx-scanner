@@ -87,11 +87,13 @@ export class SampleEngine1 extends EngineApi.Engine {
 	}
 
 	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		await new Promise(res => setTimeout(res, 250));
 		this.runRulesCallHistory.push({ruleNames, runOptions});
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 0
 		});
+		await new Promise(res => setTimeout(res, 250));
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscFineMessageFromStubEngine1",
@@ -101,10 +103,12 @@ export class SampleEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 50
 		});
+		await new Promise(res => setTimeout(res, 250));
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 100
 		});
+		await new Promise(res => setTimeout(res, 250));
 		// Create violations for every rule-target pairing.
 		const violations: EngineApi.Violation[] = [];
 		for (const ruleName of ruleNames) {
@@ -178,6 +182,7 @@ export class SampleEngine2 extends EngineApi.Engine {
 
 	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
+		await new Promise(res => setTimeout(res, 1250));
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscInfoMessageFromStubEngine2",
@@ -187,10 +192,18 @@ export class SampleEngine2 extends EngineApi.Engine {
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 5
 		});
+		this.emitEvent<EngineApi.LogEvent>({
+			type: EngineApi.EventType.LogEvent,
+			message: "Oh no! Something might be wrong (not actually, though)!",
+			logLevel: EngineApi.LogLevel.Warn
+		});
+		await new Promise(res => setTimeout(res, 550));
 		this.emitEvent<EngineApi.ProgressEvent>({
 			type: EngineApi.EventType.ProgressEvent,
 			percentComplete: 63
 		});
+
+		await new Promise(res => setTimeout(res, 250));
 		// Create violations for every rule-target pairing.
 		const violations: EngineApi.Violation[] = [];
 		for (const ruleName of ruleNames) {

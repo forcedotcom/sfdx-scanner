@@ -11,11 +11,16 @@ import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory'
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
+import {LogFileWriter} from '../writers/LogWriter';
+import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
+import {EngineProgressListener} from '../listeners/EngineProgressListener';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
+	logEventListeners: LogEventListener[];
+	progressListeners: EngineProgressListener[];
 	writer: ResultsWriter;
 	viewer: ResultsViewer;
 }
@@ -37,8 +42,13 @@ export class RunAction {
 
 	public async execute(input: RunInput): Promise<void> {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
+		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
+		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
+		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
-
+		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
+		// events they listen for basically immediately.
+		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
 		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const enginePluginModules = config.getCustomEnginePluginModules()
 			.map(pluginModule => require.resolve(pluginModule, {paths: [process.cwd()]})); // TODO: Remove this line as soon as it is moved to the core module.
@@ -53,14 +63,19 @@ export class RunAction {
 			workspaceFiles: input.workspace,
 			pathStartPoints: input['path-start']
 		};
-
+		// EngineProgressListeners should start listening right before we call Core's `.run()` method, since that's when
+		// progress events can start being emitted.
+		this.dependencies.progressListeners.forEach(listener => listener.listen(core, ruleSelection));
 		const results: RunResults = await core.run(ruleSelection, runOptions);
-
+		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
+		// or file handlers that must be gracefully ended.
+		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
+		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
 		this.dependencies.viewer.view(results);
 
-		if (input['severity-threshold']) {
-			const thresholdValue = input['severity-threshold'];
+		const thresholdValue = input['severity-threshold'];
+		if (thresholdValue) {
 			throwErrorIfSevThresholdExceeded(thresholdValue, results);
 		}
 	}

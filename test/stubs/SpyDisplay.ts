@@ -9,11 +9,38 @@ export class SpyDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
 	/**
+	 * Track that the provided message was displayed as an Error-level output.
+	 */
+	public displayError(message: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.ERROR,
+			data: message
+		});
+	}
+
+	/**
+	 * Track that the provided message was displayed as a Warn-level output.
+	 */
+	public displayWarning(message: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.WARN,
+			data: message
+		});
+	}
+
+	/**
 	 * Track that the provided message was displayed as an Info-level output.
 	 */
 	public displayInfo(message: string): void {
 		this.displayEvents.push({
 			type: DisplayEventType.INFO,
+			data: message
+		});
+	}
+
+	public displayLog(message: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.LOG,
 			data: message
 		});
 	}
@@ -48,27 +75,56 @@ export class SpyDisplay implements Display {
 		});
 	}
 
-	public getDisplayEvents(): DisplayEvent[] {
-		return this.displayEvents;
+	/**
+	 * Track that the spinner was started with the provided message, and optionally status.
+	 */
+	public spinnerStart(msg: string, status?: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_START,
+			data: JSON.stringify({
+				msg,
+				status
+			})
+		});
 	}
 
 	/**
-	 * Verify that the provided {@link DisplayEvent}s were actually displayed in the expected order.
-	 * @param expectedDisplayEvents
+	 * Track that the spinner was updated to the provided status.
 	 */
-	public expectDisplayEvents(expectedDisplayEvents: DisplayEvent[]): void {
-		expect(this.displayEvents).toHaveLength(expectedDisplayEvents.length);
-		for (let i = 0; i < this.displayEvents.length; i++) {
-			expect(this.displayEvents[i]).toEqual(expectedDisplayEvents[i]);
-		}
+	public spinnerUpdate(status: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_UPDATE,
+			data: status
+		});
+	}
+
+	/**
+	 * Track that the spinner was stopped with the provided status.
+	 * @param status
+	 */
+	public spinnerStop(status: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.SPINNER_STOP,
+			data: status
+		});
+	}
+
+	public getDisplayEvents(): DisplayEvent[] {
+		return this.displayEvents;
 	}
 }
 
 export enum DisplayEventType {
+	ERROR,
+	WARN,
 	INFO,
+	LOG,
 	STYLED_HEADER,
 	STYLED_OBJECT,
-	TABLE
+	TABLE,
+	SPINNER_START,
+	SPINNER_UPDATE,
+	SPINNER_STOP
 }
 
 export type DisplayEvent = {

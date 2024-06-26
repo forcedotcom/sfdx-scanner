@@ -11,7 +11,8 @@ export enum BundleName {
 	RuleViewer = 'rule-viewer',
 	RulesCommand = 'rules-command',
 	RunAction = 'run-action',
-	RunCommand = 'run-command'
+	RunCommand = 'run-command',
+	SpinnerProgressListener = 'spinner-progress-listener'
 }
 
 class MessageCatalog {
