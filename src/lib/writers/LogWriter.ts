@@ -4,6 +4,7 @@ import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 
 export interface LogWriter {
 	writeToLog(message: string): void;
+	closeLog(): void;
 }
 
 export class LogFileWriter implements LogWriter {
@@ -15,6 +16,10 @@ export class LogFileWriter implements LogWriter {
 
 	public writeToLog(message: string): void {
 		this.writeStream.write(message);
+	}
+
+	public closeLog(): void {
+		this.writeStream.end();
 	}
 
 	public static async fromConfig(config: CodeAnalyzerConfig): Promise<LogFileWriter> {

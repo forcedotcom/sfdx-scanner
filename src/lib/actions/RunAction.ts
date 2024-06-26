@@ -67,9 +67,10 @@ export class RunAction {
 		// progress events can start being emitted.
 		this.dependencies.progressListeners.forEach(listener => listener.listen(core, ruleSelection));
 		const results: RunResults = await core.run(ruleSelection, runOptions);
-		// EngineProgressListeners need to be explicitly told to stop listening once Core finishes running, because they
-		// typically feature a persistent UI element that must be disabled/finished.
+		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
+		// or file handlers that must be gracefully ended.
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
+		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
 		this.dependencies.viewer.view(results);
 

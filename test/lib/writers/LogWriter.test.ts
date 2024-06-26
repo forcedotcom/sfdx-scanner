@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
-import {rimraf} from 'rimraf';
+import * as tmp from 'tmp';
 import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 import {LogFileWriter} from '../../../src/lib/writers/LogWriter';
 
@@ -9,14 +9,24 @@ describe('LogWriter implementations', () => {
 	describe('LogFileWriter', () => {
 		let tmpLogFolder: string;
 		beforeEach(async () => {
-			tmpLogFolder = await fs.mkdtemp('sfca-test-');
+
+			tmpLogFolder = await new Promise((res, rej) => {
+				tmp.setGracefulCleanup();
+				tmp.dir({unsafeCleanup: true}, (err, name) => {
+					if (!err) {
+						res(name);
+					} else {
+						rej(err);
+					}
+				});
+			});
+
 			jest.spyOn(CodeAnalyzerConfig.prototype, 'getLogFolder').mockImplementation(() => {
 				return tmpLogFolder;
 			});
 		});
 
 		afterEach(async () => {
-			await rimraf(tmpLogFolder);
 			jest.restoreAllMocks();
 		})
 

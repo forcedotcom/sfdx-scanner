@@ -4,6 +4,7 @@ import {LogWriter} from '../writers/LogWriter';
 
 export interface LogEventListener {
 	listen(codeAnalyzer: CodeAnalyzer): void;
+	stopListening(): void;
 }
 
 export class LogEventDisplayer implements LogEventListener {
@@ -17,6 +18,10 @@ export class LogEventDisplayer implements LogEventListener {
 		// Set up listeners
 		codeAnalyzer.onEvent(EventType.LogEvent, (e: LogEvent) => this.handleEvent('Core', e));
 		codeAnalyzer.onEvent(EventType.EngineLogEvent, (e: EngineLogEvent) => this.handleEvent(e.engineName, e));
+	}
+
+	public stopListening(): void {
+		// Intentional no-op, because no cleanup is required.
 	}
 
 	private handleEvent(source: string, event: LogEvent|EngineLogEvent): void {
@@ -50,6 +55,10 @@ export class LogEventLogger implements LogEventListener {
 	public listen(codeAnalyzer: CodeAnalyzer): void {
 		codeAnalyzer.onEvent(EventType.LogEvent, (e: LogEvent) => this.handleEvent('Core', e));
 		codeAnalyzer.onEvent(EventType.EngineLogEvent, (e: EngineLogEvent) => this.handleEvent(e.engineName, e));
+	}
+
+	public stopListening(): void {
+		this.logWriter.closeLog();
 	}
 
 	private handleEvent(source: string, event: LogEvent|EngineLogEvent): void {

@@ -46,6 +46,7 @@ describe('LogEventListener implementations', () => {
 				// This does not matter.
 				workspaceFiles: ['package.json']
 			});
+			logEventDisplayer.stopListening();
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
@@ -73,6 +74,7 @@ describe('LogEventListener implementations', () => {
 				// This does not matter.
 				workspaceFiles: ['package.json']
 			});
+			logEventDisplayer.stopListening();
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
@@ -105,6 +107,7 @@ describe('LogEventListener implementations', () => {
 				// This does not matter.
 				workspaceFiles: ['package.json']
 			});
+			logListener.stopListening();
 
 			// ==== ASSERTIONS ====
 			// Verify that the right messages were logged.
