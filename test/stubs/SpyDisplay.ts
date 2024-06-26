@@ -8,6 +8,19 @@ import {AnyJson} from "@salesforce/ts-types";
 export class SpyDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
+	/**
+	 * Track that the provided message was displayed as an Error-level output.
+	 */
+	public displayError(message: string): void {
+		this.displayEvents.push({
+			type: DisplayEventType.ERROR,
+			data: message
+		});
+	}
+
+	/**
+	 * Track that the provided message was displayed as a Warn-level output.
+	 */
 	public displayWarning(message: string): void {
 		this.displayEvents.push({
 			type: DisplayEventType.WARN,
@@ -102,9 +115,10 @@ export class SpyDisplay implements Display {
 }
 
 export enum DisplayEventType {
+	ERROR,
+	WARN,
 	INFO,
 	LOG,
-	WARN,
 	STYLED_HEADER,
 	STYLED_OBJECT,
 	TABLE,

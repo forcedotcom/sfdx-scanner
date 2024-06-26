@@ -8,6 +8,12 @@ import {AnyJson} from '@salesforce/ts-types';
  * handing it off to an underlying {@code Display} implementation.
  */
 export interface Display {
+
+	/**
+	 * Outputs message to stdout at error-level (non-blocking) only if the "--json" flag is not present.
+	 */
+	displayError(msg: string): void;
+
 	/**
 	 * Output message to stdout at warning-level (non-blocking) only if the "--json" flag is not present.
 	 */
@@ -52,6 +58,11 @@ export class UxDisplay implements Display {
 	public constructor(displayable: Displayable, spinner: Spinner) {
 		this.displayable = displayable;
 		this.spinner = spinner;
+	}
+
+	public displayError(msg: string): void {
+		// This
+		this.displayable.error(msg, {exit: false});
 	}
 
 	public displayWarning(msg: string): void {
@@ -107,6 +118,12 @@ export class UxDisplay implements Display {
 }
 
 export interface Displayable {
+	/**
+	 * Output message to stdout at error-level (non-blocking) only when "--json" flag is not present. [Implemented by Command]
+	 * @param options.exit If true, the message will be thrown as an error instead of logged. Default value = true.
+	 */
+	error(message: string, options: {exit: boolean}): void;
+
 	// Output message to stdout at warning-level (non-blocking) only when "--json" flag is not present. [Implemented by SfCommand]
 	warn(message: string): void;
 

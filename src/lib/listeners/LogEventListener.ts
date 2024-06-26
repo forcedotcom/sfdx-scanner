@@ -27,9 +27,9 @@ export class LogEventDisplayer implements LogEventListener {
 		}
 		const formattedMessage = `${source} [${formatTimestamp(event.timestamp)}]: ${event.message}`;
 		switch (event.logLevel) {
-			// We display errors at the "warning" level, because calling `.error()` would actually kill the transaction,
-			// and we probably don't want that.
 			case LogLevel.Error:
+				this.display.displayError(formattedMessage);
+				return;
 			case LogLevel.Warn:
 				this.display.displayWarning(formattedMessage);
 				return;

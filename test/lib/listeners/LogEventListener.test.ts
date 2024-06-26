@@ -29,7 +29,7 @@ describe('LogEventListener implementations', () => {
 		});
 
 		it.each([
-			{levelName: "Error", logLevel: LogLevel.Error, displayType: 'warnings', displayEvent: DisplayEventType.WARN},
+			{levelName: "Error", logLevel: LogLevel.Error, displayType: 'errors', displayEvent: DisplayEventType.ERROR},
 			{levelName: "Warn", logLevel: LogLevel.Warn, displayType: 'warnings', displayEvent: DisplayEventType.WARN},
 			{levelName: "Info", logLevel: LogLevel.Info, displayType: 'info-logs', displayEvent: DisplayEventType.INFO},
 		])('Displays $levelName-type log events as $displayType', async ({logLevel, displayEvent}) => {
