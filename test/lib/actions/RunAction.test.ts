@@ -81,7 +81,7 @@ describe('RunAction tests', () => {
 		// Verify that the expected rules were executed on the right files.
 		const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
 		expect(actualExecutedRules).toEqual(expectedRules);
-		const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspaceFiles;
+		const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
 		expect(actualTargetFiles).toEqual([path.resolve('.')]);
 		// Verify that the expected results were passed into the Viewer and Writer.
 		expect(writer.getCallHistory()[0].getViolationCount()).toEqual(1);

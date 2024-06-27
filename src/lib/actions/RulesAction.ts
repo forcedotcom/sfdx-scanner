@@ -1,4 +1,4 @@
-import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
+import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection, Workspace} from '@salesforce/code-analyzer-core';
 
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
@@ -13,6 +13,7 @@ export type RulesDependencies = {
 export type RulesInput = {
 	'config-file'?: string;
 	'rule-selector': string[];
+	workspace: string[];
 }
 
 export class RulesAction {
@@ -35,7 +36,8 @@ export class RulesAction {
 		];
 		await Promise.all(addEnginePromises);
 
-		const ruleSelection: RuleSelection = core.selectRules(...input["rule-selector"]);
+		const workspace: Workspace = await core.createWorkspace(input.workspace);
+		const ruleSelection: RuleSelection = await core.selectRules(input["rule-selector"], {workspace});
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
 		this.dependencies.viewer.view(rules);

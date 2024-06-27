@@ -9,7 +9,7 @@ export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
 		return ['SampleEngine1', 'SampleEngine2'];
 	}
 
-	createEngine(engineName: string, config: EngineApi.ConfigObject): EngineApi.Engine {
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		if (engineName === 'SampleEngine1') {
 			this.createdEngines.set(engineName, new SampleEngine1(config));
 		} else if (engineName === 'SampleEngine2') {
@@ -17,7 +17,7 @@ export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
 		} else {
 			throw new Error(`Unsupported engine name: ${engineName}`);
 		}
-		return this.getCreatedEngine(engineName);
+		return Promise.resolve(this.getCreatedEngine(engineName));
 	}
 
 	getCreatedEngine(engineName: string): EngineApi.Engine {
@@ -112,7 +112,7 @@ export class SampleEngine1 extends EngineApi.Engine {
 		// Create violations for every rule-target pairing.
 		const violations: EngineApi.Violation[] = [];
 		for (const ruleName of ruleNames) {
-			for (const target of runOptions.workspaceFiles) {
+			for (const target of await runOptions.workspace.getExpandedFiles()) {
 				const firstEligibleFile = await resolveToTargetableFile(target);
 				if (!firstEligibleFile) {
 					throw new Error(`no files in ${target}`);
@@ -207,7 +207,7 @@ export class SampleEngine2 extends EngineApi.Engine {
 		// Create violations for every rule-target pairing.
 		const violations: EngineApi.Violation[] = [];
 		for (const ruleName of ruleNames) {
-			for (const target of runOptions.workspaceFiles) {
+			for (const target of await runOptions.workspace.getExpandedFiles()) {
 				const firstEligibleFile = await resolveToTargetableFile(target);
 				if (!firstEligibleFile) {
 					throw new Error(`no files in ${target}`);

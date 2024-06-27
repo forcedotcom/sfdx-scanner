@@ -11,7 +11,7 @@ export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 		return ["stubEngine1", "stubEngine2"];
 	}
 
-	createEngine(engineName: string, config: EngineApi.ConfigObject): EngineApi.Engine {
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		if (engineName == "stubEngine1") {
 			this.createdEngines.set(engineName, new StubEngine1(config));
 		} else if (engineName == "stubEngine2") {
@@ -19,7 +19,7 @@ export class FunctionalStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 		} else {
 			throw new Error(`Unsupported engine name: ${engineName}`)
 		}
-		return this.getCreatedEngine(engineName);
+		return Promise.resolve(this.getCreatedEngine(engineName));
 	}
 
 	getCreatedEngine(engineName: string): EngineApi.Engine {
@@ -45,12 +45,12 @@ export class ConfigurableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 		return [...this.createdEngines.keys()];
 	}
 
-	createEngine(engineName: string, _config: EngineApi.ConfigObject): EngineApi.Engine {
+	createEngine(engineName: string, _config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		// The engines have already been created, so just check whether we have it.
 		if (!this.createdEngines.has(engineName)) {
 			throw new Error(`Plugin not preconfigured with engine ${engineName}`);
 		}
-		return this.createdEngines.get(engineName) as EngineApi.Engine;
+		return Promise.resolve(this.createdEngines.get(engineName) as EngineApi.Engine);
 	}
 }
 
@@ -212,7 +212,7 @@ export class ThrowingStubPlugin1 extends EngineApi.EnginePluginV1 {
 		throw new Error('SomeErrorFromGetAvailableEngineNames');
 	}
 
-	createEngine(_engineName: string, _config: EngineApi.ConfigObject): EngineApi.Engine {
+	createEngine(_engineName: string, _config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		throw new Error('Should not be called');
 	}
 }
@@ -227,13 +227,13 @@ export class TimeableStubEnginePlugin1 extends EngineApi.EnginePluginV1 {
 		return ["timeableEngine1"];
 	}
 
-	createEngine(engineName: string, config: EngineApi.ConfigObject): EngineApi.Engine {
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		if (engineName == "timeableEngine1") {
 			this.createdEngines.set(engineName, new TimeableEngine1(config));
 		} else {
 			throw new Error(`Unsupported engine name: ${engineName}`)
 		}
-		return this.getCreatedEngine(engineName);
+		return Promise.resolve(this.getCreatedEngine(engineName));
 	}
 
 	getCreatedEngine(engineName: string): EngineApi.Engine {
@@ -341,6 +341,59 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 				logLevel
 			});
 		}
+		return Promise.resolve({violations: []});
+	}
+}
+
+export class StubEnginePluginWithTargetDependentEngine extends EngineApi.EnginePluginV1 {
+	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	getAvailableEngineNames(): string[] {
+		return ['targetDependentEngine1'];
+	}
+
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
+		if (engineName === 'targetDependentEngine1') {
+			this.createdEngines.set(engineName, new TargetDependentEngine1(config));
+		} else {
+			throw new Error(`Unsupported engine name: ${engineName}`);
+		}
+		return Promise.resolve(this.getCreatedEngine(engineName));
+	}
+
+	getCreatedEngine(engineName: string): EngineApi.Engine {
+		if (this.createdEngines.has(engineName)) {
+			return this.createdEngines.get(engineName) as EngineApi.Engine;
+		}
+		throw new Error(`Engine with name ${engineName} has not yet been created.`);
+	}
+}
+
+export class TargetDependentEngine1 extends EngineApi.Engine {
+
+	constructor(_config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	getName(): string {
+		return 'targetDependentEngine1';
+	}
+
+	describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
+		// Derive a rule for each of the targeted files/folders in the workspace.
+		return Promise.resolve(describeOptions.workspace.getFilesAndFolders().map(fileOrFolder => {
+			return {
+				name: `ruleFor${fileOrFolder}`,
+				severityLevel: EngineApi.SeverityLevel.Low,
+				type: EngineApi.RuleType.Standard,
+				tags: ["Recommended"],
+				description: `Rule synthesized for target "${fileOrFolder}`,
+				resourceUrls: [`https://example.com/${fileOrFolder}`]
+			}
+		}));
+	}
+
+	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		return Promise.resolve({violations: []});
 	}
 }

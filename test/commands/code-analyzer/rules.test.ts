@@ -155,4 +155,49 @@ describe('`code-analyzer rules` tests', () => {
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailViewer');
 		});
 	});
+
+	describe('--workspace', () => {
+		it('Can be supplied once with a single value', async () => {
+			const inputValue = './somedirectory';
+			await RulesCommand.run(['--workspace', inputValue]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', [inputValue]);
+		});
+
+		it('Can be supplied once with multiple comma-separated values', async () => {
+			const inputValue =['./somedirectory', './someotherdirectory'];
+			await RulesCommand.run(['--workspace', inputValue.join(',')]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', inputValue);
+		});
+
+		it('Can be supplied multiple times with one value each', async () => {
+			const inputValue1 = './somedirectory';
+			const inputValue2 = './someotherdirectory';
+			await RulesCommand.run(['--workspace', inputValue1, '--workspace', inputValue2]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', [inputValue1, inputValue2]);
+		});
+
+		it('Can be supplied multiple times with multiple comma-separated values', async () => {
+			const inputValue1 = ['./somedirectory', './anotherdirectory'];
+			const inputValue2 = ['./someotherdirectory', './yetanotherdirectory'];
+			await RulesCommand.run(['--workspace', inputValue1.join(','), '--workspace', inputValue2.join(',')]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', [...inputValue1, ...inputValue2]);
+		});
+
+		it('Defaults to value of "."', async () => {
+			await RulesCommand.run([]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', ['.']);
+		});
+
+		it('Can be referenced by its shortname, -w', async () => {
+			const inputValue = './somedirectory';
+			await RulesCommand.run(['-w', inputValue]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('workspace', [inputValue]);
+		});
+	});
 });

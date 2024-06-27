@@ -38,13 +38,14 @@ describe('LogEventListener implementations', () => {
 			for (const expectedMessage of expectedMessages) {
 				engine1.addEvents({logLevel, message: expectedMessage});
 			}
-			const ruleSelection = core.selectRules('all');
+			// The specific files we target in our workspace don't matter.
+			const workspace = await core.createWorkspace(['package.json']);
+			const ruleSelection = await core.selectRules(['all'], {workspace});
 
 			// ==== TESTED BEHAVIOR ====
 			logEventDisplayer.listen(core);
 			await core.run(ruleSelection, {
-				// This does not matter.
-				workspaceFiles: ['package.json']
+				workspace
 			});
 			logEventDisplayer.stopListening();
 
@@ -66,14 +67,13 @@ describe('LogEventListener implementations', () => {
 			for (const message of messages) {
 				engine1.addEvents({logLevel, message});
 			}
-			const ruleSelection = core.selectRules('all');
+			// The specific files we include in our workspace don't matter.
+			const workspace = await core.createWorkspace(['package.json']);
+			const ruleSelection = await core.selectRules(['all'], {workspace});
 
 			// ==== TESTED BEHAVIOR ====
 			logEventDisplayer.listen(core);
-			await core.run(ruleSelection, {
-				// This does not matter.
-				workspaceFiles: ['package.json']
-			});
+			await core.run(ruleSelection, {workspace});
 			logEventDisplayer.stopListening();
 
 			// ==== ASSERTIONS ====
@@ -96,17 +96,16 @@ describe('LogEventListener implementations', () => {
 			for (const expectedMessage of expectedMessages) {
 				engine1.addEvents({logLevel, message: expectedMessage});
 			}
-			const ruleSelection = core.selectRules('all');
+			// The specific files we include in our workspace don't matter.
+			const workspace = await core.createWorkspace(['package.json']);
+			const ruleSelection = await core.selectRules(['all'], {workspace});
 
 			const spyLogWriter = new SpyLogWriter();
 			const logListener = new LogEventLogger(spyLogWriter);
 
 			// ==== TESTED BEHAVIOR ====
 			logListener.listen(core);
-			await core.run(ruleSelection, {
-				// This does not matter.
-				workspaceFiles: ['package.json']
-			});
+			await core.run(ruleSelection, {workspace});
 			logListener.stopListening();
 
 			// ==== ASSERTIONS ====
