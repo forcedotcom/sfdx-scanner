@@ -17,6 +17,13 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	];
 
 	public static readonly flags = {
+		workspace: Flags.string({
+			summary: getMessage(BundleName.RulesCommand, 'flags.workspace.summary'),
+			char: 'w',
+			multiple: true,
+			delimiter: ',',
+			default: ['.']
+		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.rule-selector.summary'),
 			char: 'r',

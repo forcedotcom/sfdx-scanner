@@ -10,6 +10,10 @@
 
 *DRAFT*: Command examples
 
+# flags.workspace.summary
+
+*DRAFT*: Flag summary
+
 # flags.rule-selector.summary
 
 *DRAFT*: Flag summary

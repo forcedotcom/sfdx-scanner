@@ -43,9 +43,9 @@ describe('ResultsViewer implementations', () => {
 		it('When given no results, outputs top-level count and nothing else', async () => {
 			// ==== TEST SETUP ====
 			// "Run" the plugin without assigning any violations.
-			const results = await codeAnalyzerCore.run(codeAnalyzerCore.selectRules('all'), {
-				workspaceFiles: ['./package.json']
-			});
+			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
 			// ==== TESTED METHOD ====
 			// Pass the empty result object into the viewer.
@@ -68,10 +68,10 @@ describe('ResultsViewer implementations', () => {
 				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1),
 				DETAIL_RESULTS_CUTOFF);
 			engine1.resultsToReturn = {violations};
+			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
 			// "Run" the plugin.
-			const results = await codeAnalyzerCore.run(codeAnalyzerCore.selectRules('all'), {
-				workspaceFiles: [PATH_TO_SOME_FILE]
-			});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
 			// ==== TESTED METHOD ====
 			// Pass the result object into the viewer.
@@ -101,9 +101,9 @@ describe('ResultsViewer implementations', () => {
 				DETAIL_RESULTS_CUTOFF * 2);
 			engine1.resultsToReturn = {violations};
 			// "Run" the plugin.
-			const results = await codeAnalyzerCore.run(codeAnalyzerCore.selectRules('all'), {
-				workspaceFiles: [PATH_TO_SOME_FILE]
-			});
+			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
 			// ==== TESTED METHOD ====
 			// Pass the result object into the viewer.
@@ -147,9 +147,9 @@ describe('ResultsViewer implementations', () => {
 			];
 			engine1.resultsToReturn = {violations};
 			// "Run" the plugin.
-			const results = await codeAnalyzerCore.run(codeAnalyzerCore.selectRules('all'), {
-				workspaceFiles: ['package.json']
-			});
+			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
 			// ==== TESTED METHOD ====
 			// Pass the result object into the viewer.

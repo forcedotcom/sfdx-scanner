@@ -5,7 +5,8 @@ import {
 	RuleSelection,
 	RunOptions,
 	RunResults,
-	SeverityLevel
+	SeverityLevel,
+	Workspace
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
@@ -57,10 +58,11 @@ export class RunAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
+		const workspace: Workspace = await core.createWorkspace(input.workspace);
 
-		const ruleSelection: RuleSelection = core.selectRules(...input['rule-selector']);
+		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {
-			workspaceFiles: input.workspace,
+			workspace,
 			pathStartPoints: input['path-start']
 		};
 		// EngineProgressListeners should start listening right before we call Core's `.run()` method, since that's when

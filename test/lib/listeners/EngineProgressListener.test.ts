@@ -27,7 +27,7 @@ describe('EngineProgressListener implementations', () => {
 				await codeAnalyzer.addEnginePlugin(enginePlugin);
 			}
 			// Select all rules.
-			const ruleSelection = codeAnalyzer.selectRules('all');
+			const ruleSelection = await codeAnalyzer.selectRules(['all']);
 			// We don't want automated ticking to mess with the messages, so just turn it off for now.
 			listener = new SpinnerProgressListener(spyDisplay, -1);
 
@@ -59,7 +59,7 @@ describe('EngineProgressListener implementations', () => {
 				await codeAnalyzer.addEnginePlugin(enginePlugin);
 			}
 			// Select the rules from only one engine.
-			const ruleSelection = codeAnalyzer.selectRules('stubEngine1');
+			const ruleSelection = await codeAnalyzer.selectRules(['stubEngine1']);
 			// We don't want automated ticking to mess with the messages, so just turn it off for now.
 			listener = new SpinnerProgressListener(spyDisplay, -1);
 
@@ -90,16 +90,18 @@ describe('EngineProgressListener implementations', () => {
 			for (const enginePlugin of factory.create()) {
 				await codeAnalyzer.addEnginePlugin(enginePlugin);
 			}
-			const ruleSelection = codeAnalyzer.selectRules('stubEngine1');
+			const ruleSelection = await codeAnalyzer.selectRules(['stubEngine1']);
 			// We don't want automated ticking to mess with the messages, so just turn it off for now.
 			listener = new SpinnerProgressListener(spyDisplay, -1);
+
+			// The specific targets we use for our workspace don't matter.
+			const workspace = await codeAnalyzer.createWorkspace(['package.json']);
 
 			// ==== TESTED BEHAVIOR ====
 			// Start listening, then execute the rules, then stop listening.
 			listener.listen(codeAnalyzer, ruleSelection);
 			await codeAnalyzer.run(ruleSelection, {
-				// This option doesn't matter.
-				workspaceFiles: ['package.json']
+				workspace
 			});
 			listener.stopListening();
 
@@ -134,7 +136,7 @@ describe('EngineProgressListener implementations', () => {
 			for (const enginePlugin of factory.create()) {
 				await codeAnalyzer.addEnginePlugin(enginePlugin);
 			}
-			const ruleSelection = codeAnalyzer.selectRules('stubEngine1');
+			const ruleSelection = await codeAnalyzer.selectRules(['stubEngine1']);
 			// Explicitly use the standard 1-second tick time.
 			listener = new SpinnerProgressListener(spyDisplay, 1000);
 
@@ -169,8 +171,9 @@ describe('EngineProgressListener implementations', () => {
 			const engine: TimeableEngine1 = timeablePlugin.getCreatedEngine('timeableEngine1') as TimeableEngine1;
 			// Tell it to wait for a relatively small amount of time (less than a second, so the test doesn't take forever).
 			engine.setWaitTime(700);
-
-			const ruleSelection = codeAnalyzer.selectRules('all');
+			// The specific files we use for our workspace don't matter.
+			const workspace = await codeAnalyzer.createWorkspace(['package.json']);
+			const ruleSelection = await codeAnalyzer.selectRules(['all'], {workspace});
 			// Set the listener's tick time to be unrealistically low, to make sure ticks happen between engine update events.
 			listener = new SpinnerProgressListener(spyDisplay, 200);
 
@@ -178,8 +181,7 @@ describe('EngineProgressListener implementations', () => {
 			// Start listening, execute the rules, and stop listening.
 			listener.listen(codeAnalyzer, ruleSelection);
 			await codeAnalyzer.run(ruleSelection, {
-				// This option doesn't matter.
-				workspaceFiles: ['package.json']
+				workspace
 			});
 			listener.stopListening();
 
