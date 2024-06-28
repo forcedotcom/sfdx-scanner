@@ -1,5 +1,5 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
-import {InitAction} from '../../lib/actions/InitAction';
+import {InitAction, ConfigTemplate} from '../../lib/actions/InitAction';
 import {BundleName, getMessage} from '../../lib/messages';
 
 export default class InitCommand extends SfCommand<void> {
@@ -15,14 +15,17 @@ export default class InitCommand extends SfCommand<void> {
 		template: Flags.string({
 			summary: getMessage(BundleName.InitCommand, 'flags.template.summary'),
 			char: 't',
-			options: ["empty", "default"] // TODO: These should probably be an enum?
+			default: ConfigTemplate.EMPTY,
+			options: Object.values(ConfigTemplate)
 		})
 	};
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(InitCommand)).flags;
 		const action: InitAction = new InitAction();
-		action.execute(parsedFlags);
+		action.execute({
+			template: ConfigTemplate[parsedFlags.template]
+		});
 	}
 }
 

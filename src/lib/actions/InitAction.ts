@@ -1,8 +1,15 @@
 
 
+export enum ConfigTemplate {
+	EMPTY = 'empty',
+	DEFAULT = 'default'
+}
+
+export type InitInput = {
+	template: ConfigTemplate;
+};
+
 export class InitAction {
-
-	public execute(_input: object): void {
-
+	public execute(input: InitInput): void {
 	}
 }

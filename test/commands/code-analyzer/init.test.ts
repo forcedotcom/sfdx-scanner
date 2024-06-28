@@ -34,6 +34,12 @@ describe('`code-analyzer init` tests', () => {
 			expect(receivedActionInput).toHaveProperty('template', inputValue);
 		});
 
+		it('Defaults to a value of "empty"', async () => {
+			await InitCommand.run([]);
+			expect(spy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('template', 'empty');
+		});
+
 		it('Rejects all other values', async () => {
 			const inputValue = "asdf";
 			const executionPromise = InitCommand.run(['--template', inputValue]);
