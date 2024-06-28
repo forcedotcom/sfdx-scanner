@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 
 export interface CodeAnalyzerConfigFactory {
@@ -5,15 +7,26 @@ export interface CodeAnalyzerConfigFactory {
 }
 
 export class CodeAnalyzerConfigFactoryImpl implements CodeAnalyzerConfigFactory {
-	public create(configPath?: string): CodeAnalyzerConfig {
-		if (configPath) {
-			return CodeAnalyzerConfig.fromFile(configPath);
+	private static readonly CONFIG_FILE_NAME: string = 'code-analyzer';
+	private static readonly CONFIG_FILE_EXTENSIONS: string[] = ['yaml', 'yml'];
 
-		// TODO: If the user did not provide a config-file then we should then check to see if the default one exists
-		// at path.join(process.cwd(),'code-analyzer-config.yml') and if so then use that instead of using withDefaults.
-		// This is important so that users don't always have to do --config-file <...> all the time.
-		} else {
-			return CodeAnalyzerConfig.withDefaults();
+	public create(configPath?: string): CodeAnalyzerConfig {
+		return this.getConfigFromProvidedPath(configPath)
+			|| this.seekConfigInCurrentDirectory()
+			|| CodeAnalyzerConfig.withDefaults();
+	}
+
+	private getConfigFromProvidedPath(configPath?: string): CodeAnalyzerConfig|undefined {
+		return configPath ? CodeAnalyzerConfig.fromFile(configPath) : undefined;
+	}
+
+	private seekConfigInCurrentDirectory(): CodeAnalyzerConfig|undefined {
+		for (const ext of CodeAnalyzerConfigFactoryImpl.CONFIG_FILE_EXTENSIONS) {
+			const possibleConfigFilePath = path.resolve(`${CodeAnalyzerConfigFactoryImpl.CONFIG_FILE_NAME}.${ext}`);
+			if (fs.existsSync(possibleConfigFilePath)) {
+				return CodeAnalyzerConfig.fromFile(possibleConfigFilePath);
+			}
 		}
+		return undefined;
 	}
 }
