@@ -4,7 +4,7 @@ import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
 import {SpyResultsWriter} from '../../stubs/SpyResultsWriter';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
-import {ConfigurableStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
+import {ConfigurableStubEnginePlugin1, StubEngine1, TargetDependentEngine1} from '../../stubs/StubEnginePlugins';
 import {RunAction, RunInput, RunDependencies} from '../../../src/lib/actions/RunAction';
 import {
 	StubEnginePluginsFactory_withPreconfiguredStubEngines,
@@ -88,6 +88,36 @@ describe('RunAction tests', () => {
 		expect(writer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 		expect(viewer.getCallHistory()[0].getViolationCount()).toEqual(1);
 		expect(viewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
+	});
+
+	it('Engines with target-dependent rules run the right rules', async () => {
+		// ==== SETUP ====
+		// Add a target-dependent engine to the engines that will be run.
+		const targetDependentEngine: TargetDependentEngine1 = new TargetDependentEngine1({});
+		stubEnginePlugin.addEngine(targetDependentEngine);
+		// Select a few specific targets instead of vacuously selecting the whole project.
+		const targetedFilesAndFolders = ['package.json', 'src', 'README.md'];
+		// Create the input
+		const input: RunInput = {
+			// Select only rules in the target-dependent engine.
+			"rule-selector": [targetDependentEngine.getName()],
+			"workspace": targetedFilesAndFolders
+		};
+
+		// ==== TESTED BEHAVIOR ====
+		await action.execute(input);
+
+		// ==== ASSERTIONS ====
+		// No rules in the shared stub engine should have been run.
+		expect(engine1.runRulesCallHistory).toHaveLength(0);
+		const actualExecutedRules = targetDependentEngine.runRulesCallHistory[0].ruleNames;
+		// One rule per target should have been run in the target-dependent engine.
+		expect(actualExecutedRules).toHaveLength(targetedFilesAndFolders.length);
+		const expectedRuleNames = targetedFilesAndFolders.map(t => `ruleFor${path.resolve(t)}`);
+		// The rules' order might not exactly match the provided targets', but as long as they're all present, it's fine.
+		for (const expectedRuleName of expectedRuleNames) {
+			expect(actualExecutedRules).toContain(expectedRuleName);
+		}
 	});
 
 	it.each([

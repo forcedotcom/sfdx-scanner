@@ -370,7 +370,7 @@ export class StubEnginePluginWithTargetDependentEngine extends EngineApi.EngineP
 }
 
 export class TargetDependentEngine1 extends EngineApi.Engine {
-
+	readonly runRulesCallHistory: {ruleNames: string[], runOptions: EngineApi.RunOptions}[] = [];
 	constructor(_config: EngineApi.ConfigObject) {
 		super();
 	}
@@ -380,6 +380,9 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 	}
 
 	describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
+		if (!describeOptions.workspace) {
+			return Promise.resolve([]);
+		}
 		// Derive a rule for each of the targeted files/folders in the workspace.
 		return Promise.resolve(describeOptions.workspace.getFilesAndFolders().map(fileOrFolder => {
 			return {
@@ -394,6 +397,7 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 	}
 
 	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		this.runRulesCallHistory.push({ruleNames, runOptions});
 		return Promise.resolve({violations: []});
 	}
 }
