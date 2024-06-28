@@ -19,8 +19,7 @@ describe('RulesAction tests', () => {
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
-			'rule-selector': ['all'],
-			workspace: ['package.json']
+			'rule-selector': ['all']
 		};
 
 		await action.execute(input);
@@ -47,8 +46,7 @@ describe('RulesAction tests', () => {
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
-			'rule-selector': ['CodeStyle'],
-			workspace: ['package.json']
+			'rule-selector': ['CodeStyle']
 		};
 
 		await action.execute(input);
@@ -101,8 +99,7 @@ describe('RulesAction tests', () => {
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
-			'rule-selector': ['all'],
-			workspace: ['package.json']
+			'rule-selector': ['all']
 		};
 
 		await action.execute(input);
@@ -120,8 +117,7 @@ describe('RulesAction tests', () => {
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
-			'rule-selector': ['all'],
-			workspace: ['package.json']
+			'rule-selector': ['all']
 		};
 		const executionPromise = action.execute(input);
 

@@ -22,7 +22,6 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			char: 'w',
 			multiple: true,
 			delimiter: ',',
-			default: ['.']
 		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.rule-selector.summary'),

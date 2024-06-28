@@ -187,10 +187,10 @@ describe('`code-analyzer rules` tests', () => {
 			expect(receivedActionInput).toHaveProperty('workspace', [...inputValue1, ...inputValue2]);
 		});
 
-		it('Defaults to value of "."', async () => {
+		it('Is unused if not directly specified', async () => {
 			await RulesCommand.run([]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', ['.']);
+			expect(receivedActionInput.workspace).toBeUndefined();
 		});
 
 		it('Can be referenced by its shortname, -w', async () => {
