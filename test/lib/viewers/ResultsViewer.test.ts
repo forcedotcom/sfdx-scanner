@@ -2,7 +2,7 @@ import path from 'node:path';
 import {CodeAnalyzer, CodeAnalyzerConfig, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Engine, RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
 
-import {ResultsDetailViewer} from '../../../src/lib/viewers/ResultsViewer';
+import {ResultsDetailViewer, ResultsTableViewer} from '../../../src/lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../../src/lib/messages';
 import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import {FunctionalStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
@@ -17,27 +17,27 @@ const PATH_TO_FILE_Z = path.resolve('.', 'test', 'sample-code', 'fileZ.cls');
 describe('ResultsViewer implementations', () => {
 
 	let spyDisplay: SpyDisplay;
+	let codeAnalyzerCore: CodeAnalyzer;
+	let stubEnginePlugin: FunctionalStubEnginePlugin1;
+	let engine1: StubEngine1;
+	let rule1: RuleDescription;
+	let rule2: RuleDescription;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		spyDisplay = new SpyDisplay();
+		codeAnalyzerCore = new CodeAnalyzer(CodeAnalyzerConfig.withDefaults());
+		stubEnginePlugin = new FunctionalStubEnginePlugin1();
+		await codeAnalyzerCore.addEnginePlugin(stubEnginePlugin);
+		engine1 = stubEnginePlugin.getCreatedEngine('stubEngine1') as StubEngine1;
+		rule1 = (await engine1.describeRules())[0];
+		rule2 = (await engine1.describeRules())[1];
 	});
 
 	describe('ResultsDetailViewer', () => {
 		let viewer: ResultsDetailViewer;
-		let codeAnalyzerCore: CodeAnalyzer;
-		let stubEnginePlugin: FunctionalStubEnginePlugin1;
-		let engine1: StubEngine1;
-		let rule1: RuleDescription;
-		let rule2: RuleDescription;
 
-		beforeEach(async () => {
+		beforeEach(() => {
 			viewer = new ResultsDetailViewer(spyDisplay);
-			codeAnalyzerCore = new CodeAnalyzer(CodeAnalyzerConfig.withDefaults());
-			stubEnginePlugin = new FunctionalStubEnginePlugin1();
-			await codeAnalyzerCore.addEnginePlugin(stubEnginePlugin);
-			engine1 = stubEnginePlugin.getCreatedEngine('stubEngine1') as StubEngine1;
-			rule1 = (await engine1.describeRules())[0];
-			rule2 = (await engine1.describeRules())[1];
 		});
 
 		it('When given no results, outputs top-level count and nothing else', async () => {
@@ -232,20 +232,131 @@ describe('ResultsViewer implementations', () => {
 	});
 
 	describe('ResultsTableViewer', () => {
+		type TableRow = {
+			id: number;
+			location: string;
+			name: string;
+			severity: string;
+		};
 
-		it('When given no results, outputs empty table', () => {
+		let viewer: ResultsTableViewer;
 
+		beforeEach(() => {
+			viewer = new ResultsTableViewer(spyDisplay);
+		})
+
+		it('When given no results, outputs top-level count and nothing else', async () => {
+			// ==== SETUP ====
+			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
+			const rules = await codeAnalyzerCore.selectRules(['all']);
+			// Run without having assigned any violations.
+			const results = await codeAnalyzerCore.run(rules, {workspace});
+
+			// ==== TESTED BEHAVIOR ====
+			// Pass the empty results object into the viewer.
+			viewer.view(results);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			expect(displayEvents).toHaveLength(1);
+			expect(displayEvents).toEqual([{
+				type: DisplayEventType.LOG,
+				data: getMessage(BundleName.ResultsViewer, 'summary.found-no-results')
+			}]);
 		});
 
-		it('When given violations, they are displayed as a table', () => {
+		it('When given violations, they are displayed as a table', async () => {
+			// ==== SETUP ====
+			// This test doesn't care about sorting, so just assign our engine several copies of the same violation.
+			const violations: Violation[] = repeatViolation(
+				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1),
+				10
+			);
+			engine1.resultsToReturn = {violations};
+			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
+			const rules = await codeAnalyzerCore.selectRules(['all']);
+			// "Run" the plugin.
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
+			// ==== TESTED BEHAVIOR ====
+			viewer.view(results);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			expect(displayEvents).toHaveLength(2);
+			const expectedTableRows = violations.map((v, idx) => {
+				return createTableRowExpectation(rule1, v, idx);
+			});
+			expect(displayEvents).toEqual([{
+				type: DisplayEventType.LOG,
+				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [10, 1])
+			}, {
+				type: DisplayEventType.TABLE,
+				data: JSON.stringify({
+					columns: ['Id', 'Location', 'Name', 'Severity'],
+					rows: expectedTableRows
+				})
+			}]);
 		});
 
-		// TODO: This sorting logic has not yet been finalized!
-		it('Results are sorted by file, then location, then severity', () => {
+		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
+		// in File X" option.
+		it('Results are sorted by file, then location, then rule name', async () => {
+			// ==== SETUP ====
+			// Populate the engine with:
+			const violations: Violation[] = [
+				// A high-alphabetical rule violation late in a high-alphabetical file.
+				createViolation(rule1.name, PATH_TO_FILE_A, 20, 1),
+				// A low-alphabetical rule violation in a low-alphabetical file.
+				createViolation(rule2.name, PATH_TO_FILE_Z, 20, 1),
+				// A high-alphabetical rule violation in the same spot.
+				createViolation(rule1.name, PATH_TO_FILE_Z, 20, 1),
+				// A low-alphabetical rule violation early in the high-alphabetical file.
+				createViolation(rule2.name, PATH_TO_FILE_A, 1, 1)
+			];
+			engine1.resultsToReturn = {violations};
+			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
 
+			// ==== TESTED BEHAVIOR ====
+			viewer.view(results);
+
+			// ==== ASSERTIONS ====
+			const expectedRows: TableRow[] = [
+				// Violation 4 is earliest in the alphabetically-highest file, so it's first.
+				createTableRowExpectation(rule2, violations[3], 0),
+				// Violation 1 is later in the same file, so it's next.
+				createTableRowExpectation(rule1, violations[0], 1),
+				// Violations 2 and 3 are in the same spot, but 3 is alphabetically higher.
+				createTableRowExpectation(rule1, violations[2], 2),
+				// Violation 2 is last.
+				createTableRowExpectation(rule2, violations[1], 3),
+			]
+			const displayEvents = spyDisplay.getDisplayEvents();
+			expect(displayEvents).toHaveLength(2);
+			expect(displayEvents).toEqual([{
+				type: DisplayEventType.LOG,
+				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [4, 2])
+			}, {
+				type: DisplayEventType.TABLE,
+				data: JSON.stringify({
+					columns: ['Id', 'Location', 'Name', 'Severity'],
+					rows: expectedRows
+				})
+			}])
 		});
-	})
+
+		function createTableRowExpectation(rule: RuleDescription, violation: Violation, index: number): TableRow {
+			const primaryLocation = violation.codeLocations[violation.primaryLocationIndex];
+			return {
+				id: index + 1,
+				location: `${primaryLocation.file}:${primaryLocation.startLine}:${primaryLocation.startColumn}`,
+				name: rule.name,
+				severity: `${rule.severityLevel} (${SeverityLevel[rule.severityLevel]})`
+			};
+		}
+	});
 });
 
 function createViolation(ruleName: string, file: string, startLine: number, startColumn: number): Violation {
