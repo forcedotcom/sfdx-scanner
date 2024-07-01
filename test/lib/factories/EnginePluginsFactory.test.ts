@@ -7,6 +7,6 @@ describe('EnginePluginsFactoryImpl', () => {
 		const enginePlugins = pluginsFactory.create();
 
 		expect(enginePlugins).toHaveLength(1);
-		expect(enginePlugins[0].getAvailableEngineNames()).toEqual(['SampleEngine1', 'SampleEngine2']);
+		expect(enginePlugins[0].getAvailableEngineNames()).toEqual(['SampleEngine1', 'SampleEngine2', 'SampleEngine3']);
 	});
 });
