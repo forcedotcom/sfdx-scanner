@@ -6,7 +6,7 @@ export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
 	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
 
 	getAvailableEngineNames(): string[] {
-		return ['SampleEngine1', 'SampleEngine2'];
+		return ['SampleEngine1', 'SampleEngine2', 'SampleEngine3'];
 	}
 
 	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
@@ -14,6 +14,8 @@ export class SampleEnginePlugin extends EngineApi.EnginePluginV1 {
 			this.createdEngines.set(engineName, new SampleEngine1(config));
 		} else if (engineName === 'SampleEngine2') {
 			this.createdEngines.set(engineName, new SampleEngine2(config));
+		} else if (engineName === 'SampleEngine3') {
+			this.createdEngines.set(engineName, new SampleEngine3(config));
 		} else {
 			throw new Error(`Unsupported engine name: ${engineName}`);
 		}
@@ -227,6 +229,45 @@ export class SampleEngine2 extends EngineApi.Engine {
 		return {
 			violations
 		};
+	}
+}
+
+export class SampleEngine3 extends EngineApi.Engine {
+	readonly config: EngineApi.ConfigObject;
+
+	constructor(config: EngineApi.ConfigObject) {
+		super();
+		this.config = config;
+	}
+
+	getName(): string {
+		return 'SampleEngine3';
+	}
+
+	describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([
+			{
+				name: 'stub3RuleA',
+				severityLevel: EngineApi.SeverityLevel.High,
+				type: EngineApi.RuleType.DataFlow,
+				tags: ['Recommended', 'CodeStyle'],
+				description: 'Some description',
+				resourceUrls: ['https://example.com/stub3rulea']
+			}, {
+				name: 'stub3RuleB',
+				severityLevel: EngineApi.SeverityLevel.Low,
+				type: EngineApi.RuleType.DataFlow,
+				tags: ['Recommended', 'CodeStyle'],
+				description: 'Some description',
+				resourceUrls: ['https://example.com/stub3rulea']
+			}
+		]);
+	}
+
+	runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		return Promise.resolve({
+			violations: []
+		});
 	}
 }
 

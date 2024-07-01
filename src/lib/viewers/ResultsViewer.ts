@@ -1,3 +1,4 @@
+import {Ux} from '@salesforce/sf-plugins-core';
 import {RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {BundleName, getMessage} from '../messages';
@@ -13,27 +14,19 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 		this.display = display;
 	}
 
-	public abstract view(results: RunResults): void;
-}
-
-export class ResultsDetailViewer extends AbstractResultsViewer {
-	/**
-	 * The display format consumes a lot of vertical space. As such, we're choosing to limit the total
-	 * number of violations that it will display before truncating the results and instructing the user
-	 * to consult one of the output files.
-	 */
-	public static readonly RESULTS_CUTOFF = 10;
-
 	public view(results: RunResults): void {
 		if (results.getViolationCount() === 0) {
 			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
 		} else {
-			const violations = this.sortViolations(results.getViolations());
-
-			this.displaySummary(violations);
-			this.displayDetails(violations);
-			this.displayBreakdown(results);
+			this.displaySummary(results.getViolations());
+			this._view(results);
 		}
+	}
+
+	private displaySummary(violations: Violation[]): void {
+		const violationCount = violations.length;
+		const fileCount = this.countUniqueFiles(violations);
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-results', [violationCount, fileCount]));
 	}
 
 	private countUniqueFiles(violations: Violation[]): number {
@@ -46,6 +39,24 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			}
 		});
 		return fileSet.size;
+	}
+
+	protected abstract _view(results: RunResults): void;
+}
+
+export class ResultsDetailViewer extends AbstractResultsViewer {
+	/**
+	 * The display format consumes a lot of vertical space. As such, we're choosing to limit the total
+	 * number of violations that it will display before truncating the results and instructing the user
+	 * to consult one of the output files.
+	 */
+	public static readonly RESULTS_CUTOFF = 10;
+
+	protected _view(results: RunResults): void {
+		const violations = this.sortViolations(results.getViolations());
+
+		this.displayDetails(violations);
+		this.displayBreakdown(results);
 	}
 
 	private sortViolations(violations: Violation[]): Violation[] {
@@ -77,12 +88,6 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			const v2StartColumn = v2PrimaryLocation.getStartColumn() || 0;
 			return v1StartColumn - v2StartColumn;
 		});
-	}
-
-	private displaySummary(violations: Violation[]): void {
-		const violationCount = violations.length;
-		const fileCount = this.countUniqueFiles(violations);
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-results', [violationCount, fileCount]));
 	}
 
 	private displayDetails(violations: Violation[]): void {
@@ -129,8 +134,71 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 	}
 }
 
+type ResultRow = {
+	id: number;
+	location: string;
+	name: string;
+	severity: string;
+}
+
+const TABLE_COLUMNS: Ux.Table.Columns<ResultRow> = {
+	id: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.id-column'),
+	},
+	location: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.location-column')
+	},
+	name: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.name-column')
+	},
+	severity: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.severity-column')
+	}
+};
+
 export class ResultsTableViewer extends AbstractResultsViewer {
-	public view(results: RunResults) {
-		throw new Error(`TODO: Table-formatted output is not available yet, but results were ${JSON.stringify(results)}`);
+	protected _view(results: RunResults) {
+		const resultRows: ResultRow[] = this.sortViolations(results.getViolations())
+			.map((v, idx) => {
+				const severity = v.getRule().getSeverityLevel();
+				const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
+				return {
+					id: idx + 1,
+					location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
+					name: v.getRule().getName(),
+					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`
+				}
+			});
+		this.display.displayTable(resultRows, TABLE_COLUMNS);
+	}
+
+	private sortViolations(violations: Violation[]): Violation[] {
+		return violations.toSorted((v1, v2) => {
+			const loc1 = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
+			const loc2 = v2.getCodeLocations()[v2.getPrimaryLocationIndex()];
+			// Compare file names.
+			const file1 = loc1.getFile() || '';
+			const file2 = loc2.getFile() || '';
+			if (file1 !== file2) {
+				return file1.localeCompare(file2);
+			}
+
+			// Compare start lines.
+			const startLine1 = loc1.getStartLine() || 0;
+			const startLine2 = loc2.getStartLine() || 0;
+			if (startLine1 !== startLine2) {
+				return startLine1 - startLine2;
+			}
+
+			// Compare start columns.
+			const startColumn1 = loc1.getStartColumn() || 0;
+			const startColumn2 = loc2.getStartColumn() || 0;
+			if (startColumn1 !== startColumn2) {
+				return startColumn1 - startColumn2;
+			}
+
+			// Compare rule names.
+			return v1.getRule().getName().localeCompare(v2.getRule().getName());
+		});
 	}
 }
