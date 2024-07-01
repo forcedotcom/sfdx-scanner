@@ -20,7 +20,7 @@ exports.WORK_ITEM_PORTION = "@W-\\d{4,9}@";
  * colon, or semicolon characters. All pull request titles allow these
  * characters as separators between portions
  */
-exports.SEPARATOR = "[ -.,;:]*";
+exports.SEPARATOR = "[\\s\\-\\.\\,\\;\\:]*";
 //# sourceMappingURL=common.js.map
 
 /***/ }),
@@ -31,7 +31,7 @@ exports.SEPARATOR = "[ -.,;:]*";
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.verifyFeaturePrTitle = void 0;
+exports.verifyFeaturePrTitle = verifyFeaturePrTitle;
 const common_1 = __nccwpck_require__(6979);
 /**
  * This regex portion matches the accepted options for a Feature Branch PR type.
@@ -48,7 +48,7 @@ const SCOPE_PORTION = "\\([^()]+\\)";
  * i.e., a PR aimed at {@code dev} or a {@code release-x.y.z} branch, not
  * coming from {@code main}.
  */
-const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${SCOPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
+const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}(${common_1.SEPARATOR}${SCOPE_PORTION})?${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
  * aimed at {@code dev} or a {@code release-x.y.z} branch, not coming
@@ -58,7 +58,6 @@ const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${S
 function verifyFeaturePrTitle(title) {
     return FEATURE_PR_REGEX.test(title);
 }
-exports.verifyFeaturePrTitle = verifyFeaturePrTitle;
 //# sourceMappingURL=verifyFeaturePrTitle.js.map
 
 /***/ }),
@@ -69,7 +68,7 @@ exports.verifyFeaturePrTitle = verifyFeaturePrTitle;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.verifyMain2DevPrTitle = void 0;
+exports.verifyMain2DevPrTitle = verifyMain2DevPrTitle;
 const common_1 = __nccwpck_require__(6979);
 /**
  * This regex portion matches the accepted Type options for a pull request
@@ -99,7 +98,6 @@ const MAIN2DEV_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${
 function verifyMain2DevPrTitle(title) {
     return MAIN2DEV_PR_REGEX.test(title);
 }
-exports.verifyMain2DevPrTitle = verifyMain2DevPrTitle;
 //# sourceMappingURL=verifyMain2DevPrTitle.js.map
 
 /***/ }),
@@ -110,7 +108,7 @@ exports.verifyMain2DevPrTitle = verifyMain2DevPrTitle;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.verifyReleasePrTitle = void 0;
+exports.verifyReleasePrTitle = verifyReleasePrTitle;
 const common_1 = __nccwpck_require__(6979);
 /**
  * This regex portion matches the accepted options for a Release Branch PR type.
@@ -130,7 +128,6 @@ const RELEASE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${c
 function verifyReleasePrTitle(title) {
     return RELEASE_PR_REGEX.test(title);
 }
-exports.verifyReleasePrTitle = verifyReleasePrTitle;
 //# sourceMappingURL=verifyReleasePrTitle.js.map
 
 /***/ }),
@@ -31268,7 +31265,7 @@ function run() {
                 console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
             }
             else {
-                core.setFailed(`PR title '${title}' does not match the template of "NEW|FIX|CHANGE (__) @W-XXXX@ Summary"`);
+                core.setFailed(`PR title '${title}' does not match the template of "NEW|FIX|CHANGE (__) @W-XXXX@ Summary" or "NEW|FIX|CHANGE @W-XXXX@ Summary"`);
                 return;
             }
         }

@@ -17,7 +17,7 @@ const SCOPE_PORTION = "\\([^()]+\\)";
  * i.e., a PR aimed at {@code dev} or a {@code release-x.y.z} branch, not
  * coming from {@code main}.
  */
-const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${SEPARATOR}${SCOPE_PORTION}${SEPARATOR}${WORK_ITEM_PORTION}${SEPARATOR}[^\\s]+.*`, "i");
+const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}(${SEPARATOR}${SCOPE_PORTION})?${SEPARATOR}${WORK_ITEM_PORTION}${SEPARATOR}[^\\s]+.*`, "i");
 
 /**
  * Verifies that the provided string is an acceptable title for a PR

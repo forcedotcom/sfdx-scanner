@@ -11,5 +11,5 @@ export const WORK_ITEM_PORTION = "@W-\\d{4,9}@"
  * colon, or semicolon characters. All pull request titles allow these
  * characters as separators between portions
  */
-export const SEPARATOR = "[ -.,;:]*";
+export const SEPARATOR = "[\\s\\-\\.\\,\\;\\:]*";
 
