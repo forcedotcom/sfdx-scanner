@@ -53,7 +53,7 @@ function run(): void {
 				console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
 			} else {
 				core.setFailed(
-					`PR title '${title}' does not match the template of "NEW|FIX|CHANGE (__) @W-XXXX@ Summary"`
+					`PR title '${title}' does not match the template of "NEW|FIX|CHANGE (__) @W-XXXX@ Summary" or "NEW|FIX|CHANGE @W-XXXX@ Summary"`
 				);
 				return;
 			}
