@@ -21,7 +21,7 @@ export interface InputProcessor {
 
 	resolveTargetPaths(inputs: Inputs): string[];
 
-	resolveProjectDirPaths(inputs: Inputs): string[];
+	resolveProjectDirPaths(inputs: Inputs, displayResolvedProjectDir?: boolean): string[];
 
 	createRunOptions(inputs: Inputs, isDfa: boolean): RunOptions;
 
@@ -45,7 +45,7 @@ export class InputProcessorImpl implements InputProcessor {
 		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 
-	public resolveProjectDirPaths(inputs: Inputs): string[] {
+	public resolveProjectDirPaths(inputs: Inputs, displayResolvedProjectDir: boolean = true): string[] {
 		// If projectdir is provided, then return it since at this point it has already been validated to exist
 		if (inputs.projectdir && (inputs.projectdir as string[]).length > 0) {
 			return (inputs.projectdir as string[]).map(p => path.resolve(normalize(untildify(p))))
@@ -58,7 +58,9 @@ export class InputProcessorImpl implements InputProcessor {
 		const commonParentFolder = getFirstCommonParentFolder(this.getAllTargetFiles(inputs));
 		let projectFolder: string = findFolderThatContainsSfdxProjectFile(commonParentFolder);
 		projectFolder = projectFolder.length > 0 ? projectFolder : commonParentFolder
-		this.displayInfoOnlyOnce('info.resolvedProjectDir', [projectFolder])
+		if (displayResolvedProjectDir) {
+			this.displayInfoOnlyOnce('info.resolvedProjectDir', [projectFolder])
+		}
 		return [projectFolder];
 	}
 

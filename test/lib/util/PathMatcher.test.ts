@@ -179,7 +179,7 @@ describe('PathMatcher', () => {
 				expect(results).to.deep.equal([targets[1],targets[3]]);
 			});
 
-			it('When projectDir contains is under a .dotFolder then the projectDir is not excluded', async () => {
+			it('When projectDir is under a .dotFolder then the projectDir is not excluded', async () => {
 				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/.dotFolder/projectFolder/**/*.cls'], '/some/.dotFolder/projectFolder');
 				const targets: string[] = [
 					'/some/.dotFolder/projectFolder/subFolder/.dotFolder/a.js',
@@ -309,7 +309,7 @@ describe('PathMatcher', () => {
 				expect(await pm.pathMatchesPatterns(targets[3])).to.equal(true);
 			});
 
-			it('When projectDir contains is under a .dotFolder then the projectDir is not excluded', async () => {
+			it('When projectDir is under a .dotFolder then the projectDir is not excluded', async () => {
 				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/.dotFolder/projectFolder/**/*.cls'], '/some/.dotFolder/projectFolder/');
 				const targets: string[] = [
 					'/some/.dotFolder/projectFolder/.dotFolder/a.js',

@@ -137,9 +137,12 @@ export class PathMatcher {
 		return (await this.matcher(normalize(target))) && !this.isDotFileOrIsInDotFolderUnderProjectDir(target);
 	}
 
-	// Note that we do not want to exclude typical files underneath the projectDir just because the projectDir is
-	// underneath a dot folder (like .jenkins/projectFolder/...), so we had to add {dot: true} to the picomatch
-	// above. But we still want to exclude dot files and dot folders underneath the projectDir.
+	/**
+	 * Returns true if the target is a .fileName or is in a .folder under the project directory
+	 * 	Note that we do not want to exclude typical files underneath the projectDir just because the projectDir is
+	 * 	underneath a dot folder (like .jenkins/projectFolder/...), so we had to add {dot: true} to the picomatch
+	 * 	above. But we still want to exclude dot files and dot folders underneath the projectDir.
+	 */
 	private isDotFileOrIsInDotFolderUnderProjectDir(target: string): boolean {
 		if (target.startsWith(this.normalizedProjectDir)) {
 			target = target.slice(this.normalizedProjectDir.length);
