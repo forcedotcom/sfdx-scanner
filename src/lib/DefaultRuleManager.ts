@@ -74,7 +74,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<Results> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions, projectDir?: string): Promise<Results> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let ruleResults: RuleResult[] = [];
@@ -100,7 +100,7 @@ export class DefaultRuleManager implements RuleManager {
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
 			const engineRules = rules.filter(r => r.engine === e.getName());
-			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
+			const engineTargets = await this.unpackTargets(e, targets, matchedTargets, projectDir);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 
 			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
@@ -247,7 +247,7 @@ export class DefaultRuleManager implements RuleManager {
 	 *
 	 * Any items from the 'targets' array that result in a match are added to the 'matchedTargets' Set.
 	 */
-	protected async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
+	protected async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>, projectDir?: string): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
 		const engineTargets = await engine.getTargetPatterns();
@@ -283,7 +283,7 @@ export class DefaultRuleManager implements RuleManager {
 
 		// We want to use a path matcher that can filter based on the engine's target patterns and any negative globs
 		// provided to us.
-		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
+		const pm = new PathMatcher([...engineTargets, ...negativePatterns], projectDir);
 		for (const target of positivePatterns) {
 			// Used to detect if the target resulted in a match
 			const ruleTargetsInitialLength: number = ruleTargets.length;

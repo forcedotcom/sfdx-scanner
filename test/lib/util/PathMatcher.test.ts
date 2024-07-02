@@ -164,6 +164,34 @@ describe('PathMatcher', () => {
 				expect(results).to.not.include(targets[4], 'Path wrongly included');
 			});
 		});
+
+		describe('Hidden dot folders', () => {
+			it('When projectDir contains a .dotFolder then the files underneath it are not matched', async () => {
+				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/projectFolder/**/*.cls'], '/some/projectFolder');
+				const targets: string[] = [
+					'/some/projectFolder/subFolder/.dotFolder/a.js',
+					'/some/projectFolder/subFolder/nonDotFolder/b.js',
+					'/some/projectFolder/subFolder/.dotFolder/c.cls',
+					'/some/projectFolder/subFolder/nonDotFolder/d.cls'
+				];
+
+				const results: string[] = await pm.filterPathsByPatterns(targets);
+				expect(results).to.deep.equal([targets[1],targets[3]]);
+			});
+
+			it('When projectDir contains is under a .dotFolder then the projectDir is not excluded', async () => {
+				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/.dotFolder/projectFolder/**/*.cls'], '/some/.dotFolder/projectFolder');
+				const targets: string[] = [
+					'/some/.dotFolder/projectFolder/subFolder/.dotFolder/a.js',
+					'/some/.dotFolder/projectFolder/subFolder/nonDotFolder/b.js',
+					'/some/.dotFolder/projectFolder/subFolder/.dotFolder/c.cls',
+					'/some/.dotFolder/projectFolder/subFolder/nonDotFolder/d.cls'
+				];
+
+				const results: string[] = await pm.filterPathsByPatterns(targets);
+				expect(results).to.deep.equal([targets[1],targets[3]]);
+			});
+		});
 	});
 
 	describe('#pathMatchesPatterns()', () => {
@@ -263,6 +291,38 @@ describe('PathMatcher', () => {
 			it('DOES NOT MATCH paths matching negative patterns but not positive patterns', async () => {
 				expect(await pm.pathMatchesPatterns(targets[4])).to.equal(false, 'Path wrongly not matched.');
 			});
-		})
-	})
+		});
+
+		describe('Hidden dot folders', () => {
+			it('When projectDir contains a .dotFolder then the files underneath it are not matched', async () => {
+				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/projectFolder/**/*.cls'], '/some/projectFolder');
+				const targets: string[] = [
+					'/some/projectFolder/subFolder/.dotFolder/a.js',
+					'/some/projectFolder/subFolder/nonDotFolder/b.js',
+					'/some/projectFolder/subFolder/.dotFolder/c.cls',
+					'/some/projectFolder/subFolder/nonDotFolder/d.cls'
+				];
+
+				expect(await pm.pathMatchesPatterns(targets[0])).to.equal(false);
+				expect(await pm.pathMatchesPatterns(targets[1])).to.equal(true);
+				expect(await pm.pathMatchesPatterns(targets[2])).to.equal(false);
+				expect(await pm.pathMatchesPatterns(targets[3])).to.equal(true);
+			});
+
+			it('When projectDir contains is under a .dotFolder then the projectDir is not excluded', async () => {
+				const pm: PathMatcher = new PathMatcher(['**/*.js', '/some/.dotFolder/projectFolder/**/*.cls'], '/some/.dotFolder/projectFolder/');
+				const targets: string[] = [
+					'/some/.dotFolder/projectFolder/.dotFolder/a.js',
+					'/some/.dotFolder/projectFolder/nonDotFolder/b.js',
+					'/some/.dotFolder/projectFolder/.dotFolder/c.cls',
+					'/some/.dotFolder/projectFolder/nonDotFolder/d.cls'
+				];
+
+				expect(await pm.pathMatchesPatterns(targets[0])).to.equal(false);
+				expect(await pm.pathMatchesPatterns(targets[1])).to.equal(true);
+				expect(await pm.pathMatchesPatterns(targets[2])).to.equal(false);
+				expect(await pm.pathMatchesPatterns(targets[3])).to.equal(true);
+			});
+		});
+	});
 });
