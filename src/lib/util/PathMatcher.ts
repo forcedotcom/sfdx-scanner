@@ -10,6 +10,7 @@ type SortedPatterns = {
 
 export class PathMatcher {
 	private readonly matcher: TargetMatchingFunction;
+	private readonly normalizedProjectDir: string;
 
 	/**
 	 *
@@ -17,8 +18,9 @@ export class PathMatcher {
 	 *                                     be positive or negative strings (i.e. don't/do start with `!`), or objects
 	 *                                     describing complex patterns.
 	 */
-	constructor(patterns: TargetPattern[]) {
+	constructor(patterns: TargetPattern[], projectDir?: string) {
 		this.matcher = this.generateMatchingFunction(patterns);
+		this.normalizedProjectDir = normalize(projectDir || process.cwd());
 	}
 
 
@@ -29,8 +31,8 @@ export class PathMatcher {
 	private generateMatchingFunction(patterns: TargetPattern[]): TargetMatchingFunction {
 		const {inclusionPatterns, exclusionPatterns, advancedPatterns} = this.sortPatterns(patterns);
 
-		const inclusionMatcher = picomatch(inclusionPatterns);
-		const exclusionMatcher = picomatch(exclusionPatterns);
+		const inclusionMatcher = picomatch(inclusionPatterns, {dot: true});
+		const exclusionMatcher = picomatch(exclusionPatterns, {dot: true});
 		// Each of the advanced patterns generates its own matching function, which will be applied in sequence.
 		const advancedMatchers = advancedPatterns.map(ap => this.generateAdvancedMatcher(ap));
 
@@ -115,7 +117,7 @@ export class PathMatcher {
 	 * @returns {Promise<string[]>} - The subset of the target strings that match the provided patterns.
 	 */
 	public async filterPathsByPatterns(targets: string[]): Promise<string[]> {
-		const matchResults: boolean[] = await Promise.all(targets.map(t => this.matcher(normalize(t))));
+		const matchResults: boolean[] = await Promise.all(targets.map(t => this.pathMatchesPatterns(t)));
 
 		const filteredTargets: string[] = [];
 		matchResults.forEach((r: boolean, idx: number) => {
@@ -132,6 +134,19 @@ export class PathMatcher {
 	 * @returns {Promise<boolean>}
 	 */
 	public async pathMatchesPatterns(target: string): Promise<boolean> {
-		return this.matcher(normalize(target));
+		return (await this.matcher(normalize(target))) && !this.isDotFileOrIsInDotFolderUnderProjectDir(target);
+	}
+
+	/**
+	 * Returns true if the target is a .fileName or is in a .folder under the project directory
+	 * 	Note that we do not want to exclude typical files underneath the projectDir just because the projectDir is
+	 * 	underneath a dot folder (like .jenkins/projectFolder/...), so we had to add {dot: true} to the picomatch
+	 * 	above. But we still want to exclude dot files and dot folders underneath the projectDir.
+	 */
+	private isDotFileOrIsInDotFolderUnderProjectDir(target: string): boolean {
+		if (target.startsWith(this.normalizedProjectDir)) {
+			target = target.slice(this.normalizedProjectDir.length);
+		}
+		return target.includes('/.');
 	}
 }
