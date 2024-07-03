@@ -90,11 +90,13 @@ export abstract class AbstractRunAction implements Action {
 		const resultsProcessor: ResultsProcessor = this.resultsProcessorFactory.createResultsProcessor(
 			this.display, outputOptions, jsonReturnValueHolder);
 
+		const primaryProjectDir: string = this.inputProcessor.resolveProjectDirPaths(inputs, false)[0];
+
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
 
 		try {
-			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
+			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions, primaryProjectDir);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
 			await resultsProcessor.processResults(results);
 			return jsonReturnValueHolder.get();
