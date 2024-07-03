@@ -60,8 +60,8 @@ jobs:
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
       - run: yarn
-      # Increment the version as desired.
-      - name: Increment version
+      # Increment the version as desired locally, without actually committing anything.
+      - name: Locally increment version
         run: |
           # A workflow dispatch event lets the user specify what release type they want.
           if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
@@ -72,20 +72,21 @@ jobs:
           fi
           # Increment the version as needed.
           npm --no-git-tag-version version $RELEASE_TYPE
-      # Create the new branch as a direct copy of `dev` and push it to GitHub so the API can
-      # interact with it later.
-      - id: create-branch
+      # The branch protection rule for `release-x.y.z` branches prevents pushing commits directly. To work around this,
+      # we create an interim branch that we _can_ push commits to, and we'll do our version bookkeeping in that branch
+      # instead.
+      - id: create-interim-branch
+        name: Create interim branch
         run: |
           NEW_VERSION=$(jq -r ".version" package.json)
-          git checkout -b release-$NEW_VERSION
-          # Push the branch immediately without committing anything.
-          git push --set-upstream origin release-$NEW_VERSION
-          # Output the branch name so we can use it in later jobs.
-          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          INTERIM_BRANCH_NAME=${NEW_VERSION}-interim
+          # Create and check out the interim branch.
+          git checkout -b $INTERIM_BRANCH_NAME
+          # Immediately push the interim branch with no changes, so GraphQL can push to it later.
+          git push --set-upstream origin $INTERIM_BRANCH_NAME
       # Update our dependencies.
       - run: |
           yarn upgrade
-          node tools/UpdateRetireJsVulns.js
       # Use the GraphQL API to create a signed commit with the various changes.
       - run: |
           # GraphQL needs to know what branch to push to.
@@ -96,11 +97,10 @@ jobs:
           # GraphQL needs the latest versions of the files we changed, as Base64 encoded strings.
           NEW_PACKAGE="$(cat package.json | base64)"
           NEW_YARN_LOCK="$(cat yarn.lock | base64)"
-          NEW_RETIREJS_VULNS="$(cat retire-js/RetireJsVulns.json | base64)"
           gh api graphql -F message="$MESSAGE" -F oldOid=`git rev-parse HEAD` -F branch="$BRANCH" \
-          -F newPackage="$NEW_PACKAGE" -F newYarnLock="$NEW_YARN_LOCK" -F newRetireJsVulns="$NEW_RETIREJS_VULNS" \
+          -F newPackage="$NEW_PACKAGE" -F newYarnLock="$NEW_YARN_LOCK" \
           -f query='
-            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newYarnLock: Base64String!, $newRetireJsVulns: Base64String!) {
+            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newYarnLock: Base64String!) {
               createCommitOnBranch(input: {
                 branch: {
                   repositoryNameWithOwner: "forcedotcom/sfdx-scanner",
@@ -117,9 +117,6 @@ jobs:
                     }, {
                       path: "yarn.lock",
                       contents: $newYarnLock
-                    }, {
-                      path: "retire-js/RetireJsVulns.json",
-                      contents: $newRetireJsVulns
                     }
                   ]
                 },
@@ -130,6 +127,21 @@ jobs:
                 }
               }
             }'
+      # Now that we've done our bookkeeping commits on the interim branch, use it as the base for the real release branch.
+      - name: Create release branch
+        id: create-branch
+        run: |
+          # The commit happened on the remote end, not ours, so we need to clean the directory and pull.
+          git checkout -- .
+          git pull
+          # Now we can create the actual release branch.
+          NEW_VERSION=$(jq -r ".version" package.json)
+          git checkout -b release-$NEW_VERSION
+          git push --set-upstream origin release-$NEW_VERSION
+          # Now that we're done with the interim branch, delete it.
+          git push -d ${NEW_VERSION}-interim
+          # Output the release branch name so we can use it in later jobs.
+          echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
   # Run all the various tests against the newly created branch.
   test-release-branch:
     needs: create-release-branch
