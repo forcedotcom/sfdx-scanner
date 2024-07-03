@@ -129,34 +129,16 @@ describe("InputProcessorImpl Tests", async () => {
 			const inputs: Inputs = {
 				target: ['thisFileDoesNotExist.xml', 'thisFileAlsoDoesNotExist.json']
 			};
-			let errorThrown: boolean;
-			let message: string;
-			try {
-				inputProcessor.resolveProjectDirPaths(inputs);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).to.equal(true, 'Error should have been thrown');
-			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
+			const projectDirPaths: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(projectDirPaths).to.deep.equal([process.cwd()]);
 		})
 
 		it("Unspecified projectdir with glob target that resolves to no files", async () => {
 			const inputs: Inputs = {
 				target: ['**.filesOfThisTypeShouldNotExist']
 			};
-			let errorThrown: boolean;
-			let message: string;
-			try {
-				inputProcessor.resolveProjectDirPaths(inputs);
-				errorThrown = false;
-			} catch (e) {
-				errorThrown = true;
-				message = e.message;
-			}
-			expect(errorThrown).to.equal(true, 'Error should have been thrown');
-			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
+			const projectDirPaths: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(projectDirPaths).to.deep.equal([process.cwd()]);
 		})
 	})
 })

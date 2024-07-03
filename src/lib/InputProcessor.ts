@@ -2,9 +2,7 @@ import {Inputs} from "../types";
 import {RunOptions} from "./RuleManager";
 import {RunOutputOptions} from "./output/RunResultsProcessor";
 import {inferFormatFromOutfile, OutputFormat} from "./output/OutputFormat";
-import {SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../MessageCatalog";
-import {INTERNAL_ERROR_CODE} from "../Constants";
 import {Display} from "./Display";
 import normalize = require('normalize-path');
 import path = require('path');
@@ -53,9 +51,14 @@ export class InputProcessorImpl implements InputProcessor {
 
 		// If projectdir is not provided then:
 		// * We calculate the first common parent directory that includes all the target files.
+		// --> If there are no target files, then we return the current working directory
 		// --> If none of its parent folders contain a sfdx-project.json file, then we return this first common parent.
 		// --> Otherwise we return the folder that contains the sfdx-project.json file.
-		const commonParentFolder = getFirstCommonParentFolder(this.getAllTargetFiles(inputs));
+		const allTargetFiles: string[] = this.getAllTargetFiles(inputs);
+		if (allTargetFiles.length == 0) {
+			return [process.cwd()];
+		}
+		const commonParentFolder = getFirstCommonParentFolder(allTargetFiles);
 		let projectFolder: string = findFolderThatContainsSfdxProjectFile(commonParentFolder);
 		projectFolder = projectFolder.length > 0 ? projectFolder : commonParentFolder
 		if (displayResolvedProjectDir) {
@@ -100,11 +103,7 @@ export class InputProcessorImpl implements InputProcessor {
 
 	private getAllTargetFiles(inputs: Inputs): string[] {
 		const targetPaths: string[] = this.resolveTargetPaths(inputs).map(p => trimMethodSpecifier(p))
-		const allAbsoluteTargetFiles: string[] = globby.sync(targetPaths).map(p => path.resolve(p));
-		if (allAbsoluteTargetFiles.length == 0) {
-			throw new SfError(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'), null, null, INTERNAL_ERROR_CODE);
-		}
-		return allAbsoluteTargetFiles;
+		return globby.sync(targetPaths).map(p => path.resolve(p));
 	}
 
 	private displayInfoOnlyOnce(messageKey: string, tokens?: Tokens) {
