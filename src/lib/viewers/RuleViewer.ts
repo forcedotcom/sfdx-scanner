@@ -46,7 +46,7 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 }
 
 type RuleRow = {
-	id: number;
+	num: number;
 	name: string;
 	engine: string;
 	severity: string;
@@ -54,8 +54,8 @@ type RuleRow = {
 };
 
 const TABLE_COLUMNS: Ux.Table.Columns<RuleRow> = {
-	id: {
-		header: getMessage(BundleName.RuleViewer, 'summary.table.id-column')
+	num: {
+		header: getMessage(BundleName.RuleViewer, 'summary.table.num-column')
 	},
 	name: {
 		header: getMessage(BundleName.RuleViewer, 'summary.table.name-column')
@@ -76,7 +76,7 @@ export class RuleTableViewer extends AbstractRuleViewer {
 		const ruleJsons: RuleRow[] = rules.map((rule, idx) => {
 			const severity = rule.getSeverityLevel();
 			return {
-				id: idx + 1,
+				num: idx + 1,
 				name: rule.getName(),
 				engine: rule.getEngineName(),
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,

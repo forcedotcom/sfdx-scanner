@@ -135,9 +135,9 @@ describe('RuleViewer implementations', () => {
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
-					columns: ['Id', 'Name', 'Engine', 'Severity', 'Tag'],
+					columns: ['#', 'Name', 'Engine', 'Severity', 'Tag'],
 					rows: [{
-						id: 1,
+						num: 1,
 						name: rule.getName(),
 						engine: rule.getEngineName(),
 						severity: rule.getFormattedSeverity(),
@@ -166,15 +166,15 @@ describe('RuleViewer implementations', () => {
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
-					columns: ['Id', 'Name', 'Engine', 'Severity', 'Tag'],
+					columns: ['#', 'Name', 'Engine', 'Severity', 'Tag'],
 					rows: [{
-						id: 1,
+						num: 1,
 						name: rule1.getName(),
 						engine: rule1.getEngineName(),
 						severity: rule1.getFormattedSeverity(),
 						tag: rule1.getFormattedTags()
 					}, {
-						id: 2,
+						num: 2,
 						name: rule2.getName(),
 						engine: rule2.getEngineName(),
 						severity: rule2.getFormattedSeverity(),

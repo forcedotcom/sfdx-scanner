@@ -10,9 +10,9 @@
 
 *DRAFT*: %d. %s
 
-# summary.table.id-column
+# summary.table.num-column
 
-Id
+ #
 
 # summary.table.name-column
 
