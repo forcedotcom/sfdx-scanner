@@ -233,9 +233,10 @@ describe('ResultsViewer implementations', () => {
 
 	describe('ResultsTableViewer', () => {
 		type TableRow = {
-			id: number;
+			num: number;
 			location: string;
-			name: string;
+			rule: string;
+			message: string;
 			severity: string;
 		};
 
@@ -285,7 +286,7 @@ describe('ResultsViewer implementations', () => {
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(2);
 			const expectedTableRows = violations.map((v, idx) => {
-				return createTableRowExpectation(rule1, v, idx);
+				return createTableRowExpectation(rule1, v, engine1, idx);
 			});
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
@@ -293,7 +294,7 @@ describe('ResultsViewer implementations', () => {
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
-					columns: ['Id', 'Location', 'Name', 'Severity'],
+					columns: ['#', 'Severity', 'Rule', 'Location', 'Message'],
 					rows: expectedTableRows
 				})
 			}]);
@@ -301,18 +302,18 @@ describe('ResultsViewer implementations', () => {
 
 		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
 		// in File X" option.
-		it('Results are sorted by file, then location, then rule name', async () => {
+		it('Results are sorted by severity, then file, then location', async () => {
 			// ==== SETUP ====
 			// Populate the engine with:
 			const violations: Violation[] = [
-				// A high-alphabetical rule violation late in a high-alphabetical file.
+				// A low-severity violation late in a high-alphabetical file.
 				createViolation(rule1.name, PATH_TO_FILE_A, 20, 1),
-				// A low-alphabetical rule violation in a low-alphabetical file.
-				createViolation(rule2.name, PATH_TO_FILE_Z, 20, 1),
-				// A high-alphabetical rule violation in the same spot.
-				createViolation(rule1.name, PATH_TO_FILE_Z, 20, 1),
-				// A low-alphabetical rule violation early in the high-alphabetical file.
-				createViolation(rule2.name, PATH_TO_FILE_A, 1, 1)
+				// A low-severity violation early in the same high-alphabetical file.
+				createViolation(rule1.name, PATH_TO_FILE_A, 1, 1),
+				// A low-severity violation early in a low-alphabetical file.
+				createViolation(rule1.name, PATH_TO_FILE_Z, 1, 1),
+				// A high-severity violation later in the same low-alphabetical file.
+				createViolation(rule2.name, PATH_TO_FILE_Z, 20, 1)
 			];
 			engine1.resultsToReturn = {violations};
 			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
@@ -324,14 +325,15 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const expectedRows: TableRow[] = [
-				// Violation 4 is earliest in the alphabetically-highest file, so it's first.
-				createTableRowExpectation(rule2, violations[3], 0),
-				// Violation 1 is later in the same file, so it's next.
-				createTableRowExpectation(rule1, violations[0], 1),
-				// Violations 2 and 3 are in the same spot, but 3 is alphabetically higher.
-				createTableRowExpectation(rule1, violations[2], 2),
-				// Violation 2 is last.
-				createTableRowExpectation(rule2, violations[1], 3),
+				// Violation 4 has the highest severity, so it goes first.
+				createTableRowExpectation(rule2, violations[3], engine1, 0),
+				// 1, 2, and 3 are tied for severity and 1 and 2 are tied for highest file,
+				// but 2 has the earliest location, so it goes next.
+				createTableRowExpectation(rule1, violations[1], engine1, 1),
+				// Violation 1 is later in the same high-alphabetical file, so it's next.
+				createTableRowExpectation(rule1, violations[0], engine1, 2),
+				// Violation 3 is last.
+				createTableRowExpectation(rule1, violations[2], engine1, 3),
 			]
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(2);
@@ -341,19 +343,20 @@ describe('ResultsViewer implementations', () => {
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
-					columns: ['Id', 'Location', 'Name', 'Severity'],
+					columns: ['#', 'Severity', 'Rule', 'Location', 'Message'],
 					rows: expectedRows
 				})
 			}])
 		});
 
-		function createTableRowExpectation(rule: RuleDescription, violation: Violation, index: number): TableRow {
+		function createTableRowExpectation(rule: RuleDescription, violation: Violation, engine: Engine, index: number): TableRow {
 			const primaryLocation = violation.codeLocations[violation.primaryLocationIndex];
 			return {
-				id: index + 1,
+				num: index + 1,
 				location: `${primaryLocation.file}:${primaryLocation.startLine}:${primaryLocation.startColumn}`,
-				name: rule.name,
-				severity: `${rule.severityLevel} (${SeverityLevel[rule.severityLevel]})`
+				rule: `${engine.getName()}:${rule.name}`,
+				severity: `${rule.severityLevel} (${SeverityLevel[rule.severityLevel]})`,
+				message: violation.message
 			};
 		}
 	});

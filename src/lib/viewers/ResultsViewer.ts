@@ -53,41 +53,10 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 	public static readonly RESULTS_CUTOFF = 10;
 
 	protected _view(results: RunResults): void {
-		const violations = this.sortViolations(results.getViolations());
+		const violations = sortViolations(results.getViolations());
 
 		this.displayDetails(violations);
 		this.displayBreakdown(results);
-	}
-
-	private sortViolations(violations: Violation[]): Violation[] {
-		return violations.toSorted((v1, v2) => {
-			// First compare severities.
-			const v1Sev = v1.getRule().getSeverityLevel();
-			const v2Sev = v2.getRule().getSeverityLevel();
-			if (v1Sev !== v2Sev) {
-				return v1Sev - v2Sev;
-			}
-			// Next, compare file names.
-			const v1PrimaryLocation = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
-			const v2PrimaryLocation = v2.getCodeLocations()[v2.getPrimaryLocationIndex()];
-			const v1File = v1PrimaryLocation.getFile() || '';
-			const v2File = v2PrimaryLocation.getFile() || '';
-			if (v1File !== v2File) {
-				return v1File.localeCompare(v2File);
-			}
-
-			// Next, compare start lines.
-			const v1StartLine = v1PrimaryLocation.getStartLine() || 0;
-			const v2StartLine = v2PrimaryLocation.getStartLine() || 0;
-			if (v1StartLine !== v2StartLine) {
-				return v1StartLine - v2StartLine;
-			}
-
-			// Finally, compare start columns.
-			const v1StartColumn = v1PrimaryLocation.getStartColumn() || 0;
-			const v2StartColumn = v2PrimaryLocation.getStartColumn() || 0;
-			return v1StartColumn - v2StartColumn;
-		});
 	}
 
 	private displayDetails(violations: Violation[]): void {
@@ -135,70 +104,76 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 }
 
 type ResultRow = {
-	id: number;
+	num: number;
 	location: string;
-	name: string;
+	rule: string;
 	severity: string;
+	message: string;
 }
 
 const TABLE_COLUMNS: Ux.Table.Columns<ResultRow> = {
-	id: {
-		header: getMessage(BundleName.ResultsViewer, 'summary.table.id-column'),
+	num: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.num-column'),
+	},
+	severity: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.severity-column')
+	},
+	rule: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.rule-column')
 	},
 	location: {
 		header: getMessage(BundleName.ResultsViewer, 'summary.table.location-column')
 	},
-	name: {
-		header: getMessage(BundleName.ResultsViewer, 'summary.table.name-column')
-	},
-	severity: {
-		header: getMessage(BundleName.ResultsViewer, 'summary.table.severity-column')
+	message: {
+		header: getMessage(BundleName.ResultsViewer, 'summary.table.message-column')
 	}
 };
 
 export class ResultsTableViewer extends AbstractResultsViewer {
 	protected _view(results: RunResults) {
-		const resultRows: ResultRow[] = this.sortViolations(results.getViolations())
+		const resultRows: ResultRow[] = sortViolations(results.getViolations())
 			.map((v, idx) => {
 				const severity = v.getRule().getSeverityLevel();
 				const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
 				return {
-					id: idx + 1,
+					num: idx + 1,
 					location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
-					name: v.getRule().getName(),
-					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`
+					rule: `${v.getRule().getEngineName()}:${v.getRule().getName()}`,
+					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
+					message: v.getMessage()
 				}
 			});
 		this.display.displayTable(resultRows, TABLE_COLUMNS);
 	}
+}
 
-	private sortViolations(violations: Violation[]): Violation[] {
-		return violations.toSorted((v1, v2) => {
-			const loc1 = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
-			const loc2 = v2.getCodeLocations()[v2.getPrimaryLocationIndex()];
-			// Compare file names.
-			const file1 = loc1.getFile() || '';
-			const file2 = loc2.getFile() || '';
-			if (file1 !== file2) {
-				return file1.localeCompare(file2);
-			}
+function sortViolations(violations: Violation[]): Violation[] {
+	return violations.toSorted((v1, v2) => {
+		// First compare severities.
+		const v1Sev = v1.getRule().getSeverityLevel();
+		const v2Sev = v2.getRule().getSeverityLevel();
+		if (v1Sev !== v2Sev) {
+			return v1Sev - v2Sev;
+		}
+		// Next, compare file names.
+		const v1PrimaryLocation = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
+		const v2PrimaryLocation = v2.getCodeLocations()[v2.getPrimaryLocationIndex()];
+		const v1File = v1PrimaryLocation.getFile() || '';
+		const v2File = v2PrimaryLocation.getFile() || '';
+		if (v1File !== v2File) {
+			return v1File.localeCompare(v2File);
+		}
 
-			// Compare start lines.
-			const startLine1 = loc1.getStartLine() || 0;
-			const startLine2 = loc2.getStartLine() || 0;
-			if (startLine1 !== startLine2) {
-				return startLine1 - startLine2;
-			}
+		// Next, compare start lines.
+		const v1StartLine = v1PrimaryLocation.getStartLine() || 0;
+		const v2StartLine = v2PrimaryLocation.getStartLine() || 0;
+		if (v1StartLine !== v2StartLine) {
+			return v1StartLine - v2StartLine;
+		}
 
-			// Compare start columns.
-			const startColumn1 = loc1.getStartColumn() || 0;
-			const startColumn2 = loc2.getStartColumn() || 0;
-			if (startColumn1 !== startColumn2) {
-				return startColumn1 - startColumn2;
-			}
-
-			// Compare rule names.
-			return v1.getRule().getName().localeCompare(v2.getRule().getName());
-		});
-	}
+		// Next, compare start columns.
+		const v1StartColumn = v1PrimaryLocation.getStartColumn() || 0;
+		const v2StartColumn = v2PrimaryLocation.getStartColumn() || 0;
+		return v1StartColumn - v2StartColumn;
+	});
 }

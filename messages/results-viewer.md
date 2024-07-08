@@ -26,18 +26,22 @@
 
 *DRAFT*: %d %s severity
 
-# summary.table.id-column
+# summary.table.num-column
 
-Id
+ #
 
 # summary.table.location-column
 
 Location
 
-# summary.table.name-column
+# summary.table.rule-column
 
-Name
+Rule
 
 # summary.table.severity-column
 
 Severity
+
+# summary.table.message-column
+
+Message
