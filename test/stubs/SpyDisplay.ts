@@ -68,10 +68,14 @@ export class SpyDisplay implements Display {
 	/**
 	 * Track that the provided table data was displayed.
 	 */
-	public displayTable<R extends Ux.Table.Data>(data: R[], _columns: Ux.Table.Columns<R>): void {
+	public displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void {
+		const columnNames: string[] = Object.values(columns).map(column => column.header || '');
 		this.displayEvents.push({
 			type: DisplayEventType.TABLE,
-			data: JSON.stringify(data)
+			data: JSON.stringify({
+				columns: columnNames,
+				rows: data
+			})
 		});
 	}
 

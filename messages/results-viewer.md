@@ -25,3 +25,23 @@
 # summary.detail.breakdown.item
 
 *DRAFT*: %d %s severity
+
+# summary.table.num-column
+
+ #
+
+# summary.table.location-column
+
+Location
+
+# summary.table.rule-column
+
+Rule
+
+# summary.table.severity-column
+
+Severity
+
+# summary.table.message-column
+
+Message
