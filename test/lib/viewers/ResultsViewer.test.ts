@@ -194,13 +194,13 @@ describe('ResultsViewer implementations', () => {
 				type: DisplayEventType.STYLED_OBJECT,
 				data: JSON.stringify({
 					obj: {
-						engine: engine.getName(),
 						severity: formattedSeverity,
+						engine: engine.getName(),
 						message: violation.message,
 						location: primaryLocationString,
 						resources: rule.resourceUrls.join(',')
 					},
-					keys: ['engine', 'severity', 'message', 'location', 'resources']
+					keys: ['severity', 'engine', 'message', 'location', 'resources']
 				})
 			}];
 		}
