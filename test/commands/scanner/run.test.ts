@@ -523,6 +523,26 @@ describe('scanner run', function () {
 				getMessage(BundleName.CommonRun, 'internal.outfileMustBeSupportedType', [ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE]));
 		});
 	});
+
+	describe('When zero files targeted are with --target', () => {
+		it('When --target is a folder that contains zero relevant files to scan', () => {
+			const emptyFolder = fs.mkdtempSync(path.join(os.tmpdir(), 'empty-folder'));
+			const output = runCommand(`scanner run --target ${emptyFolder}`);
+			fs.rmSync(emptyFolder, {recursive: true, force: true});
+
+			assertNoError(output);
+			expect(output.shellOutput.stdout).to.contain('No rule violations found');
+		});
+
+		it('When --target is a glob that finds zero files', () => {
+			const jsOnlyFolder = path.join('test', 'code-fixtures', 'projects', 'js', 'src');
+			const globThatGivesZeroFiles = jsOnlyFolder + path.sep + '*.cls'; // There are no cls files in the js folder
+			const output = runCommand(`scanner run --target ${globThatGivesZeroFiles}`);
+			
+			assertNoError(output);
+			expect(output.shellOutput.stdout).to.contain('No rule violations found');
+		});
+	});
 });
 
 function validateXmlOutput(xml: string): void {
