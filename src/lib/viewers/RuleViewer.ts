@@ -1,6 +1,7 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {Rule, RuleType, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
+import {toStyledHeaderAndBody} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 
 export interface RuleViewer {
@@ -29,19 +30,23 @@ abstract class AbstractRuleViewer implements RuleViewer {
 
 export class RuleDetailViewer extends AbstractRuleViewer {
 	protected _view(rules: Rule[]): void {
+		const styledRules: string[] = [];
 		for (let i = 0; i < rules.length; i++) {
 			const rule = rules[i];
-			this.display.displayStyledHeader(getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]));
+			const header = getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]);
 			const severity = rule.getSeverityLevel();
-			this.display.displayStyledObject({
+			const body = {
 				engine: rule.getEngineName(),
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
 				type: RuleType[rule.getType()],
 				tags: rule.getTags().join(', '),
 				resources: rule.getResourceUrls().join(', '),
 				description: rule.getDescription()
-			}, ['engine', 'severity', 'type', 'tags', 'resources', 'description']);
+			};
+			const keys = ['engine', 'severity', 'type', 'tags', 'resources', 'description'];
+			styledRules.push(toStyledHeaderAndBody(header, body, keys));
 		}
+		this.display.displayLog(styledRules.join('\n\n'));
 	}
 }
 

@@ -12,6 +12,7 @@
 		"@salesforce/sf-plugins-core": "^5.0.4",
 		"@salesforce/ts-types": "^2.0.9",
 		"@types/node": "^17",
+		"ansis": "^3.2.0",
 		"ts-node": "^10",
 		"tslib": "^2"
 	},

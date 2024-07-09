@@ -1,4 +1,5 @@
 import {RuleDetailViewer, RuleTableViewer} from '../../../src/lib/viewers/RuleViewer';
+import {toStyledHeaderAndBody} from '../../../src/lib/utils/StylingUtil';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
 
@@ -18,7 +19,7 @@ describe('RuleViewer implementations', () => {
 			}]);
 		});
 
-		it('When given one rule, outputs correct summary and rule data', () => {
+		it('When given one rule, outputs correct summary and correctly styled rule data', () => {
 			const display = new SpyDisplay();
 			const viewer = new RuleDetailViewer(display);
 			const rule = new StubRules.StubRule1();
@@ -28,30 +29,24 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(3);
+			expect(displayEvents).toHaveLength(2);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
 				data: '*DRAFT*: Found 1 rules:'
 			}, {
-				type: DisplayEventType.STYLED_HEADER,
-				data: `*DRAFT*: 1. ${rule.getName()}`
-			}, {
-				type: DisplayEventType.STYLED_OBJECT,
-				data: JSON.stringify({
-					obj: {
-						engine: rule.getEngineName(),
-						severity: rule.getFormattedSeverity(),
-						type: rule.getFormattedType(),
-						tags: rule.getFormattedTags(),
-						resources: rule.getFormattedResourceUrls(),
-						description: rule.getDescription()
-					},
-					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
-				})
+				type: DisplayEventType.LOG,
+				data: toStyledHeaderAndBody(`*DRAFT*: 1. ${rule.getName()}`, {
+					engine: rule.getEngineName(),
+					severity: rule.getFormattedSeverity(),
+					type: rule.getFormattedType(),
+					tags: rule.getFormattedTags(),
+					resources: rule.getFormattedResourceUrls(),
+					description: rule.getDescription()
+				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
 			}]);
 		});
 
-		it('When given multiple rules, outputs correct summary and rule data', () => {
+		it('When given multiple rules, outputs correct summary and correctly styled rule data', () => {
 			const display = new SpyDisplay();
 			const viewer = new RuleDetailViewer(display);
 			const rule1 = new StubRules.StubRule1();
@@ -63,42 +58,29 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(5);
+			expect(displayEvents).toHaveLength(2);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
 				data: '*DRAFT*: Found 2 rules:'
 			}, {
-				type: DisplayEventType.STYLED_HEADER,
-				data: `*DRAFT*: 1. ${rule1.getName()}`
-			}, {
-				type: DisplayEventType.STYLED_OBJECT,
-				data: JSON.stringify({
-					obj: {
-						engine: rule1.getEngineName(),
-						severity: rule1.getFormattedSeverity(),
-						type: rule1.getFormattedType(),
-						tags: rule1.getFormattedTags(),
-						resources: rule1.getFormattedResourceUrls(),
-						description: rule1.getDescription()
-					},
-					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
-				})
-			}, {
-				type: DisplayEventType.STYLED_HEADER,
-				data: `*DRAFT*: 2. ${rule2.getName()}`
-			}, {
-				type: DisplayEventType.STYLED_OBJECT,
-				data: JSON.stringify({
-					obj: {
-						engine: rule2.getEngineName(),
-						severity: rule2.getFormattedSeverity(),
-						type: rule2.getFormattedType(),
-						tags: rule2.getFormattedTags(),
-						resources: rule2.getFormattedResourceUrls(),
-						description: rule2.getDescription()
-					},
-					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
-				})
+				type: DisplayEventType.LOG,
+				data: toStyledHeaderAndBody(`*DRAFT*: 1. ${rule1.getName()}`, {
+					engine: rule1.getEngineName(),
+					severity: rule1.getFormattedSeverity(),
+					type: rule1.getFormattedType(),
+					tags: rule1.getFormattedTags(),
+					resources: rule1.getFormattedResourceUrls(),
+					description: rule1.getDescription()
+				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
+				+ '\n\n'
+				+ toStyledHeaderAndBody(`*DRAFT*: 2. ${rule2.getName()}`, {
+					engine: rule2.getEngineName(),
+					severity: rule2.getFormattedSeverity(),
+					type: rule2.getFormattedType(),
+					tags: rule2.getFormattedTags(),
+					resources: rule2.getFormattedResourceUrls(),
+					description: rule2.getDescription()
+				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
 			}]);
 		});
 	});
