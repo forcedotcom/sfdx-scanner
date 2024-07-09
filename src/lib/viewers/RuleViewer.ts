@@ -38,9 +38,9 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
 				type: RuleType[rule.getType()],
 				tags: rule.getTags().join(', '),
-				url: rule.getResourceUrls().join(', '),
+				resources: rule.getResourceUrls().join(', '),
 				description: rule.getDescription()
-			}, ['engine', 'severity', 'type', 'tags', 'url', 'description']);
+			}, ['engine', 'severity', 'type', 'tags', 'resources', 'description']);
 		}
 	}
 }

@@ -43,10 +43,10 @@ describe('RuleViewer implementations', () => {
 						severity: rule.getFormattedSeverity(),
 						type: rule.getFormattedType(),
 						tags: rule.getFormattedTags(),
-						url: rule.getFormattedResourceUrls(),
+						resources: rule.getFormattedResourceUrls(),
 						description: rule.getDescription()
 					},
-					keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
+					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
 				})
 			}]);
 		});
@@ -78,10 +78,10 @@ describe('RuleViewer implementations', () => {
 						severity: rule1.getFormattedSeverity(),
 						type: rule1.getFormattedType(),
 						tags: rule1.getFormattedTags(),
-						url: rule1.getFormattedResourceUrls(),
+						resources: rule1.getFormattedResourceUrls(),
 						description: rule1.getDescription()
 					},
-					keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
+					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
 				})
 			}, {
 				type: DisplayEventType.STYLED_HEADER,
@@ -94,10 +94,10 @@ describe('RuleViewer implementations', () => {
 						severity: rule2.getFormattedSeverity(),
 						type: rule2.getFormattedType(),
 						tags: rule2.getFormattedTags(),
-						url: rule2.getFormattedResourceUrls(),
+						resources: rule2.getFormattedResourceUrls(),
 						description: rule2.getDescription()
 					},
-					keys: ['engine', 'severity', 'type', 'tags', 'url', 'description']
+					keys: ['engine', 'severity', 'type', 'tags', 'resources', 'description']
 				})
 			}]);
 		});

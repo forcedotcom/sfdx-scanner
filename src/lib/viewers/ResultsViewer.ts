@@ -75,12 +75,12 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 			);
 			const primaryLocation = violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
 			this.display.displayStyledObject({
-				engine: rule.getEngineName(),
 				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
+				engine: rule.getEngineName(),
 				message: violation.getMessage(),
 				location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
 				resources: violation.getResourceUrls().join(',')
-			}, ['engine', 'severity', 'message', 'location', 'resources']);
+			}, ['severity', 'engine', 'message', 'location', 'resources']);
 		}
 		if (omittedResultsCount > 0) {
 			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [omittedResultsCount]));
