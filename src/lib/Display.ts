@@ -62,7 +62,7 @@ export class UxDisplay implements Display {
 
 	public displayError(msg: string): void {
 		// Setting "exit" to false means that the error will be displayed in a non-halting fashion instead of killing
-		// aborting the transaction entirely.
+		// the transaction entirely.
 		this.displayable.error(msg, {exit: false});
 	}
 
