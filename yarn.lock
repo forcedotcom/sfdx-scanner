@@ -1504,10 +1504,10 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/code-analyzer-core@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.6.0.tgz#d2687c31373c6a0109673b866796ba065c53cfd1"
-  integrity sha512-UvCnbJYa+9pYYdnSFVaGi64I2MjF4a902xedG3wfETbxoi3qO4n4541ceZMyX17byYQE0lBBRH45W/JXkL9Hgw==
+"@salesforce/code-analyzer-core@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.8.0.tgz#f18d2cd36b402bd1ad7163dcaea20d392eb92411"
+  integrity sha512-xlAYJqOo64mRrk59Xdi5QLNXkr9jEsJ4/ACtzsBFGGGG4fRqGeyUYxY2tFTfg64NJF0eNlizeMnn0Qus6CCH4Q==
   dependencies:
     "@salesforce/code-analyzer-engine-api" "0.6.0"
     "@types/js-yaml" "^4.0.9"
