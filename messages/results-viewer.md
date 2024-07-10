@@ -10,10 +10,6 @@
 
 *DRAFT*: %d. %s
 
-# summary.detail.results-truncated
-
-*DRAFT*: Results truncated for readability. See %d additional violations in output file(s).
-
 # summary.detail.breakdown.header
 
 *DRAFT*: Summary

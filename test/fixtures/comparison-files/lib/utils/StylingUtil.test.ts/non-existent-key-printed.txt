@@ -1,0 +1,2 @@
+[34mnotARealKey[39m: 
+[34mbeep[39m:        abcde

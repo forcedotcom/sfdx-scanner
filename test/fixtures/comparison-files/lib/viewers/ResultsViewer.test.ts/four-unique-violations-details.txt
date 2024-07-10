@@ -1,0 +1,34 @@
+*DRAFT*: Found 4 violation(s) across 2 file(s):
+=== *DRAFT*: 1. stub1RuleB
+    severity:  2 (High)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_Z__:20:1
+    resources: https://example.com/stub1RuleB
+
+=== *DRAFT*: 2. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_A__:1:1
+    resources: https://example.com/stub1RuleA
+
+=== *DRAFT*: 3. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_A__:20:1
+    resources: https://example.com/stub1RuleA
+
+=== *DRAFT*: 4. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_Z__:1:1
+    resources: https://example.com/stub1RuleA
+
+
+=== *DRAFT*: Summary
+*DRAFT*: Found 4 violation(s):
+*DRAFT*: 1 High severity
+*DRAFT*: 3 Low severity

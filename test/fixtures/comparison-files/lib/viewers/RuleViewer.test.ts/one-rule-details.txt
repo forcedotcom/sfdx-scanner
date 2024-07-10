@@ -1,0 +1,8 @@
+*DRAFT*: Found 1 rules:
+=== *DRAFT*: 1. StubRule1
+    engine:      FakeEngine1
+    severity:    2 (High)
+    type:        Standard
+    tags:        Recommended, Security
+    resources:   www.google.com
+    description: This is the description for a stub rule. Blah blah blah.

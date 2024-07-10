@@ -1,0 +1,4 @@
+[2m===[22m [1mSAMPLE HEADER TEXT[22m
+    [34mboop[39m: true
+    [34mbeep[39m: abcde
+    [34ma[39m:    3
