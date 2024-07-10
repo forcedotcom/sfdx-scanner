@@ -1,6 +1,5 @@
 import {Display} from '../../src/lib/Display';
 import {Ux} from '@salesforce/sf-plugins-core';
-import {AnyJson} from "@salesforce/ts-types";
 
 /**
  * Implementation of {@link Display} that tracks every call in an array and allows assertions against them.
@@ -42,26 +41,6 @@ export class SpyDisplay implements Display {
 		this.displayEvents.push({
 			type: DisplayEventType.LOG,
 			data: message
-		});
-	}
-
-	/**
-	 * Track that the provided text was displayed as a header.
-	 */
-	public displayStyledHeader(headerText: string): void {
-		this.displayEvents.push({
-			type: DisplayEventType.STYLED_HEADER,
-			data: headerText
-		});
-	}
-
-	/**
-	 * Track that the provided object was displayed with the provided keys.
-	 */
-	public displayStyledObject(obj: AnyJson, keys?: string[]): void {
-		this.displayEvents.push({
-			type: DisplayEventType.STYLED_OBJECT,
-			data: JSON.stringify({obj, keys})
 		});
 	}
 
@@ -123,8 +102,6 @@ export enum DisplayEventType {
 	WARN,
 	INFO,
 	LOG,
-	STYLED_HEADER,
-	STYLED_OBJECT,
 	TABLE,
 	SPINNER_START,
 	SPINNER_UPDATE,

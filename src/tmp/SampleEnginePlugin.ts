@@ -121,7 +121,7 @@ export class SampleEngine1 extends EngineApi.Engine {
 				}
 				violations.push({
 					ruleName,
-					message: 'Fake Rule Fakily Violated',
+					message: 'Fake Rule\nFakily Violated',
 					codeLocations: [{
 						file: firstEligibleFile,
 						startLine: 1,

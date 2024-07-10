@@ -1,6 +1,7 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
+import {toStyledHeaderAndBody, toStyledHeader} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 
 export interface ResultsViewer {
@@ -45,50 +46,43 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 }
 
 export class ResultsDetailViewer extends AbstractResultsViewer {
-	/**
-	 * The display format consumes a lot of vertical space. As such, we're choosing to limit the total
-	 * number of violations that it will display before truncating the results and instructing the user
-	 * to consult one of the output files.
-	 */
-	public static readonly RESULTS_CUTOFF = 10;
-
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
 
 		this.displayDetails(violations);
+		this.display.displayLog('\n');
 		this.displayBreakdown(results);
 	}
 
 	private displayDetails(violations: Violation[]): void {
-		// If there are more results than the cutoff amount, we'll only show that many.
-		const printableViolationCount = Math.min(ResultsDetailViewer.RESULTS_CUTOFF, violations.length);
-		const omittedResultsCount = violations.length - printableViolationCount;
-		for (let i = 0; i < printableViolationCount; i++) {
-			const violation = violations[i];
-			const rule = violation.getRule();
-			const sev = rule.getSeverityLevel();
-			this.display.displayStyledHeader(
-				getMessage(
-					BundleName.ResultsViewer,
-					'summary.detail.violation-header',
-					[i + 1, rule.getName()])
-			);
-			const primaryLocation = violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
-			this.display.displayStyledObject({
-				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
-				engine: rule.getEngineName(),
-				message: violation.getMessage(),
-				location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
-				resources: violation.getResourceUrls().join(',')
-			}, ['severity', 'engine', 'message', 'location', 'resources']);
-		}
-		if (omittedResultsCount > 0) {
-			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.results-truncated', [omittedResultsCount]));
-		}
+		const styledViolations: string[] = violations
+			.map((violation, idx) => this.styleViolation(violation, idx));
+		this.display.displayLog(styledViolations.join('\n\n'));
+	}
+
+	private styleViolation(violation: Violation, idx: number): string {
+		const rule = violation.getRule();
+		const sev = rule.getSeverityLevel();
+		const primaryLocation = violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
+
+		const header = getMessage(
+			BundleName.ResultsViewer,
+			'summary.detail.violation-header',
+			[idx + 1, rule.getName()]
+		);
+		const body = {
+			severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
+			engine: rule.getEngineName(),
+			message: violation.getMessage(),
+			location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
+			resources: violation.getResourceUrls().join(',')
+		};
+		const keys = ['severity', 'engine', 'message', 'location', 'resources'];
+		return toStyledHeaderAndBody(header, body, keys);
 	}
 
 	private displayBreakdown(results: RunResults): void {
-		this.display.displayStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header'));
+		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header')));
 		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
 		for (const sev of Object.values(SeverityLevel)) {
 			// Some of the keys will be numbers, since the enum is numerical. Skip those.
