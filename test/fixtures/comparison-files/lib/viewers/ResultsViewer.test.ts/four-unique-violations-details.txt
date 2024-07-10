@@ -1,34 +1,34 @@
 *DRAFT*: Found 4 violation(s) across 2 file(s):
-[2m===[22m [1m*DRAFT*: 1. stub1RuleB[22m
-    [34mseverity[39m:  2 (High)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_FILE_Z__:20:1
-    [34mresources[39m: https://example.com/stub1RuleB
+=== *DRAFT*: 1. stub1RuleB
+    severity:  2 (High)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_Z__:20:1
+    resources: https://example.com/stub1RuleB
 
-[2m===[22m [1m*DRAFT*: 2. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_FILE_A__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 2. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_A__:1:1
+    resources: https://example.com/stub1RuleA
 
-[2m===[22m [1m*DRAFT*: 3. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_FILE_A__:20:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 3. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_A__:20:1
+    resources: https://example.com/stub1RuleA
 
-[2m===[22m [1m*DRAFT*: 4. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_FILE_Z__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 4. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_FILE_Z__:1:1
+    resources: https://example.com/stub1RuleA
 
 
-[2m===[22m [1m*DRAFT*: Summary[22m
+=== *DRAFT*: Summary
 *DRAFT*: Found 4 violation(s):
 *DRAFT*: 1 High severity
 *DRAFT*: 3 Low severity

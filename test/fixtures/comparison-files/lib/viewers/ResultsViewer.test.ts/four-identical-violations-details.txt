@@ -1,33 +1,33 @@
 *DRAFT*: Found 4 violation(s) across 1 file(s):
-[2m===[22m [1m*DRAFT*: 1. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_SOME_FILE__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 1. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_SOME_FILE__:1:1
+    resources: https://example.com/stub1RuleA
 
-[2m===[22m [1m*DRAFT*: 2. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_SOME_FILE__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 2. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_SOME_FILE__:1:1
+    resources: https://example.com/stub1RuleA
 
-[2m===[22m [1m*DRAFT*: 3. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_SOME_FILE__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 3. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_SOME_FILE__:1:1
+    resources: https://example.com/stub1RuleA
 
-[2m===[22m [1m*DRAFT*: 4. stub1RuleA[22m
-    [34mseverity[39m:  4 (Low)
-    [34mengine[39m:    stubEngine1
-    [34mmessage[39m:   This is a message
-    [34mlocation[39m:  __PATH_TO_SOME_FILE__:1:1
-    [34mresources[39m: https://example.com/stub1RuleA
+=== *DRAFT*: 4. stub1RuleA
+    severity:  4 (Low)
+    engine:    stubEngine1
+    message:   This is a message
+    location:  __PATH_TO_SOME_FILE__:1:1
+    resources: https://example.com/stub1RuleA
 
 
-[2m===[22m [1m*DRAFT*: Summary[22m
+=== *DRAFT*: Summary
 *DRAFT*: Found 4 violation(s):
 *DRAFT*: 4 Low severity

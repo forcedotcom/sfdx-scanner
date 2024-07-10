@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'path';
+import ansis from 'ansis';
 import {RuleDetailViewer, RuleTableViewer} from '../../../src/lib/viewers/RuleViewer';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
 
-const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
+const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test', 'fixtures', 'comparison-files', 'lib',
 	'viewers', 'RuleViewer.test.ts');
 
 describe('RuleViewer implementations', () => {
@@ -37,9 +38,10 @@ describe('RuleViewer implementations', () => {
 			for (const displayEvent of actualDisplayEvents) {
 				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
 			}
-			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
+			// Rip off all of ansis's styling, so we're just comparing plain text.
+			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 
-			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'one-rule-details.txt'), {encoding: 'utf-8'});
+			const expectedRuleDetails = readComparisonFile('one-rule-details.txt');
 			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 
@@ -59,9 +61,10 @@ describe('RuleViewer implementations', () => {
 			for (const displayEvent of actualDisplayEvents) {
 				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
 			}
-			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
+			// Rip off all of ansis's styling, so we're just comparing plain text.
+			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 
-			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'two-rules-details.txt'), {encoding: 'utf-8'});
+			const expectedRuleDetails = readComparisonFile('two-rules-details.txt');
 			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 	});
@@ -148,3 +151,7 @@ describe('RuleViewer implementations', () => {
 		});
 	});
 });
+
+function readComparisonFile(fileName: string): string {
+	return fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, fileName), {encoding: 'utf-8'});
+}

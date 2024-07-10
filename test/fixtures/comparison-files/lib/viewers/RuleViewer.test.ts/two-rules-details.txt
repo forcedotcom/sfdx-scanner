@@ -1,16 +1,16 @@
 *DRAFT*: Found 2 rules:
-[2m===[22m [1m*DRAFT*: 1. StubRule1[22m
-    [34mengine[39m:      FakeEngine1
-    [34mseverity[39m:    2 (High)
-    [34mtype[39m:        Standard
-    [34mtags[39m:        Recommended, Security
-    [34mresources[39m:   www.google.com
-    [34mdescription[39m: This is the description for a stub rule. Blah blah blah.
+=== *DRAFT*: 1. StubRule1
+    engine:      FakeEngine1
+    severity:    2 (High)
+    type:        Standard
+    tags:        Recommended, Security
+    resources:   www.google.com
+    description: This is the description for a stub rule. Blah blah blah.
 
-[2m===[22m [1m*DRAFT*: 2. StubRule2[22m
-    [34mengine[39m:      FakeEngine1
-    [34mseverity[39m:    4 (Low)
-    [34mtype[39m:        Flow
-    [34mtags[39m:        CodeStyle, Performance
-    [34mresources[39m:   www.bing.com, www.salesforce.com
-    [34mdescription[39m: This is the description for a second stub rule. Blah blah blah.
+=== *DRAFT*: 2. StubRule2
+    engine:      FakeEngine1
+    severity:    4 (Low)
+    type:        Flow
+    tags:        CodeStyle, Performance
+    resources:   www.bing.com, www.salesforce.com
+    description: This is the description for a second stub rule. Blah blah blah.

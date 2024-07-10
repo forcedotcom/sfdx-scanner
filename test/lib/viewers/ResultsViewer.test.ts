@@ -1,5 +1,6 @@
 import path from 'node:path';
 import * as fs from 'node:fs/promises';
+import ansis from 'ansis';
 import {CodeAnalyzer, CodeAnalyzerConfig, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Engine, RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
 
@@ -8,12 +9,12 @@ import {BundleName, getMessage} from '../../../src/lib/messages';
 import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import {FunctionalStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
 
-const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
+const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test', 'fixtures', 'comparison-files', 'lib',
 	'viewers', 'ResultsViewer.test.ts');
 
-const PATH_TO_SOME_FILE = path.resolve('.', 'test', 'sample-code', 'someFile.cls');
-const PATH_TO_FILE_A = path.resolve('.', 'test', 'sample-code', 'fileA.cls');
-const PATH_TO_FILE_Z = path.resolve('.', 'test', 'sample-code', 'fileZ.cls');
+const PATH_TO_SOME_FILE = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'someFile.cls');
+const PATH_TO_FILE_A = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'fileA.cls');
+const PATH_TO_FILE_Z = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'fileZ.cls');
 
 describe('ResultsViewer implementations', () => {
 
@@ -80,17 +81,13 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			// Compare the text in the events with the text in our comparison file.
-			// NOTE: If you actually look at the comparison file, it will have weird control characters in it to match
-			//       the styling applied to the output. If you need to regenerate the file, you cannot simply copy-paste,
-			//       because that removes the styling. Instead, you should use fs.writeFileSync to write directly to the
-			//       comparison file.
 			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
 			for (const event of actualDisplayEvents) {
 				expect(event.type).toEqual(DisplayEventType.LOG);
 			}
-			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
-			const expectedViolationDetails = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'four-identical-violations-details.txt'),
-				{encoding: 'utf-8'}))
+			// Rip off all of ansis's styling, so we're just comparing plain text.
+			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
+			const expectedViolationDetails = (await readComparisonFile('four-identical-violations-details.txt'))
 				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE);
 			expect(actualEventText).toEqual(expectedViolationDetails);
 		});
@@ -122,18 +119,13 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			// Compare the text in the events with the text in our comparison file.
-			// NOTE: If you actually look at the comparison file, it will have weird control characters in it to match
-			//       the styling applied to the output. If you need to regenerate the file, you cannot simply copy-paste,
-			//       because that removes the styling. Instead, you should use fs.writeFileSync to write directly to the
-			//       comparison file.
 			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
 			for (const event of actualDisplayEvents) {
 				expect(event.type).toEqual(DisplayEventType.LOG);
 			}
-			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
-			const expectedViolationDetails = (await fs.readFile(
-				path.join(PATH_TO_COMPARISON_FILES, 'four-unique-violations-details.txt'),
-				{encoding: 'utf-8'}))
+			// Rip off all of ansis's styling, so we're just comparing plain text.
+			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
+			const expectedViolationDetails = (await readComparisonFile('four-unique-violations-details.txt'))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
 			expect(actualEventText).toEqual(expectedViolationDetails);
@@ -286,4 +278,8 @@ function createViolation(ruleName: string, file: string, startLine: number, star
 
 function repeatViolation(violation: Violation, times: number): Violation[] {
 	return Array(times).fill(violation);
+}
+
+function readComparisonFile(fileName: string): Promise<string> {
+	return fs.readFile(path.join(PATH_TO_COMPARISON_FILES, fileName), {encoding: 'utf-8'});
 }
