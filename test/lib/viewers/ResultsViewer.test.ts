@@ -85,8 +85,11 @@ describe('ResultsViewer implementations', () => {
 			//       because that removes the styling. Instead, you should use fs.writeFileSync to write directly to the
 			//       comparison file.
 			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
+			for (const event of actualDisplayEvents) {
+				expect(event.type).toEqual(DisplayEventType.LOG);
+			}
 			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
-			const expectedViolationDetails = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'four-identical-violations-output.txt'),
+			const expectedViolationDetails = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'four-identical-violations-details.txt'),
 				{encoding: 'utf-8'}))
 				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE)
 				.trimEnd();
@@ -125,9 +128,12 @@ describe('ResultsViewer implementations', () => {
 			//       because that removes the styling. Instead, you should use fs.writeFileSync to write directly to the
 			//       comparison file.
 			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
+			for (const event of actualDisplayEvents) {
+				expect(event.type).toEqual(DisplayEventType.LOG);
+			}
 			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
 			const expectedViolationDetails = (await fs.readFile(
-				path.join(PATH_TO_COMPARISON_FILES, 'four-unique-violations-output.txt'),
+				path.join(PATH_TO_COMPARISON_FILES, 'four-unique-violations-details.txt'),
 				{encoding: 'utf-8'}))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z)

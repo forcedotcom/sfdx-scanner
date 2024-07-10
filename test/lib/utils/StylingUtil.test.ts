@@ -66,6 +66,21 @@ describe('StylingUtil tests', () => {
 			expect(actualOutput).toEqual(expectedOutput);
 		});
 
+		it('When a non-existent key is selected, an empty string is used instead', async () => {
+			const input = {
+				beep: 'abcde',
+				boop: 'true',
+				lorem: 'ipsum',
+				a: '3',
+				z: '7'
+			};
+			const actualOutput = toStyledPropertyList(input, ['notARealKey', 'beep']);
+
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'non-existent-key-printed.txt'), {encoding: 'utf-8'})).trimEnd();
+
+			expect(actualOutput).toEqual(expectedOutput);
+		})
+
 		it('When key selection is empty list, an empty string is returned', () => {
 			const input = {
 				beep: 'abcde',

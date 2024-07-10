@@ -1,5 +1,9 @@
 import ansis from 'ansis';
 
+/**
+ * For now, the styling methods only accept objects if all of their keys correspond to string values. This puts the
+ * burden of formatting non-string properties on the caller.
+ */
 type Styleable = null | undefined | {[key: string]: string};
 
 export function toStyledHeaderAndBody(header: string, body: Styleable, keys?: string[]): string {
@@ -26,7 +30,7 @@ export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): 
 		return `${keyPortion}${keyValueGap}${valuePortion}`;
 	}
 
-	const output = keysToPrint.map(key => styleProperty(key, body[key]));
+	const output = keysToPrint.map(key => styleProperty(key, body[key] || ''));
 	return output.join('\n');
 }
 

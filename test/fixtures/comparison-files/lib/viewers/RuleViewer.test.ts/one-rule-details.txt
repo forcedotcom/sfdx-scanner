@@ -1,0 +1,8 @@
+*DRAFT*: Found 1 rules:
+[2m===[22m [1m*DRAFT*: 1. StubRule1[22m
+    [34mengine[39m:      FakeEngine1
+    [34mseverity[39m:    2 (High)
+    [34mtype[39m:        Standard
+    [34mtags[39m:        Recommended, Security
+    [34mresources[39m:   www.google.com
+    [34mdescription[39m: This is the description for a stub rule. Blah blah blah.

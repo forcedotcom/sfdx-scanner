@@ -1,7 +1,11 @@
+import fs from 'node:fs';
+import path from 'path';
 import {RuleDetailViewer, RuleTableViewer} from '../../../src/lib/viewers/RuleViewer';
-import {toStyledHeaderAndBody} from '../../../src/lib/utils/StylingUtil';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
+
+const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
+	'viewers', 'RuleViewer.test.ts');
 
 describe('RuleViewer implementations', () => {
 	describe('RuleDetailViewer', () => {
@@ -28,22 +32,15 @@ describe('RuleViewer implementations', () => {
 				rule
 			]);
 
-			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 1 rules:'
-			}, {
-				type: DisplayEventType.LOG,
-				data: toStyledHeaderAndBody(`*DRAFT*: 1. ${rule.getName()}`, {
-					engine: rule.getEngineName(),
-					severity: rule.getFormattedSeverity(),
-					type: rule.getFormattedType(),
-					tags: rule.getFormattedTags(),
-					resources: rule.getFormattedResourceUrls(),
-					description: rule.getDescription()
-				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
-			}]);
+			const actualDisplayEvents = display.getDisplayEvents();
+			expect(actualDisplayEvents).toHaveLength(2);
+			for (const displayEvent of actualDisplayEvents) {
+				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
+			}
+			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
+
+			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'one-rule-details.txt'), {encoding: 'utf-8'}).trimEnd();
+			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 
 		it('When given multiple rules, outputs correct summary and correctly styled rule data', () => {
@@ -57,31 +54,15 @@ describe('RuleViewer implementations', () => {
 				rule2
 			]);
 
-			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 2 rules:'
-			}, {
-				type: DisplayEventType.LOG,
-				data: toStyledHeaderAndBody(`*DRAFT*: 1. ${rule1.getName()}`, {
-					engine: rule1.getEngineName(),
-					severity: rule1.getFormattedSeverity(),
-					type: rule1.getFormattedType(),
-					tags: rule1.getFormattedTags(),
-					resources: rule1.getFormattedResourceUrls(),
-					description: rule1.getDescription()
-				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
-				+ '\n\n'
-				+ toStyledHeaderAndBody(`*DRAFT*: 2. ${rule2.getName()}`, {
-					engine: rule2.getEngineName(),
-					severity: rule2.getFormattedSeverity(),
-					type: rule2.getFormattedType(),
-					tags: rule2.getFormattedTags(),
-					resources: rule2.getFormattedResourceUrls(),
-					description: rule2.getDescription()
-				}, ['engine', 'severity', 'type', 'tags', 'resources', 'description'])
-			}]);
+			const actualDisplayEvents = display.getDisplayEvents();
+			expect(actualDisplayEvents).toHaveLength(2);
+			for (const displayEvent of actualDisplayEvents) {
+				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
+			}
+			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
+
+			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'two-rules-details.txt'), {encoding: 'utf-8'}).trimEnd();
+			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 	});
 
