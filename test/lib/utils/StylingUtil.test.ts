@@ -18,7 +18,7 @@ describe('StylingUtil tests', () => {
 
 			const actualOutput = toStyledHeaderAndBody(header, body, ['boop', 'beep', 'a']);
 
-			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-header-and-body.txt'), {encoding: 'utf-8'})).trimEnd();
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-header-and-body.txt'), {encoding: 'utf-8'}));
 
 			expect(actualOutput).toEqual(expectedOutput);
 		});
@@ -30,7 +30,7 @@ describe('StylingUtil tests', () => {
 			const styledHeader = toStyledHeader(input);
 
 			const expectedHeader = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-header.txt'), {encoding: 'utf-8'}))
-				.trimEnd();
+				;
 
 			expect(styledHeader).toEqual(expectedHeader);
 		});
@@ -46,7 +46,7 @@ describe('StylingUtil tests', () => {
 			};
 			const actualOutput = toStyledPropertyList(input);
 
-			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'all-keys-printed.txt'), {encoding: 'utf-8'})).trimEnd();
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'all-keys-printed.txt'), {encoding: 'utf-8'}));
 
 			expect(actualOutput).toEqual(expectedOutput);
 		});
@@ -61,7 +61,7 @@ describe('StylingUtil tests', () => {
 			};
 			const actualOutput = toStyledPropertyList(input, ['boop', 'a', 'beep']);
 
-			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'subset-of-keys-printed.txt'), {encoding: 'utf-8'})).trimEnd();
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'subset-of-keys-printed.txt'), {encoding: 'utf-8'}));
 
 			expect(actualOutput).toEqual(expectedOutput);
 		});
@@ -76,7 +76,7 @@ describe('StylingUtil tests', () => {
 			};
 			const actualOutput = toStyledPropertyList(input, ['notARealKey', 'beep']);
 
-			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'non-existent-key-printed.txt'), {encoding: 'utf-8'})).trimEnd();
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'non-existent-key-printed.txt'), {encoding: 'utf-8'}));
 
 			expect(actualOutput).toEqual(expectedOutput);
 		})

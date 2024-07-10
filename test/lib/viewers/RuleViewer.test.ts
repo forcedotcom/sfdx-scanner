@@ -39,7 +39,7 @@ describe('RuleViewer implementations', () => {
 			}
 			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
 
-			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'one-rule-details.txt'), {encoding: 'utf-8'}).trimEnd();
+			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'one-rule-details.txt'), {encoding: 'utf-8'});
 			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 
@@ -61,7 +61,7 @@ describe('RuleViewer implementations', () => {
 			}
 			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
 
-			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'two-rules-details.txt'), {encoding: 'utf-8'}).trimEnd();
+			const expectedRuleDetails = fs.readFileSync(path.join(PATH_TO_COMPARISON_FILES, 'two-rules-details.txt'), {encoding: 'utf-8'});
 			expect(actualEventText).toEqual(expectedRuleDetails);
 		});
 	});

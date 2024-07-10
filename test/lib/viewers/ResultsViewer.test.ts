@@ -91,8 +91,7 @@ describe('ResultsViewer implementations', () => {
 			const actualEventText = actualDisplayEvents.map(e => e.data).join('\n');
 			const expectedViolationDetails = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'four-identical-violations-details.txt'),
 				{encoding: 'utf-8'}))
-				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE)
-				.trimEnd();
+				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE);
 			expect(actualEventText).toEqual(expectedViolationDetails);
 		});
 
@@ -136,8 +135,7 @@ describe('ResultsViewer implementations', () => {
 				path.join(PATH_TO_COMPARISON_FILES, 'four-unique-violations-details.txt'),
 				{encoding: 'utf-8'}))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
-				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z)
-				.trimEnd();
+				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
 			expect(actualEventText).toEqual(expectedViolationDetails);
 		});
 	});
