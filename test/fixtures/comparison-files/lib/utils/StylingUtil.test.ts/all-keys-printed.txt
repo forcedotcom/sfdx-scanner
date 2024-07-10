@@ -1,0 +1,4 @@
+[34mbeep[39m: abcde
+[34mboop[39m: true
+[34ma[39m:    3
+[34mz[39m:    7
