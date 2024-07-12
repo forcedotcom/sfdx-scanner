@@ -112,7 +112,7 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 			this.startSpinning(getMessage(BundleName.ProgressEventListener, 'selection-spinner.action'));
 		}
 
-		this.completionPercent = e.percentComplete;
+		this.completionPercent = Math.floor(e.percentComplete);
 		this.updateSpinner();
 		// Since the events this spinner listens to have one aggregated completion percentage, we can (and should) stop
 		// listening as soon as we get the 100% event, instead of waiting for the `stopListening()` method.
