@@ -1,5 +1,5 @@
 import {EnginePlugin} from '@salesforce/code-analyzer-engine-api';
-import {SampleEnginePlugin} from '../../tmp/SampleEnginePlugin';
+import * as RetireJSEngine from '@salesforce/code-analyzer-retirejs-engine';
 
 export interface EnginePluginsFactory {
 	create(): EnginePlugin[];
@@ -8,7 +8,7 @@ export interface EnginePluginsFactory {
 export class EnginePluginsFactoryImpl implements EnginePluginsFactory {
 	public create(): EnginePlugin[] {
 		return [
-			new SampleEnginePlugin()
+			RetireJSEngine.createEnginePlugin()
 		];
 	}
 }
