@@ -15,6 +15,8 @@ describe('RulesAction tests', () => {
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
+			logEventListeners: [],
+			progressListeners: [],
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -42,6 +44,8 @@ describe('RulesAction tests', () => {
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
+			logEventListeners: [],
+			progressListeners: [],
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -64,6 +68,8 @@ describe('RulesAction tests', () => {
 			configFactory: new StubDefaultConfigFactory(),
 			// The engine we're using here will synthesize one rule per target.
 			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withTargetDependentStubEngine(),
+			logEventListeners: [],
+			progressListeners: [],
 			viewer
 		};
 		const targetedFilesAndFolders = ['package.json', 'src', 'README.md'];
@@ -95,6 +101,8 @@ describe('RulesAction tests', () => {
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withNoPlugins(),
+			logEventListeners: [],
+			progressListeners: [],
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);
@@ -113,6 +121,8 @@ describe('RulesAction tests', () => {
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
 			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withThrowingStubPlugin(),
+			logEventListeners: [],
+			progressListeners: [],
 			viewer
 		};
 		const action = RulesAction.createAction(dependencies);

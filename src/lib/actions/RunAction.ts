@@ -14,14 +14,14 @@ import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
-import {EngineProgressListener} from '../listeners/EngineProgressListener';
+import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
-	progressListeners: EngineProgressListener[];
+	progressListeners: ProgressEventListener[];
 	writer: ResultsWriter;
 	viewer: ResultsViewer;
 }
@@ -60,14 +60,14 @@ export class RunAction {
 		await Promise.all(addEnginePromises);
 		const workspace: Workspace = await core.createWorkspace(input.workspace);
 
+		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
+		// that's when progress events can start being emitted.
+		this.dependencies.progressListeners.forEach(listener => listener.listen(core));
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {
 			workspace,
 			pathStartPoints: input['path-start']
 		};
-		// EngineProgressListeners should start listening right before we call Core's `.run()` method, since that's when
-		// progress events can start being emitted.
-		this.dependencies.progressListeners.forEach(listener => listener.listen(core, ruleSelection));
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
 		// or file handlers that must be gracefully ended.

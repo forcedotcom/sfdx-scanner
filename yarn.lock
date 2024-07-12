@@ -1504,22 +1504,22 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/code-analyzer-core@^0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.8.0.tgz#f18d2cd36b402bd1ad7163dcaea20d392eb92411"
-  integrity sha512-xlAYJqOo64mRrk59Xdi5QLNXkr9jEsJ4/ACtzsBFGGGG4fRqGeyUYxY2tFTfg64NJF0eNlizeMnn0Qus6CCH4Q==
+"@salesforce/code-analyzer-core@^0.9.0":
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.9.0.tgz#271bedc7c4d533829a3ee986108e39b8eefb4064"
+  integrity sha512-t88GYiMeVivChJsZUxO3DknhgQxWnUSkF+fBwh4Ynk9R5ZPAbdonP/1sKN5FzLoelfObJTlVIqZITdM9u7LKnQ==
   dependencies:
-    "@salesforce/code-analyzer-engine-api" "0.6.0"
+    "@salesforce/code-analyzer-engine-api" "0.7.0"
     "@types/js-yaml" "^4.0.9"
     "@types/node" "^20.0.0"
     csv-stringify "^6.5.0"
     js-yaml "^4.1.0"
     xmlbuilder "^15.1.1"
 
-"@salesforce/code-analyzer-engine-api@0.6.0", "@salesforce/code-analyzer-engine-api@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-engine-api/-/code-analyzer-engine-api-0.6.0.tgz#a2ceb138ff4b07d2ff816acdb5c19d2c1f7aba7f"
-  integrity sha512-lzmvuSOSWQRpvNssR55OG6heAboR6YfqmS91uDn2egeHz++utpHA1BSz0PItNv1a2n3/CdWywIBtjv67MxqVmw==
+"@salesforce/code-analyzer-engine-api@0.7.0", "@salesforce/code-analyzer-engine-api@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-engine-api/-/code-analyzer-engine-api-0.7.0.tgz#9490596eb49af5bd10a67cfd3eb6e026f302162a"
+  integrity sha512-1lobFXDTeHlF6yPr20c2Q7c7MPBgCb+r0LYkNTESTaxq/rwuUftuJ4RDiKsnEmSiPk9OrxsWqvFUAIzLp3jTjA==
   dependencies:
     "@types/node" "^20.0.0"
 

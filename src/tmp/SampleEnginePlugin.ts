@@ -43,8 +43,31 @@ export class SampleEngine1 extends EngineApi.Engine {
 		return 'SampleEngine1';
 	}
 
-	describeRules(): Promise<EngineApi.RuleDescription[]> {
-		return Promise.resolve([
+	async describeRules(): Promise<EngineApi.RuleDescription[]> {
+		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
+			type: EngineApi.EventType.DescribeRulesProgressEvent,
+			percentComplete: 10
+		});
+		await new Promise(res => setTimeout(res, 750));
+
+		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
+			type: EngineApi.EventType.DescribeRulesProgressEvent,
+			percentComplete: 50
+		});
+		await new Promise(res => setTimeout(res, 750));
+
+		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
+			type: EngineApi.EventType.DescribeRulesProgressEvent,
+			percentComplete: 73
+		});
+		await new Promise(res => setTimeout(res, 750));
+
+		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
+			type: EngineApi.EventType.DescribeRulesProgressEvent,
+			percentComplete: 99
+		});
+		await new Promise(res => setTimeout(res, 750));
+		return [
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
@@ -85,29 +108,29 @@ export class SampleEngine1 extends EngineApi.Engine {
 				description: "Some description for stub1RuleE",
 				resourceUrls: ["https://example.com/stub1RuleE", "https://example.com/stub1RuleE_2"]
 			}
-		]);
+		];
 	}
 
 	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
-		await new Promise(res => setTimeout(res, 250));
+		await new Promise(res => setTimeout(res, 450));
 		this.runRulesCallHistory.push({ruleNames, runOptions});
-		this.emitEvent<EngineApi.ProgressEvent>({
-			type: EngineApi.EventType.ProgressEvent,
+		this.emitEvent<EngineApi.RunRulesProgressEvent>({
+			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 0
 		});
-		await new Promise(res => setTimeout(res, 250));
+		await new Promise(res => setTimeout(res, 450));
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscFineMessageFromStubEngine1",
 			logLevel: EngineApi.LogLevel.Fine
 		});
-		this.emitEvent<EngineApi.ProgressEvent>({
-			type: EngineApi.EventType.ProgressEvent,
+		this.emitEvent<EngineApi.RunRulesProgressEvent>({
+			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 50
 		});
 		await new Promise(res => setTimeout(res, 250));
-		this.emitEvent<EngineApi.ProgressEvent>({
-			type: EngineApi.EventType.ProgressEvent,
+		this.emitEvent<EngineApi.RunRulesProgressEvent>({
+			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 100
 		});
 		await new Promise(res => setTimeout(res, 250));
@@ -153,8 +176,13 @@ export class SampleEngine2 extends EngineApi.Engine {
 		return "SampleEngine2";
 	}
 
-	describeRules(): Promise<EngineApi.RuleDescription[]> {
-		return Promise.resolve([
+	async describeRules(): Promise<EngineApi.RuleDescription[]> {
+		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
+			type: EngineApi.EventType.DescribeRulesProgressEvent,
+			percentComplete: 20
+		});
+		await new Promise(res => setTimeout(res, 500));
+		return [
 			{
 				name: "stub2RuleA",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
@@ -179,19 +207,19 @@ export class SampleEngine2 extends EngineApi.Engine {
 				description: "Some description for stub2RuleC",
 				resourceUrls: [] // Purposely putting in nothing here
 			}
-		]);
+		];
 	}
 
 	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		this.runRulesCallHistory.push({ruleNames, runOptions});
-		await new Promise(res => setTimeout(res, 1250));
+		await new Promise(res => setTimeout(res, 550));
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscInfoMessageFromStubEngine2",
 			logLevel: EngineApi.LogLevel.Info
 		});
-		this.emitEvent<EngineApi.ProgressEvent>({
-			type: EngineApi.EventType.ProgressEvent,
+		this.emitEvent<EngineApi.RunRulesProgressEvent>({
+			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 5
 		});
 		this.emitEvent<EngineApi.LogEvent>({
@@ -200,8 +228,8 @@ export class SampleEngine2 extends EngineApi.Engine {
 			logLevel: EngineApi.LogLevel.Warn
 		});
 		await new Promise(res => setTimeout(res, 550));
-		this.emitEvent<EngineApi.ProgressEvent>({
-			type: EngineApi.EventType.ProgressEvent,
+		this.emitEvent<EngineApi.RunRulesProgressEvent>({
+			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 63
 		});
 
