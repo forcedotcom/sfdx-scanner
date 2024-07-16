@@ -24,6 +24,7 @@ export enum BundleName {
 	PmdEngine = "PmdEngine",
 	PmdLanguageManager = "PmdLanguageManager",
 	Remove = "remove",
+	RetireJsEngine = 'RetireJsEngine',
 	Run = "run-pathless",
 	RunDfa = "run-dfa",
 	RunOutputProcessor = "RunOutputProcessor",

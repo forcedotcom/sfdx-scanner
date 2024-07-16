@@ -11,6 +11,7 @@ import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
 import {CUSTOM_CONFIG} from '../../Constants';
+import {BundleName, getMessage} from '../../MessageCatalog';
 import * as fs from "node:fs";
 
 // Note that we don't want to call npx retire from this file since we don't want to accidentally have npx pick up
@@ -513,18 +514,34 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			storeEntries: true
 		});
 
-		// Not sure why, but this method demands an argument that doesn't seem to be used anywhere. Passing in null.
-		const entries = await zip.entries(null);
+		let entries: {[p: string]: StreamZip.ZipEntry};
+		try {
+			// Not sure why, but this method demands an argument that doesn't seem to be used anywhere. Passing in null.
+			entries = await zip.entries(null);
+		} catch (e) {
+			const reason = e instanceof Error ? e.message : e as string;
+			throw new Error(getMessage(BundleName.RetireJsEngine, 'error.couldNotGetZipEntries', [zipSrc, reason]));
+		}
 		// Iterate over every entry in the ZIP.
 		for (const {name, isDirectory} of Object.values(entries)) {
 			// Skip directories and non-text files.
-			if (isDirectory || this.srh.identifyBufferType(await zip.entryData(name)) !== StaticResourceType.TEXT) {
+			if (isDirectory) {
+				continue;
+			}
+			let buffer: Buffer;
+			try {
+				buffer = await zip.entryData(name);
+			} catch (e) {
+				const reason = e instanceof Error ? e.message : e as string;
+				throw new Error(getMessage(BundleName.RetireJsEngine, 'error.couldNotReadEntryData', [name, zipSrc, reason]));
+			}
+			if (this.srh.identifyBufferType(buffer) !== StaticResourceType.TEXT) {
 				continue;
 			}
 
 			// Each zipped text file needs to be mapped to an alias corresponding to its location within the ZIP.
 			// That way, each violation can be tied to an individual file within the ZIP instead of the ZIP as a whole.
-			const originalPath =`${zipSrc}:${name}`;
+			const originalPath = `${zipSrc}:${name}`;
 
 			// We derive the alias path using the path to the ZIP's alias folder, and any pathing information within the
 			// file itself. If there's no corresponding directory yet, we need to create it.
@@ -537,7 +554,12 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			// Combine the two to get our full alias path.
 			const aliasPath = path.join(aliasDir, aliasFile);
 			this.originalFilesByAlias.set(aliasPath, originalPath);
-			await zip.extract(name, aliasPath);
+			try {
+				await zip.extract(name, aliasPath);
+			} catch (e) {
+				const reason = e instanceof e ? e.message : e as string;
+				throw new Error(getMessage(BundleName.RetireJsEngine, 'error.couldNotExtractZip', [zipSrc, reason]));
+			}
 		}
 		return await zip.close();
 	}

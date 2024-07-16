@@ -226,6 +226,26 @@ describe('RetireJsEngine', () => {
 						expect(actualDupedFiles.has(fullPath)).to.equal(true, `Zip contents ${fullPath} should be aliased`);
 					}
 				}
+			});
+
+			it('Unparseable ZIP causes clear error', async () => {
+				// Create a target that simulates a glob matching a ZIP we know won't parse.
+				const invalidTarget : RuleTarget = {
+					target: path.join('test', 'code-fixtures', 'invalid-zips', 'ZipInInvalidFormat.zip'),
+					targetType: TargetType.GLOB,
+					paths: [path.join('test', 'code-fixtures', 'invalid-zips', 'ZipInInvalidFormat.zip')]
+				};
+
+				let errorThrown: boolean = false;
+				let errorMessage: string;
+				try {
+					await (testEngine as any).createTmpDirWithDuplicatedTargets([invalidTarget]);
+				} catch (e) {
+					errorThrown = true;
+					errorMessage = e.message;
+				}
+				expect(errorThrown).to.equal(true);
+				expect(errorMessage).to.contain('Failed to get entries from ZIP');
 
 			});
 
