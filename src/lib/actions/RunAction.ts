@@ -51,8 +51,7 @@ export class RunAction {
 		// events they listen for basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
 		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const enginePluginModules = config.getCustomEnginePluginModules()
-			.map(pluginModule => require.resolve(pluginModule, {paths: [process.cwd()]})); // TODO: Remove this line as soon as it is moved to the core module.
+		const enginePluginModules = config.getCustomEnginePluginModules();
 		const addEnginePromises: Promise<void>[] = [
 			...enginePlugins.map(enginePlugin => core.addEnginePlugin(enginePlugin)),
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))

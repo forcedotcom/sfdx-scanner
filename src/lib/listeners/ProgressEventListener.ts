@@ -165,11 +165,12 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 			return;
 		}
 
+		// Update the progress map at the start so that the updated information is used in the next status.
+		this.progressMap.set(e.engineName, e.percentComplete);
+
 		if (!this.isSpinning()) {
 			this.startSpinning(getMessage(BundleName.ProgressEventListener, 'execution-spinner.action'));
 		}
-
-		this.progressMap.set(e.engineName, e.percentComplete);
 		this.updateSpinner();
 	}
 
