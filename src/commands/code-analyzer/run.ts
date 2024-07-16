@@ -8,7 +8,7 @@ import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
-import {SpinnerProgressListener} from '../../lib/listeners/EngineProgressListener';
+import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class RunCommand extends SfCommand<void> implements Displayable {
@@ -96,7 +96,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
-			progressListeners: [new SpinnerProgressListener(uxDisplay)],
+			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
 			viewer: view === View.TABLE
 				? new ResultsTableViewer(uxDisplay)
 				: new ResultsDetailViewer(uxDisplay)

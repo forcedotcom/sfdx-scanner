@@ -15,6 +15,7 @@
 		"@typescript-eslint/no-unused-vars": ["error", {"argsIgnorePattern": "^_"}]
 	},
 	"plugins": [
-		"@typescript-eslint"
+		"@typescript-eslint",
+		"sf-plugin"
 	]
 }

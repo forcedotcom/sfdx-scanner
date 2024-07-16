@@ -6,6 +6,8 @@ import {RuleDetailViewer, RuleTableViewer} from '../../lib/viewers/RuleViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
+import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
+import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 
 export default class RulesCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -55,6 +57,8 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
+			logEventListeners: [new LogEventDisplayer(uxDisplay)],
+			progressListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
 			viewer: view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
 		};
 	}

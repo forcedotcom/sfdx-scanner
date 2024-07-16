@@ -14,14 +14,14 @@ import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
-import {EngineProgressListener} from '../listeners/EngineProgressListener';
+import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {BundleName, getMessage} from '../messages';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
-	progressListeners: EngineProgressListener[];
+	progressListeners: ProgressEventListener[];
 	writer: ResultsWriter;
 	viewer: ResultsViewer;
 }
@@ -51,8 +51,7 @@ export class RunAction {
 		// events they listen for basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
 		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const enginePluginModules = config.getCustomEnginePluginModules()
-			.map(pluginModule => require.resolve(pluginModule, {paths: [process.cwd()]})); // TODO: Remove this line as soon as it is moved to the core module.
+		const enginePluginModules = config.getCustomEnginePluginModules();
 		const addEnginePromises: Promise<void>[] = [
 			...enginePlugins.map(enginePlugin => core.addEnginePlugin(enginePlugin)),
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
@@ -60,14 +59,14 @@ export class RunAction {
 		await Promise.all(addEnginePromises);
 		const workspace: Workspace = await core.createWorkspace(input.workspace);
 
+		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
+		// that's when progress events can start being emitted.
+		this.dependencies.progressListeners.forEach(listener => listener.listen(core));
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {
 			workspace,
 			pathStartPoints: input['path-start']
 		};
-		// EngineProgressListeners should start listening right before we call Core's `.run()` method, since that's when
-		// progress events can start being emitted.
-		this.dependencies.progressListeners.forEach(listener => listener.listen(core, ruleSelection));
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
 		// or file handlers that must be gracefully ended.
