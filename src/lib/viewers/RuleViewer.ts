@@ -43,7 +43,7 @@ export class RuleDetailViewer extends AbstractRuleViewer {
 				resources: rule.getResourceUrls().join(', '),
 				description: rule.getDescription()
 			};
-			const keys = ['engine', 'severity', 'type', 'tags', 'resources', 'description'];
+			const keys = ['severity', 'engine', 'type', 'tags', 'resources', 'description'];
 			styledRules.push(toStyledHeaderAndBody(header, body, keys));
 		}
 		this.display.displayLog(styledRules.join('\n\n'));
