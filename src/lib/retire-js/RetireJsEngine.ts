@@ -557,7 +557,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			try {
 				await zip.extract(name, aliasPath);
 			} catch (e) {
-				const reason = e instanceof e ? e.message : e as string;
+				const reason = e instanceof Error ? e.message : e as string;
 				throw new Error(getMessage(BundleName.RetireJsEngine, 'error.couldNotExtractZip', [zipSrc, reason]));
 			}
 		}
