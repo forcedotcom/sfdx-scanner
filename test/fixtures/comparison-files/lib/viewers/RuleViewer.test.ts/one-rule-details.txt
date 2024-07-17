@@ -1,7 +1,7 @@
 *DRAFT*: Found 1 rules:
 === *DRAFT*: 1. StubRule1
-    engine:      FakeEngine1
     severity:    2 (High)
+    engine:      FakeEngine1
     type:        Standard
     tags:        Recommended, Security
     resources:   www.google.com

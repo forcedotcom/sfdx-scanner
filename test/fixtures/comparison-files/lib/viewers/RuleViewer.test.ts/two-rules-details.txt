@@ -1,15 +1,15 @@
 *DRAFT*: Found 2 rules:
 === *DRAFT*: 1. StubRule1
-    engine:      FakeEngine1
     severity:    2 (High)
+    engine:      FakeEngine1
     type:        Standard
     tags:        Recommended, Security
     resources:   www.google.com
     description: This is the description for a stub rule. Blah blah blah.
 
 === *DRAFT*: 2. StubRule2
-    engine:      FakeEngine1
     severity:    4 (Low)
+    engine:      FakeEngine1
     type:        Flow
     tags:        CodeStyle, Performance
     resources:   www.bing.com, www.salesforce.com
