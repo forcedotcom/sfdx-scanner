@@ -231,9 +231,9 @@ describe('RetireJsEngine', () => {
 			it('Unparseable ZIP causes clear error', async () => {
 				// Create a target that simulates a glob matching a ZIP we know won't parse.
 				const invalidTarget : RuleTarget = {
-					target: path.join('test', 'code-fixtures', 'invalid-zips', 'ZipInInvalidFormat.zip'),
+					target: path.join('test', 'test-zips', 'invalid-zips', 'ZipInInvalidFormat.zip'),
 					targetType: TargetType.GLOB,
-					paths: [path.join('test', 'code-fixtures', 'invalid-zips', 'ZipInInvalidFormat.zip')]
+					paths: [path.join('test', 'test-zips', 'invalid-zips', 'ZipInInvalidFormat.zip')]
 				};
 
 				let errorThrown: boolean = false;
