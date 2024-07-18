@@ -22,6 +22,10 @@ class MessageCatalog {
 		return this.getBundle(bundle).getMessage(messageKey, tokens);
 	}
 
+	public getMessages(bundle: BundleName, messageKey: string, tokens?: Tokens): string[] {
+		return this.getBundle(bundle).getMessages(messageKey, tokens);
+	}
+
 	private getBundle(bundle: BundleName): Messages<string> {
 		if (!this.bundleMap.has(bundle)) {
 			this.bundleMap.set(bundle, Messages.loadMessages('@salesforce/plugin-code-analyzer', bundle.toString()));
@@ -36,4 +40,9 @@ let INSTANCE: MessageCatalog;
 export function getMessage(bundle: BundleName, messageKey: string, tokens?: Tokens): string {
 	INSTANCE = INSTANCE || new MessageCatalog();
 	return INSTANCE.getMessage(bundle, messageKey, tokens);
+}
+
+export function getMessages(bundle: BundleName, messageKey: string, tokens?: Tokens): string[] {
+	INSTANCE = INSTANCE || new MessageCatalog();
+	return INSTANCE.getMessages(bundle, messageKey, tokens);
 }

@@ -20,7 +20,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 0 rules.'
+				data: 'Found 0 rules.'
 			}]);
 		});
 
@@ -80,7 +80,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 0 rules.'
+				data: 'Found 0 rules.'
 			}]);
 		});
 
@@ -97,7 +97,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(2);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 1 rules:'
+				data: 'Found 1 rule(s):'
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
@@ -128,7 +128,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(2);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: '*DRAFT*: Found 2 rules:'
+				data: 'Found 2 rule(s):'
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({

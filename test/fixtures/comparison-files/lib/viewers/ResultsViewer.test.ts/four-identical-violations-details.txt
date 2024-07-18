@@ -1,26 +1,26 @@
-*DRAFT*: Found 4 violation(s) across 1 file(s):
-=== *DRAFT*: 1. stub1RuleA
+Found 4 violation(s) across 1 file(s):
+=== 1. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
     location:  __PATH_TO_SOME_FILE__:1:1
     resources: https://example.com/stub1RuleA
 
-=== *DRAFT*: 2. stub1RuleA
+=== 2. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
     location:  __PATH_TO_SOME_FILE__:1:1
     resources: https://example.com/stub1RuleA
 
-=== *DRAFT*: 3. stub1RuleA
+=== 3. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
     location:  __PATH_TO_SOME_FILE__:1:1
     resources: https://example.com/stub1RuleA
 
-=== *DRAFT*: 4. stub1RuleA
+=== 4. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
@@ -28,6 +28,6 @@
     resources: https://example.com/stub1RuleA
 
 
-=== *DRAFT*: Summary
-*DRAFT*: Found 4 violation(s):
-*DRAFT*: 4 Low severity
+=== Summary
+Found 4 violation(s):
+4 Low severity
