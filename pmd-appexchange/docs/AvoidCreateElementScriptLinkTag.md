@@ -10,7 +10,9 @@ AvoidCreateElementScriptLinkTag[](#avoidcreateelementscriptlinktag)
 
 **Description:**
 
-   Detects dynamic creation of script or link tags
+Detects dynamic creation of script or link tags
+Note: This rule identifies the `<script>` block where `createElement` is detected; but can only show the line number where the `<script>` tag begins and not the line number for `createElement`.
+That means if there are multiple `createElement` calls with `script` as input, you'll see multiple issues reported with the line number of the `<script>` tag. This is a known issue; developers are expected to go through the `<script>` block to identify the use of `createElement`
 
 **Example(s):**
 
