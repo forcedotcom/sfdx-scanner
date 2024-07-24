@@ -559,7 +559,7 @@ export class CustomPmdEngine extends AbstractPmdEngine {
 }
 
 export class AppExchangePmdEngine extends AbstractPmdEngine {
-	private static readonly SUPPORTED_LANGUAGES = ['apex', 'html', 'javascript', 'sfmetadata', 'visualforce', 'xml'];
+	private static readonly SUPPORTED_LANGUAGES = ['apex', 'aurahtml', 'html', 'javascript', 'sfmetadata', 'visualforce', 'xml'];
 	private static ENGINE_ENUM = ENGINE.PMD_APPEXCHANGE;
 	public static ENGINE_NAME = AppExchangePmdEngine.ENGINE_ENUM.valueOf();
 	private catalogWrapper: PmdCatalogWrapper;

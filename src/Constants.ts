@@ -2,7 +2,7 @@ import os = require('os');
 import path = require('path');
 
 export const PMD7_VERSION = '7.2.0';
-export const PMD_APPEXCHANGE_RULES_VERSION = '0.13';
+export const PMD_APPEXCHANGE_RULES_VERSION = '0.14';
 export const SFGE_VERSION = '1.0.1-pilot';
 export const DEFAULT_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
 export const CATALOG_FILE = 'Catalog.json';
