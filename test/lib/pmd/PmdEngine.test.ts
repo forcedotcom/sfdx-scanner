@@ -37,7 +37,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 	afterEach(() => {
 		Sinon.restore();
 	});
-	describe('processStdOut()', () => {
+	describe('processOutput()', () => {
 		it('Nodes that do not represent violations are filtered out of results', async () => {
 			// This file contains a `file`-type node and a mix of other node types that are direct children of the `pmd`
 			// node. The file nodes and the error nodes representing parser errors should be converted to violations.
@@ -47,7 +47,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const xml: string = await fileHandler.readFile(xmlPath);
 			expect(xml).to.not.be.null;
 
-			const results = (testPmdEngine as any).processStdOut(xml);
+			const results = (testPmdEngine as any).processOutput(xml);
 			expect(results).to.be.length(3, 'Should be three result entries');
 			expect(results[0].violations).to.be.length(13, 'Unexpected violation count in 1st entry');
 			expect(results[1].violations).to.be.length(1, 'Unexpected violation count in 2nd entry');
@@ -94,7 +94,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const xml: string = await fileHandler.readFile(xmlPath);
 			expect(xml).to.not.be.null;
 
-			await (testPmdEngine as any).processStdOut(xml);
+			await (testPmdEngine as any).processOutput(xml);
 			Sinon.assert.callCount(uxSpy, 3);
 			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, expectedConfigError);
 			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, expectedError);
@@ -193,19 +193,19 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 
 	describe('processStdout unusual cases', () => {
 		it('Empty stdout', async () => {
-			const results = await (testPmdEngine as any).processStdOut('');
+			const results = await (testPmdEngine as any).processOutput('');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
 		});
 
 		it('Missing closing tag', async () => {
-			const results = await (testPmdEngine as any).processStdOut('<?xml blah blah blah');
+			const results = await (testPmdEngine as any).processOutput('<?xml blah blah blah');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
 		});
 
 		it('Missing opening tag', async () => {
-			const results = await (testPmdEngine as any).processStdOut('blah blah blah</pmd>');
+			const results = await (testPmdEngine as any).processOutput('blah blah blah</pmd>');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
 		});
