@@ -151,13 +151,14 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 			const reportFile: string = await fh.tmpFileWithCleanup();
 			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
 
-			await (await PmdWrapper.create({
+			const stdout = await (await PmdWrapper.create({
 				targets: targetPaths,
 				rules: selectedRules,
 				rulePathsByLanguage,
 				supplementalClasspath,
 				reportFile
 			})).execute();
+			this.logger.trace(`STDOUT from PMD: ${stdout}`);
 			const rawResults: string = await fh.readFile(reportFile);
 			const results = this.processOutput(rawResults);
 			this.logger.trace(`Found ${results.length} for PMD`);
