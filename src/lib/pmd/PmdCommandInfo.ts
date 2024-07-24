@@ -8,7 +8,7 @@ export interface PmdCommandInfo {
 
 	getJarPathForLanguage(lang: string): string
 
-	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string): string[]
+	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string, outfile: string): string[]
 
 	constructJavaCommandArgsForCpd(fileList: string, minimumTokens: number, language: string): string[]
 }
@@ -22,10 +22,10 @@ export class Pmd7CommandInfo implements PmdCommandInfo {
 		return path.join(PMD7_LIB, `pmd-${language}-${this.getVersion()}.jar`);
 	}
 
-	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string): string[] {
+	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string, outfile: string): string[] {
 		const classpath =  classPathsForExternalRules.concat([`${PMD7_LIB}/*`]).join(path.delimiter);
 		const args = ['-cp', classpath, PMD7_CLI_CLASS, 'check', '--file-list', fileList,
-			'--format', 'xml'];
+			'--format', 'xml', '-r', outfile];
 		if (rulesets.length > 0) {
 			args.push('--rulesets', rulesets);
 		}

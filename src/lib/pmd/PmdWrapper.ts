@@ -14,6 +14,7 @@ type PmdWrapperOptions = PmdSupportOptions & {
 	 * are handled elsewhere).
 	 */
 	supplementalClasspath: string[];
+	reportFile: string;
 };
 
 export default class PmdWrapper extends PmdSupport {
@@ -22,12 +23,14 @@ export default class PmdWrapper extends PmdSupport {
 	private supplementalClasspath: string[];
 	private logger: Logger;
 	private initialized: boolean;
+	private readonly reportFile: string;
 
 	public constructor(opts: PmdWrapperOptions) {
 		super(opts);
 		this.targets = opts.targets;
 		this.rules = opts.rules;
 		this.supplementalClasspath = opts.supplementalClasspath;
+		this.reportFile = opts.reportFile;
 	}
 
 	protected async init(): Promise<void> {
@@ -56,7 +59,7 @@ export default class PmdWrapper extends PmdSupport {
 
 		const pmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo();
 		const classPathsForExternalRules: string[] = this.buildSharedClasspath().concat(this.supplementalClasspath);
-		const args: string[] = pmdCommandInfo.constructJavaCommandArgsForPmd(tmpPath, classPathsForExternalRules, this.rules);
+		const args: string[] = pmdCommandInfo.constructJavaCommandArgsForPmd(tmpPath, classPathsForExternalRules, this.rules, this.reportFile);
 
 		this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
