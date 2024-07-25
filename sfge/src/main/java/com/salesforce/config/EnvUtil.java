@@ -2,9 +2,7 @@ package com.salesforce.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.graph.ops.registry.RegistryDataLimitCalculator;
-
 import java.io.File;
-import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
 public final class EnvUtil {
@@ -16,7 +14,8 @@ public final class EnvUtil {
     private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
     private static final String ENV_STACK_DEPTH_LIMIT = "SFGE_STACK_DEPTH_LIMIT";
     private static final String ENV_PATH_EXPANSION_LIMIT = "SFGE_PATH_EXPANSION_LIMIT";
-    private static final String ENV_FILES_TO_ENTRIES_CACHE_LOCATION = "SFGE_FILES_TO_ENTRIES_CACHE_LOCATION";
+    private static final String ENV_FILES_TO_ENTRIES_CACHE_LOCATION =
+            "SFGE_FILES_TO_ENTRIES_CACHE_LOCATION";
     private static final String ENV_DISABLE_CACHING = "SFGE_DISABLE_CACHING";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
@@ -39,10 +38,11 @@ public final class EnvUtil {
     static final int DEFAULT_PATH_EXPANSION_LIMIT =
             RegistryDataLimitCalculator.getApexPathExpanderRegistryLimit();
 
-    @VisibleForTesting static final String DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION = ".sfge-cache" + File.separator + "fileToEntryMapData.json";
+    @VisibleForTesting
+    static final String DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION =
+            ".sfge-cache" + File.separator + "fileToEntryMapData.json";
 
     @VisibleForTesting static final boolean DEFAULT_DISABLE_CACHING = true;
-
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -111,7 +111,8 @@ public final class EnvUtil {
     }
 
     static String getFilesToEntriesCacheLocation() {
-        return getStringOrDefault(ENV_FILES_TO_ENTRIES_CACHE_LOCATION, DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION);
+        return getStringOrDefault(
+                ENV_FILES_TO_ENTRIES_CACHE_LOCATION, DEFAULT_FILES_TO_ENTRIES_CACHE_LOCATION);
     }
 
     static boolean isCachingDisabled() {

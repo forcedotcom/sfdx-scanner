@@ -107,7 +107,8 @@ public class PathBasedRuleRunner {
         return result;
     }
 
-    private void extractFileEntryMapping(TaintedFileTracker taintedFileTracker, MethodVertex entryMethod, Result result) {
+    private void extractFileEntryMapping(
+            TaintedFileTracker taintedFileTracker, MethodVertex entryMethod, Result result) {
         final String entryFile = entryMethod.getFileName();
         final String entryMethodName = entryMethod.getName();
 
@@ -239,12 +240,14 @@ public class PathBasedRuleRunner {
         return ApexPathUtil.summarizeForwardPaths(g, methodVertex, expanderConfig);
     }
 
-    private ApexPathExpanderConfig getApexPathExpanderConfig(TaintedFileTracker taintedFileTracker) {
+    private ApexPathExpanderConfig getApexPathExpanderConfig(
+            TaintedFileTracker taintedFileTracker) {
         ApexPathExpanderConfig.Builder expanderConfigBuilder =
                 ApexPathUtil.getFullConfiguredPathExpanderConfigBuilder();
         // Add default PathExpansionObservers
 
-        // We need a new instance of TaintedFileTracker since the tainted files are unique to each path expansion.
+        // We need a new instance of TaintedFileTracker since the tainted files are unique to each
+        // path expansion.
         expanderConfigBuilder = expanderConfigBuilder.withPathExpansionObserver(taintedFileTracker);
 
         // Add observers that the rules request

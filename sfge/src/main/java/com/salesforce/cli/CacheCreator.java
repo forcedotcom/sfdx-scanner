@@ -1,12 +1,9 @@
 package com.salesforce.cli;
 
-import java.io.File;
+import com.salesforce.config.SfgeConfigProvider;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import com.salesforce.config.SfgeConfig;
-import com.salesforce.config.SfgeConfigProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,8 +29,7 @@ public final class CacheCreator {
     public void create(Result result) {
         if (SfgeConfigProvider.get().isCachingDisabled()) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
-                    "Skipping to cache information since it has been disabled.");
+                LOGGER.info("Skipping to cache information since it has been disabled.");
             }
             return;
         }

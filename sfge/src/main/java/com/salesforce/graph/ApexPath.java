@@ -1,6 +1,5 @@
 package com.salesforce.graph;
 
-import com.google.common.collect.ImmutableList;
 import com.salesforce.Collectible;
 import com.salesforce.NullCollectible;
 import com.salesforce.collections.CollectionUtil;
