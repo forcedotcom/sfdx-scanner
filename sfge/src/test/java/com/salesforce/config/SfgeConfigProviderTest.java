@@ -95,7 +95,9 @@ public class SfgeConfigProviderTest {
             MatcherAssert.assertThat(
                     sfgeConfig.getPathExpansionLimit(),
                     equalTo(-1 * EnvUtil.DEFAULT_PATH_EXPANSION_LIMIT));
-            MatcherAssert.assertThat(sfgeConfig.getFilesToEntriesCacheLocation(), equalTo(DUMMY_FILES_TO_ENTRIES_LOCATION));
+            MatcherAssert.assertThat(
+                    sfgeConfig.getFilesToEntriesCacheLocation(),
+                    equalTo(DUMMY_FILES_TO_ENTRIES_LOCATION));
             MatcherAssert.assertThat(sfgeConfig.isCachingDisabled(), equalTo(true));
         } finally {
             SfgeConfigTestProvider.remove();

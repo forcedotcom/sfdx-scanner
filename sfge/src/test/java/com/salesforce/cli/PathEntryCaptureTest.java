@@ -1,25 +1,25 @@
 package com.salesforce.cli;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 import com.salesforce.TestUtil;
 import com.salesforce.graph.ops.GraphUtil;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.AbstractPathBasedRule;
 import com.salesforce.rules.ApexFlsViolationRule;
 import com.salesforce.rules.PathBasedRuleRunner;
+import java.nio.file.Path;
+import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import java.nio.file.Path;
-import java.util.*;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-
 /**
- * Executes path expansion on physical files to verify accuracy of {@link FilesToEntriesMap} created.
+ * Executes path expansion on physical files to verify accuracy of {@link FilesToEntriesMap}
+ * created.
  */
 public class PathEntryCaptureTest {
     private GraphTraversalSource g;
@@ -72,7 +72,8 @@ public class PathEntryCaptureTest {
     }
 
     @Test
-    public void testMultiplePathsToDifferentClasses(TestInfo testInfo) throws GraphUtil.GraphLoadException {
+    public void testMultiplePathsToDifferentClasses(TestInfo testInfo)
+            throws GraphUtil.GraphLoadException {
         String entryClass = "EntryClass";
         String entryMethod = "doSomething";
 
@@ -86,12 +87,10 @@ public class PathEntryCaptureTest {
         verifier.assertFileToEntryExists(entryClass, entryClass, entryMethod);
     }
 
-
-
     private FilesToEntriesMap executePathBasedRuleRunner(String entryClass, String entryMethod) {
         MethodVertex methodVertex = TestUtil.getMethodVertex(g, entryClass, entryMethod);
         List<AbstractPathBasedRule> rules =
-            Collections.singletonList(ApexFlsViolationRule.getInstance());
+                Collections.singletonList(ApexFlsViolationRule.getInstance());
 
         // Define a PathBasedRuleRunner to apply the rule against the method vertex.
         PathBasedRuleRunner runner = new PathBasedRuleRunner(g, rules, methodVertex);
@@ -100,9 +99,7 @@ public class PathEntryCaptureTest {
         return result.getFilesToEntriesMap();
     }
 
-    /**
-     * Helper class to offload the brunt of assertions and make the tests more readable.
-     */
+    /** Helper class to offload the brunt of assertions and make the tests more readable. */
     class Verifier {
         private final HashMap<String, HashSet<FilesToEntriesMap.Entry>> map;
         private final Path testFileDirectory;
@@ -117,21 +114,37 @@ public class PathEntryCaptureTest {
         }
 
         void assertFileToEntryExists(String keyClass, String entryClass, String entryMethod) {
-            assertThat("Expected key file not found: " + keyClass, map.keySet(), hasItem(getAbsolutePath(testFileDirectory, keyClass)));
+            assertThat(
+                    "Expected key file not found: " + keyClass,
+                    map.keySet(),
+                    hasItem(getAbsolutePath(testFileDirectory, keyClass)));
 
-            HashSet<FilesToEntriesMap.Entry> entries = map.get(getAbsolutePath(testFileDirectory, keyClass));
-            assertThat("Expected entry not found.", entries, hasItem(getExpectedEntry(testFileDirectory, entryClass, entryMethod)));
+            HashSet<FilesToEntriesMap.Entry> entries =
+                    map.get(getAbsolutePath(testFileDirectory, keyClass));
+            assertThat(
+                    "Expected entry not found.",
+                    entries,
+                    hasItem(getExpectedEntry(testFileDirectory, entryClass, entryMethod)));
         }
 
         void assertFileToEntryDoesNotExist(String keyClass, String entryClass, String entryMethod) {
-            assertThat("Unxpected key file found: " + keyClass, map.keySet(), not(hasItem(getAbsolutePath(testFileDirectory, keyClass))));
+            assertThat(
+                    "Unxpected key file found: " + keyClass,
+                    map.keySet(),
+                    not(hasItem(getAbsolutePath(testFileDirectory, keyClass))));
 
-            HashSet<FilesToEntriesMap.Entry> entries = map.get(getAbsolutePath(testFileDirectory, keyClass));
-            assertThat("Unexpected entry found.", entries, not(hasItem(getExpectedEntry(testFileDirectory, entryClass, entryMethod))));
+            HashSet<FilesToEntriesMap.Entry> entries =
+                    map.get(getAbsolutePath(testFileDirectory, keyClass));
+            assertThat(
+                    "Unexpected entry found.",
+                    entries,
+                    not(hasItem(getExpectedEntry(testFileDirectory, entryClass, entryMethod))));
         }
 
-        private FilesToEntriesMap.Entry getExpectedEntry(Path testFileDirectory, String entryClass, String entryMethod) {
-            return new FilesToEntriesMap.Entry(getAbsolutePath(testFileDirectory, entryClass), entryMethod);
+        private FilesToEntriesMap.Entry getExpectedEntry(
+                Path testFileDirectory, String entryClass, String entryMethod) {
+            return new FilesToEntriesMap.Entry(
+                    getAbsolutePath(testFileDirectory, entryClass), entryMethod);
         }
 
         private String getAbsolutePath(Path testFileDirectory, String entryClass) {

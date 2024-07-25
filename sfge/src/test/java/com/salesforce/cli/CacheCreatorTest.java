@@ -1,7 +1,13 @@
 package com.salesforce.cli;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
+
 import com.salesforce.config.SfgeConfigTestProvider;
 import com.salesforce.config.TestSfgeConfig;
+import java.io.File;
+import java.io.IOException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -12,15 +18,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 public class CacheCreatorTest {
-    private static final String DUMMY_FILE_NAME = ".test-sfge-cache" + File.separator + "myFileToEntriesDummy.json";
+    private static final String DUMMY_FILE_NAME =
+            ".test-sfge-cache" + File.separator + "myFileToEntriesDummy.json";
     @Mock CacheCreator.Dependencies dependencies;
 
     AutoCloseable openMocks;
@@ -28,15 +28,17 @@ public class CacheCreatorTest {
     @BeforeEach
     void setUp() {
         openMocks = MockitoAnnotations.openMocks(this);
-        SfgeConfigTestProvider.set(new TestSfgeConfig() {
-            @Override
-            public String getFilesToEntriesCacheLocation() {
-                return DUMMY_FILE_NAME;
-            }
-            public boolean isCachingDisabled() {
-                return false;
-            }
-        });
+        SfgeConfigTestProvider.set(
+                new TestSfgeConfig() {
+                    @Override
+                    public String getFilesToEntriesCacheLocation() {
+                        return DUMMY_FILE_NAME;
+                    }
+
+                    public boolean isCachingDisabled() {
+                        return false;
+                    }
+                });
     }
 
     @AfterEach
@@ -57,12 +59,13 @@ public class CacheCreatorTest {
 
         String actualFilename = fileNameCaptor.getValue();
         MatcherAssert.assertThat(actualFilename, Matchers.containsString(DUMMY_FILE_NAME));
-
     }
 
     @Test
     public void testIOExceptionDoesNotDisrupt() throws IOException {
-        doThrow(new IOException("dummy exception")).when(dependencies).writeFile(anyString(), anyString());
+        doThrow(new IOException("dummy exception"))
+                .when(dependencies)
+                .writeFile(anyString(), anyString());
 
         Result result = new Result();
         CacheCreator cacheCreator = new CacheCreator(dependencies);
@@ -74,12 +77,13 @@ public class CacheCreatorTest {
     public void testNoFileWrittenWhenCachingIsDisabled() throws IOException {
 
         // Disable caching
-        SfgeConfigTestProvider.set(new TestSfgeConfig() {
-            @Override
-            public boolean isCachingDisabled() {
-                return true;
-            }
-        });
+        SfgeConfigTestProvider.set(
+                new TestSfgeConfig() {
+                    @Override
+                    public boolean isCachingDisabled() {
+                        return true;
+                    }
+                });
 
         try {
             Result result = new Result();
