@@ -39,7 +39,10 @@ dependencies {
 }
 
 group = "com.salesforce.apex"
+
+// Keep this in sync with src/Constants.ts > SFGE_VERSION
 version = "1.0.1-pilot"
+
 description = "Salesforce Graph Engine"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
