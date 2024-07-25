@@ -66,8 +66,14 @@ export default class PmdWrapper extends PmdSupport {
 	}
 
 	protected isSuccessfulExitCode(code: number): boolean {
-		// PMD's convention is that an exit code of 0 indicates a successful run with no violations, and an exit code of
-		// 4 indicates a successful run with at least one violation.
-		return code === 0 || code === 4;
+		// PMD has the following exit codes: (https://pmd.github.io/pmd/pmd_userdocs_cli_reference.html#exit-status)
+		// 0  Everything is fine, no violations found and no recoverable error occurred.
+		// 1  PMD exited with an exception.
+		// 2  Usage error. Command-line parameters are invalid or missing.
+		// 4  At least one violation has been detected, unless --no-fail-on-violation is set.
+		// 5  At least one recoverable error has occurred, unless --no-fail-on-error is set. There might be additionally zero or more violations detected.
+		//    - This can happen if a file is not able to be parsed by PMD. It appears that we spit out this information
+		//      as warning already via stdout. So we can ignore this error code.
+		return code === 0 || code === 4 || code === 5;
 	}
 }
