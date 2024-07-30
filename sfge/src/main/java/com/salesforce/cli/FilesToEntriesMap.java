@@ -1,11 +1,10 @@
 package com.salesforce.cli;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-
-import com.google.common.annotations.VisibleForTesting;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -109,7 +108,8 @@ public class FilesToEntriesMap {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Entry entry = (Entry) o;
-            return Objects.equals(filename, entry.filename) && Objects.equals(methodName, entry.methodName);
+            return Objects.equals(filename, entry.filename)
+                    && Objects.equals(methodName, entry.methodName);
         }
 
         @Override

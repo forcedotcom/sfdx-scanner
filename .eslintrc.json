@@ -13,5 +13,8 @@
 	},
 	"plugins": [
 		"@typescript-eslint"
-	]
+	],
+	"rules": {
+		"sf-plugin/only-extend-SfCommand": "off"
+	}
 }

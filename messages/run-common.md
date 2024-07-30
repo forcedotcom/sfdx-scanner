@@ -74,10 +74,6 @@ The selected output format doesn't match the output file type. Output format: %s
 
 --projectdir must specify existing paths
 
-# validations.noFilesFoundInTarget
-
-No files were found in the target. --target must contain at least one file.
-
 # info.resolvedTarget
 
 The --target flag wasn't specified so the default target '.' will be used.

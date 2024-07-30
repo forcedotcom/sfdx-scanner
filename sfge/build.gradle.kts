@@ -15,13 +15,13 @@ dependencies {
 	implementation(project(":cli-messaging"))
 	implementation("commons-cli:commons-cli:1.4")
 	implementation("org.apache.commons:commons-collections4:4.4")
-	implementation("org.apache.tinkerpop:tinkergraph-gremlin:3.5.1")
-	implementation("org.apache.tinkerpop:gremlin-driver:3.5.1")
+	implementation("org.apache.tinkerpop:tinkergraph-gremlin:3.5.8")
+	implementation("org.apache.tinkerpop:gremlin-driver:3.5.8")
 	implementation("org.antlr:antlr-runtime:3.5.2")
 	implementation("org.apache.logging.log4j:log4j-api:2.17.1")
 	implementation("org.apache.logging.log4j:log4j-core:2.17.1")
 	implementation("com.google.code.gson:gson:2.10.1")
-	implementation("com.google.guava:guava:26.0-jre")
+	implementation("com.google.guava:guava:33.2.1-jre")
 	implementation("com.google.code.findbugs:jsr305:3.0.2")
 	implementation ("com.googlecode.json-simple:json-simple:1.1.1") {
 		exclude("junit")
@@ -39,7 +39,10 @@ dependencies {
 }
 
 group = "com.salesforce.apex"
+
+// Keep this in sync with src/Constants.ts > SFGE_VERSION
 version = "1.0.1-pilot"
+
 description = "Salesforce Graph Engine"
 java.sourceCompatibility = JavaVersion.VERSION_11
 

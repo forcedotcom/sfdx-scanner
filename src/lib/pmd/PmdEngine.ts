@@ -147,15 +147,20 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 				this.logger.trace('No matching pmd target files found. Nothing to execute.');
 				return [];
 			}
+			const fh = new FileHandler();
+			const reportFile: string = await fh.tmpFileWithCleanup();
 			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
 
 			const stdout = await (await PmdWrapper.create({
 				targets: targetPaths,
 				rules: selectedRules,
 				rulePathsByLanguage,
-				supplementalClasspath
+				supplementalClasspath,
+				reportFile
 			})).execute();
-			const results = this.processStdOut(stdout);
+			this.logger.trace(`STDOUT from PMD: ${stdout}`);
+			const rawResults: string = await fh.readFile(reportFile);
+			const results = this.processOutput(rawResults);
 			this.logger.trace(`Found ${results.length} for PMD`);
 			return results;
 		} catch (e) {
@@ -167,21 +172,21 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 
 
 	/**
-	 * stdout returned from PMD contains an XML payload that may be surrounded by other text.
+	 * PMD output is represented as an XML payload.
 	 * 'file' nodes from the XML are returned as rows of output to the user. 'configerror', 'error',
 	 * and 'suppressedviolation' nodes are emitted as warnings from the CLI.
 	 */
-	protected processStdOut(stdout: string): RuleResult[] {
+	protected processOutput(output: string): RuleResult[] {
 		let results: RuleResult[] = [];
 
-		this.logger.trace(`Output received from PMD: ${stdout}`);
+		this.logger.trace(`Output received from PMD: ${output}`);
 
 		// Try to find the xml payload. It begins with '<?xml' and ends with '</pmd>'
 		const pmdEnd = '</pmd>';
-		const xmlStart = stdout.indexOf('<?xml');
-		const xmlEnd = stdout.lastIndexOf(pmdEnd);
+		const xmlStart = output.indexOf('<?xml');
+		const xmlEnd = output.lastIndexOf(pmdEnd);
 		if (xmlStart != -1 && xmlEnd != -1) {
-			const pmdXml = stdout.slice(xmlStart, xmlEnd + pmdEnd.length);
+			const pmdXml = output.slice(xmlStart, xmlEnd + pmdEnd.length);
 			const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true}) as Element;
 
 			const elements =  pmdJson.elements[0].elements;
@@ -554,7 +559,7 @@ export class CustomPmdEngine extends AbstractPmdEngine {
 }
 
 export class AppExchangePmdEngine extends AbstractPmdEngine {
-	private static readonly SUPPORTED_LANGUAGES = ['apex', 'html', 'javascript', 'sfmetadata', 'visualforce', 'xml'];
+	private static readonly SUPPORTED_LANGUAGES = ['apex', 'aurahtml', 'html', 'javascript', 'sfmetadata', 'visualforce', 'xml'];
 	private static ENGINE_ENUM = ENGINE.PMD_APPEXCHANGE;
 	public static ENGINE_NAME = AppExchangePmdEngine.ENGINE_ENUM.valueOf();
 	private catalogWrapper: PmdCatalogWrapper;
