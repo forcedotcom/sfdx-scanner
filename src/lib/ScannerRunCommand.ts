@@ -9,6 +9,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 * here to avoid duplicate code.
 	 */
 	public static readonly flags = {
+		...ScannerCommand.flags,
 		verbose: Flags.boolean({
 			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),

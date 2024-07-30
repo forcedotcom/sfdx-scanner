@@ -22,6 +22,7 @@ export default class List extends ScannerCommand {
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
 	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
+		...ScannerCommand.flags,
 		verbose: Flags.boolean({
 			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
