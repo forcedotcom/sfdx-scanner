@@ -1,5 +1,5 @@
-*DRAFT*: Found 2 rules:
-=== *DRAFT*: 1. StubRule1
+Found 2 rule(s):
+=== 1. StubRule1
     severity:    2 (High)
     engine:      FakeEngine1
     type:        Standard
@@ -7,7 +7,7 @@
     resources:   www.google.com
     description: This is the description for a stub rule. Blah blah blah.
 
-=== *DRAFT*: 2. StubRule2
+=== 2. StubRule2
     severity:    4 (Low)
     engine:      FakeEngine1
     type:        Flow

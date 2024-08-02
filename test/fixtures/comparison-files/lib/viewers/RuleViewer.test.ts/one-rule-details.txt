@@ -1,5 +1,5 @@
-*DRAFT*: Found 1 rules:
-=== *DRAFT*: 1. StubRule1
+Found 1 rule(s):
+=== 1. StubRule1
     severity:    2 (High)
     engine:      FakeEngine1
     type:        Standard

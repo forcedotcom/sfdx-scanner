@@ -4,7 +4,7 @@ import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerCon
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {RuleDetailViewer, RuleTableViewer} from '../../lib/viewers/RuleViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
-import {BundleName, getMessage} from '../../lib/messages';
+import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
@@ -14,19 +14,19 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	public static readonly enableJsonFlag = false;
 	public static readonly summary = getMessage(BundleName.RulesCommand, 'command.summary');
 	public static readonly description = getMessage(BundleName.RulesCommand, 'command.description');
-	public static readonly examples = [
-		getMessage(BundleName.RulesCommand, 'command.examples')
-	];
+	public static readonly examples = getMessages(BundleName.RulesCommand, 'command.examples');
 
 	public static readonly flags = {
 		workspace: Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.workspace.summary'),
+			description: getMessage(BundleName.RulesCommand, 'flags.workspace.description'),
 			char: 'w',
 			multiple: true,
 			delimiter: ',',
 		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.rule-selector.summary'),
+			description: getMessage(BundleName.RulesCommand, 'flags.rule-selector.description'),
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
@@ -34,11 +34,13 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		}),
 		'config-file': Flags.file({
 			summary: getMessage(BundleName.RulesCommand, 'flags.config-file.summary'),
+			description: getMessage(BundleName.RulesCommand, 'flags.config-file.description'),
 			char: 'c',
 			exists: true
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.view.summary'),
+			description: getMessage(BundleName.RulesCommand, 'flags.view.description'),
 			char: 'v',
 			default: View.TABLE,
 			options: Object.values(View)

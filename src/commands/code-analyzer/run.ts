@@ -6,7 +6,7 @@ import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerCon
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
-import {BundleName, getMessage} from '../../lib/messages';
+import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -16,14 +16,13 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	public static readonly enableJsonFlag = false;
 	public static readonly summary = getMessage(BundleName.RunCommand, 'command.summary');
 	public static readonly description = getMessage(BundleName.RunCommand, 'command.description');
-	public static readonly examples = [
-		getMessage(BundleName.RunCommand, 'command.examples')
-	];
+	public static readonly examples = getMessages(BundleName.RunCommand, 'command.examples');
 
 	public static readonly flags = {
 		// === Flags pertaining to targeting ===
 		workspace: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.workspace.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.workspace.description'),
 			char: 'w',
 			multiple: true,
 			delimiter: ',',
@@ -31,6 +30,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		}),
 		'path-start': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.path-start.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.path-start.description'),
 			char: 's',
 			multiple: true,
 			delimiter: ','
@@ -38,6 +38,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		// === Flags pertaining to rule selection ===
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.rule-selector.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.rule-selector.description'),
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
@@ -46,6 +47,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		// === Flags pertaining to output ===
 		'severity-threshold': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.severity-threshold.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.severity-threshold.description'),
 			char: 't',
 			options: [
 				'1', 'critical',
@@ -57,12 +59,14 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.view.description'),
 			char: 'v',
 			default: View.TABLE,
 			options: Object.values(View)
 		}),
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.output-file.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.output-file.description'),
 			char: 'f',
 			multiple: true,
 			delimiter: ','
@@ -70,6 +74,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		// === Flags pertaining to configuration ===
 		'config-file': Flags.file({
 			summary: getMessage(BundleName.RunCommand, 'flags.config-file.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.config-file.description'),
 			char: 'c',
 			exists: true
 		})

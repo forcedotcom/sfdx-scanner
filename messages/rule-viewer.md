@@ -1,14 +1,14 @@
 # summary.found-no-rules
 
-*DRAFT*: Found 0 rules.
+Found 0 rules.
 
 # summary.found-rules
 
-*DRAFT*: Found %d rules:
+Found %d rule(s):
 
 # summary.detail.header
 
-*DRAFT*: %d. %s
+%d. %s
 
 # summary.table.num-column
 
