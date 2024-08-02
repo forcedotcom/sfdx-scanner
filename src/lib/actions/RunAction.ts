@@ -10,6 +10,7 @@ import {
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
+import {WorkspaceFactory} from '../factories/WorkspaceFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
@@ -57,7 +58,7 @@ export class RunAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
-		const workspace: Workspace = await core.createWorkspace(input.workspace);
+		const workspace: Workspace = await (new WorkspaceFactory()).create(core, input.workspace);
 
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.

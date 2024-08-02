@@ -2,6 +2,7 @@ import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce
 
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
+import {WorkspaceFactory} from '../factories/WorkspaceFactory';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
@@ -44,7 +45,9 @@ export class RulesAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
-		const selectOptions = input.workspace ? {workspace: await core.createWorkspace(input.workspace)} : undefined;
+		const selectOptions = input.workspace
+			? {workspace: await (new WorkspaceFactory()).create(core, input.workspace)}
+			: undefined;
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.
 		this.dependencies.progressListeners.forEach(listener => listener.listen(core));
