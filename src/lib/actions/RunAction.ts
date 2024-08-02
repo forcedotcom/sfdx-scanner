@@ -10,6 +10,7 @@ import {
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
+import {PathStartFactory} from '../factories/PathStartFactory';
 import {WorkspaceFactory} from '../factories/WorkspaceFactory';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
@@ -66,7 +67,7 @@ export class RunAction {
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {
 			workspace,
-			pathStartPoints: input['path-start']
+			pathStartPoints: await (new PathStartFactory()).create(input['path-start'])
 		};
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
