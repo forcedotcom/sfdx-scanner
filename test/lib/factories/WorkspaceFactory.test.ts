@@ -108,7 +108,7 @@ describe('WorkspaceFactory', () => {
 				},
 				{
 					scenario: 'dotted subfolders of the current directory',
-					glob: path.join('.', '.*/.*'),
+					glob: path.join('.', '.*', '.*'),
 					expectation: [
 						expect.stringMatching('\\.dotted-file-1a\\.txt'),
 						expect.stringMatching('\\.dotted-file-1b\\.txt')
@@ -116,7 +116,7 @@ describe('WorkspaceFactory', () => {
 				},
 				{
 					scenario: 'undotted subfolders of the current directory',
-					glob: path.join('.', '*/.*'),
+					glob: path.join('.', '*', '.*'),
 					expectation: [
 						expect.stringMatching('\\.dotted-file-2a\\.txt'),
 						expect.stringMatching('\\.dotted-file-2b\\.txt')
@@ -148,7 +148,7 @@ describe('WorkspaceFactory', () => {
 				},
 				{
 					scenario: 'dotted subfolders of the current directory',
-					glob: path.join('.', '.**/*'),
+					glob: path.join('.', '.**', '*'),
 					expectation: [
 						expect.stringMatching('undotted-file-1a\\.txt'),
 						expect.stringMatching('undotted-file-1b\\.txt')
@@ -156,7 +156,7 @@ describe('WorkspaceFactory', () => {
 				},
 				{
 					scenario: 'undotted subfolders of the current directory',
-					glob: path.join('.', '*/*'),
+					glob: path.join('.', '*', '*'),
 					expectation: [
 						expect.stringMatching('undotted-file-2a\\.txt'),
 						expect.stringMatching('undotted-file-2b\\.txt')
