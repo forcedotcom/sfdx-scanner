@@ -28,8 +28,21 @@ describe('PathStartFactory implementations', () => {
 
 	describe('File matching', () => {
 		it.each([
-			{scenario: 'a single file', expectation: 'just that file', input: ['undotted-file-1.txt']},
-			{scenario: 'a list of files', expectation: 'just those files', input: [path.join('.', 'undotted-directory-a', 'undotted-file-2a.txt'), '.dotted-file-2.txt']}
+			{scenario: 'a single relative file', expectation: 'just that file', input: ['undotted-file-1.txt']},
+			{scenario: 'a list of relative files', expectation: 'just those files', input: [path.join('.', 'undotted-directory-a', 'undotted-file-2a.txt'), '.dotted-file-2.txt']},
+			{
+				scenario: 'a single absolute file',
+				expectation: 'just that file',
+				input: [path.join(PATH_TO_WORKSPACE, 'undotted-file-1.txt')]
+			},
+			{
+				scenario: 'a list of absolute files',
+				expectation: 'just those files',
+				input: [
+					path.join(PATH_TO_WORKSPACE, 'undotted-directory-a', 'undotted-file-2a.txt'),
+					path.join(PATH_TO_WORKSPACE, 'undotted-file-2.txt')
+				]
+			}
 		])('Given $scenario, returns $expectation', async ({input}) => {
 			const factory = new PathStartFactory();
 			const output = await factory.create(input);

@@ -16,6 +16,7 @@
 		"@types/node": "^17",
 		"ansis": "^3.2.0",
 		"globby": "^11",
+		"normalize-path": "^3.0.0",
 		"ts-node": "^10",
 		"tslib": "^2"
 	},
@@ -24,6 +25,7 @@
 		"@oclif/plugin-help": "^5",
 		"@salesforce/cli-plugins-testkit": "^5.3.8",
 		"@types/jest": "^29.5.12",
+		"@types/normalize-path": "^3.0.2",
 		"@types/tmp": "^0.2.6",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",

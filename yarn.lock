@@ -2588,6 +2588,11 @@
   dependencies:
     undici-types "~5.26.4"
 
+"@types/normalize-path@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/normalize-path/-/normalize-path-3.0.2.tgz#aea8cd8b0ab39b8a86041843842825d8a01524c5"
+  integrity sha512-DO++toKYPaFn0Z8hQ7Tx+3iT9t77IJo/nDiqTXilgEP+kPNIYdpS9kh3fXuc53ugqwp9pxC1PVjCpV1tQDyqMA==
+
 "@types/semver@^7.5.0", "@types/semver@^7.5.4":
   version "7.5.8"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.8.tgz#8268a8c57a3e4abd25c165ecd36237db7948a55e"

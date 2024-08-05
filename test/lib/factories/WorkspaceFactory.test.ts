@@ -17,22 +17,48 @@ describe('WorkspaceFactory', () => {
 
 	describe('File/Folder matching', () => {
 		it.each([
-			{scenario: 'a single file', expectation: 'just that file', input: ['undotted-file-1.txt']},
+			{scenario: 'a single relative file', expectation: 'just that file', input: ['undotted-file-1.txt']},
 			{
-				scenario: 'a list of files',
+				scenario: 'a list of relative files',
 				expectation: 'just those files',
 				input: [path.join('.', 'undotted-directory-a', 'undotted-file-2a.txt'), '.dotted-file-2.txt']
 			},
-			{scenario: 'a single folder', expectation: 'just that folder', input: ['undotted-directory-a']},
+			{scenario: 'a single relative folder', expectation: 'just that folder', input: ['undotted-directory-a']},
 			{
 				scenario: 'a list of folders',
 				expectation: 'just those folders',
 				input: ['undotted-directory-a', '.dotted-directory-b']
 			},
 			{
-				scenario: 'mixed folders and files',
+				scenario: 'mixed relative folders and files',
 				expectation: 'just those files/folders',
 				input: ['.dotted-file-1.txt', path.join('.', 'undotted-directory-b')]
+			},
+			{scenario: 'a single absolute file', expectation: 'just that file', input: [path.join(PATH_TO_WORKSPACE, 'undotted-file-1.txt')]},
+			{
+				scenario: 'a list of absolute files',
+				expectation: 'just those files',
+				input: [
+					path.join(PATH_TO_WORKSPACE, 'undotted-directory-a', 'undotted-file-2a.txt'),
+					path.join(PATH_TO_WORKSPACE, '.dotted-file-2.txt')
+				]
+			},
+			{scenario: 'a single absolute folder', expectation: 'just that folder', input: ['undotted-directory-a']},
+			{
+				scenario: 'a list of absolute folders',
+				expectation: 'just those folders',
+				input: [
+					path.join(PATH_TO_WORKSPACE, 'undotted-directory-a'),
+					path.join(PATH_TO_WORKSPACE, '.dotted-directory-b')
+				]
+			},
+			{
+				scenario: 'mixed absolute folders and files',
+				expectation: 'just those files/folders',
+				input: [
+					path.join(PATH_TO_WORKSPACE, '.dotted-file-1.txt'),
+					path.join(PATH_TO_WORKSPACE, 'undotted-directory-b')
+				]
 			}
 		])('Given $scenario, requests a workspace with $expectation', async ({input}) => {
 			// ==== TEST SETUP ====
