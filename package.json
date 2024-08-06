@@ -15,8 +15,7 @@
 		"@salesforce/ts-types": "^2.0.9",
 		"@types/node": "^17",
 		"ansis": "^3.2.0",
-		"globby": "^11",
-		"normalize-path": "^3.0.0",
+		"fast-glob": "^3.3.2",
 		"ts-node": "^10",
 		"tslib": "^2"
 	},
