@@ -15,12 +15,11 @@ export async function createPathStarts(pathStarts?: string[]): Promise<string[]|
 		if (fg.isDynamicPattern(normalizedPathStart)) {
 			// Globs and method-level targeting are mutually exclusive.
 			if (path.basename(pathStart).includes('#')) {
-				throw new Error(getMessage(BundleName.PathStartFactory, 'error.glob-method-conflict', [pathStart]));
+				throw new Error(getMessage(BundleName.PathStartUtil, 'error.glob-method-conflict', [pathStart]));
 			}
-			// NOTE: We are returning the strict results of the Glob here, meaning that the paths will be normalized
-			// to UNIX style. If this is discovered to cause problems downstream on Windows, then we'll need to
-			// identify a fix.
-			processedPaths.push(...await fg.glob(normalizedPathStart));
+			// Since Glob results are UNIX-styled, we need to convert the results to use whatever the local path separator
+			// character is.
+			processedPaths.push(...(await fg.glob(normalizedPathStart)).map(p => p.replace(/[\\/]/g, path.sep)));
 		} else {
 			processedPaths.push(pathStart);
 		}

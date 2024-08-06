@@ -59,38 +59,35 @@ describe('PathStartUtil', () => {
 				{
 					scenario: 'a single relative file',
 					glob: path.join('.', 'undotted*1.txt'),
-					expectation: [
-						expect.stringMatching('undotted-file-1\\.txt')
-					]
+					expectation: new Set(['undotted-file-1.txt'])
 				},
 				{
 					scenario: 'a list of relative files',
 					glob: path.join('.', 'undotted*'),
-					expectation: [
-						expect.stringMatching('undotted-file-1\\.txt'),
-						expect.stringMatching('undotted-file-2\\.txt')
-					]
+					expectation: new Set(['undotted-file-1.txt', 'undotted-file-2.txt'])
 				},
 				{
 					scenario: 'a single absolute file',
 					glob: path.resolve(PATH_TO_WORKSPACE, 'undotted*1.txt'),
-					expectation: [
-						expect.stringMatching('undotted-file-1\\.txt')
-					]
+					expectation: new Set([
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt')
+					])
 				},
 				{
 					scenario: 'a list of absolute files',
 					glob: path.resolve(PATH_TO_WORKSPACE, 'undotted*'),
-					expectation: [
-						expect.stringMatching('undotted-file-1\\.txt'),
-						expect.stringMatching('undotted-file-2\\.txt')
-					]
+					expectation: new Set([
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt'),
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-2.txt')
+					])
 				}
 			])('Given a glob that matches $scenario, returns the correct files', async ({glob, expectation}) => {
 				const output = await PathStartUtil.createPathStarts([glob]);
 				expect(output).toBeDefined();
-				expect(output as string[]).toHaveLength(expectation.length);
-				expect(output as string[]).toEqual(expect.arrayContaining(expectation));
+				expect(output as string[]).toHaveLength(expectation.size);
+				for (const expectedPathStart of expectation.keys()) {
+					expect(output as string[]).toContain(expectedPathStart);
+				}
 			});
 
 			describe('Dotted file handling', () => {
@@ -98,26 +95,26 @@ describe('PathStartUtil', () => {
 					{
 						scenario: 'the current directory',
 						glob: path.join('.', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-1\\.txt'),
-							expect.stringMatching('\\.dotted-file-2\\.txt')
-						]
+						expectation: new Set([
+							'.dotted-file-1.txt',
+							'.dotted-file-2.txt'
+						])
 					},
 					{
 						scenario: 'dotted subfolders of the current directory',
-						glob: path.join('.', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-1\\.txt'),
-							expect.stringMatching('\\.dotted-file-2\\.txt')
-						]
+						glob: path.join('.', '.*', '.*'),
+						expectation: new Set([
+							path.join('.dotted-directory-a', '.dotted-file-1a.txt'),
+							path.join('.dotted-directory-b', '.dotted-file-1b.txt')
+						])
 					},
 					{
-						scenario: 'the current directory',
-						glob: path.join('.', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-1\\.txt'),
-							expect.stringMatching('\\.dotted-file-2\\.txt')
-						]
+						scenario: 'undotted subfolders of the current directory',
+						glob: path.join('.', '*', '.*'),
+						expectation: new Set([
+							path.join('undotted-directory-a', '.dotted-file-2a.txt'),
+							path.join('undotted-directory-b', '.dotted-file-2b.txt')
+						])
 					}
 				])('A glob explicitly seeking dotted files in $scenario will find them', async ({
 																									glob,
@@ -125,34 +122,36 @@ describe('PathStartUtil', () => {
 																								}) => {
 					const output = await PathStartUtil.createPathStarts([glob]);
 					expect(output).toBeDefined();
-					expect(output as string[]).toHaveLength(expectation.length);
-					expect(output as string[]).toEqual(expect.arrayContaining(expectation));
+					expect(output as string[]).toHaveLength(expectation.size);
+					for (const expectedPathStart of expectation.keys()) {
+						expect(output as string[]).toContain(expectedPathStart);
+					}
 				});
 
 				it.each([
 					{
 						scenario: 'the current directory',
 						glob: path.join('.', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-1\\.txt'),
-							expect.stringMatching('undotted-file-2\\.txt')
-						]
+						expectation: new Set([
+							'undotted-file-1.txt',
+							'undotted-file-2.txt'
+						])
 					},
 					{
 						scenario: 'dotted subfolders of the current directory',
 						glob: path.join('.', '.**', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-1a\\.txt'),
-							expect.stringMatching('undotted-file-1b\\.txt')
-						]
+						expectation: new Set([
+							path.join('.dotted-directory-a', 'undotted-file-1a.txt'),
+							path.join('.dotted-directory-b', 'undotted-file-1b.txt')
+						])
 					},
 					{
 						scenario: 'undotted subfolders of the current directory',
 						glob: path.join('.', '*', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-2a\\.txt'),
-							expect.stringMatching('undotted-file-2b\\.txt')
-						]
+						expectation: new Set([
+							path.join('undotted-directory-a', 'undotted-file-2a.txt'),
+							path.join('undotted-directory-b', 'undotted-file-2b.txt')
+						])
 					},
 				])('A glob NOT explicitly seeking dotted items in $scenario will find only undotted items', async ({
 																													   glob,
@@ -160,8 +159,10 @@ describe('PathStartUtil', () => {
 																												   }) => {
 					const output = await PathStartUtil.createPathStarts([glob]);
 					expect(output).toBeDefined();
-					expect(output as string[]).toHaveLength(expectation.length);
-					expect(output as string[]).toEqual(expect.arrayContaining(expectation));
+					expect(output as string[]).toHaveLength(expectation.size);
+					for (const expectedPathStart of expectation.keys()) {
+						expect(output as string[]).toContain(expectedPathStart);
+					}
 				})
 			})
 		});

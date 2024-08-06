@@ -97,25 +97,31 @@ describe('WorkspaceUtil', () => {
 					scenario: 'a single relative file',
 					expectation: 'just that file',
 					input: path.join('.', 'undotted*1.txt'),
-					output: new Set(['undotted-file-1.txt'])
+					output: new Set([path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt')])
 				},
 				{
 					scenario: 'a list of relative files',
 					expectation: 'just those files',
 					input: path.join('.', 'undotted*'),
-					output: new Set(['undotted-file-1.txt', 'undotted-file-2.txt'])
+					output: new Set([
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt'),
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-2.txt')
+					])
 				},
 				{
 					scenario: 'a single absolute file',
 					expectation: 'just that file',
 					input: path.resolve(PATH_TO_WORKSPACE, 'undotted*1.txt'),
-					output: new Set(['undotted-file-1.txt'])
+					output: new Set([path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt')])
 				},
 				{
 					scenario: 'a list of absolute files',
 					expectation: 'just those files',
 					input: path.resolve(PATH_TO_WORKSPACE, 'undotted*'),
-					output: new Set(['undotted-file-1.txt', 'undotted-file-2.txt'])
+					output: new Set([
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt'),
+						path.resolve(PATH_TO_WORKSPACE, 'undotted-file-2.txt')
+					])
 				}
 			])('Given a glob that matches $scenario, requests a workspace with $expectation', async ({
 																										 input,
@@ -129,10 +135,10 @@ describe('WorkspaceUtil', () => {
 				const workspace: Workspace = await WorkspaceUtil.createWorkspace(core, [input]);
 
 				// ==== ASSERTIONS ====
-				const workspaceBaseNames: string[] = workspace.getFilesAndFolders().map(i => path.basename(i));
-				expect(workspaceBaseNames).toHaveLength(output.size);
-				for (const expectedBaseName of output.keys()) {
-					expect(workspaceBaseNames).toContain(expectedBaseName);
+				const actualWorkspacePaths: string[] = workspace.getFilesAndFolders();
+				expect(actualWorkspacePaths).toHaveLength(output.size);
+				for (const expectedWorkspacePath of output.keys()) {
+					expect(actualWorkspacePaths).toContain(expectedWorkspacePath);
 				}
 			});
 
@@ -141,26 +147,26 @@ describe('WorkspaceUtil', () => {
 					{
 						scenario: 'the current directory',
 						glob: path.join('.', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-1\\.txt'),
-							expect.stringMatching('\\.dotted-file-2\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-file-1.txt'),
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-file-2.txt')
+						])
 					},
 					{
 						scenario: 'dotted subfolders of the current directory',
 						glob: path.join('.', '.*', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-1a\\.txt'),
-							expect.stringMatching('\\.dotted-file-1b\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-directory-a', '.dotted-file-1a.txt'),
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-directory-b', '.dotted-file-1b.txt')
+						])
 					},
 					{
 						scenario: 'undotted subfolders of the current directory',
 						glob: path.join('.', '*', '.*'),
-						expectation: [
-							expect.stringMatching('\\.dotted-file-2a\\.txt'),
-							expect.stringMatching('\\.dotted-file-2b\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-directory-a', '.dotted-file-2a.txt'),
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-directory-b', '.dotted-file-2b.txt')
+						])
 					}
 				])('A glob explicitly seeking dotted files in $scenario will find them', async ({
 																									glob,
@@ -175,34 +181,36 @@ describe('WorkspaceUtil', () => {
 
 					// ==== ASSERTIONS ====
 					const workspaceFiles: string[] = workspace.getFilesAndFolders();
-					expect(workspaceFiles).toHaveLength(expectation.length);
-					expect(workspaceFiles).toEqual(expect.arrayContaining(expectation));
+					expect(workspaceFiles).toHaveLength(expectation.size);
+					for (const expectedWorkspacePath of expectation.keys()) {
+						expect(workspaceFiles).toContain(expectedWorkspacePath);
+					}
 				});
 
 				it.each([
 					{
 						scenario: 'the current directory',
 						glob: path.join('.', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-1\\.txt'),
-							expect.stringMatching('undotted-file-2\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-file-1.txt'),
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-file-2.txt')
+						])
 					},
 					{
 						scenario: 'dotted subfolders of the current directory',
 						glob: path.join('.', '.**', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-1a\\.txt'),
-							expect.stringMatching('undotted-file-1b\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-directory-a', 'undotted-file-1a.txt'),
+							path.resolve(PATH_TO_WORKSPACE, '.dotted-directory-b', 'undotted-file-1b.txt')
+						])
 					},
 					{
 						scenario: 'undotted subfolders of the current directory',
 						glob: path.join('.', '*', '*'),
-						expectation: [
-							expect.stringMatching('undotted-file-2a\\.txt'),
-							expect.stringMatching('undotted-file-2b\\.txt')
-						]
+						expectation: new Set([
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-directory-a', 'undotted-file-2a.txt'),
+							path.resolve(PATH_TO_WORKSPACE, 'undotted-directory-b', 'undotted-file-2b.txt')
+						])
 					}
 				])('A glob NOT explicitly seeking dotted items in $scenario will find only undotted items', async ({
 																													   glob,
@@ -217,8 +225,10 @@ describe('WorkspaceUtil', () => {
 
 					// ==== ASSERTIONS ====
 					const workspaceFiles: string[] = workspace.getFilesAndFolders();
-					expect(workspaceFiles).toHaveLength(expectation.length);
-					expect(workspaceFiles).toEqual(expect.arrayContaining(expectation));
+					expect(workspaceFiles).toHaveLength(expectation.size);
+					for (const expectedWorkspacePath of expectation.keys()) {
+						expect(workspaceFiles).toContain(expectedWorkspacePath);
+					}
 				});
 			});
 		});
