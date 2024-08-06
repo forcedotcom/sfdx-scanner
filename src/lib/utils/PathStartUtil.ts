@@ -8,11 +8,10 @@ export async function createPathStarts(pathStarts?: string[]): Promise<string[]|
 	}
 	const processedPaths: string[] = [];
 	for (const pathStart of pathStarts) {
-		// Globs assume the path separator character is '/' and treat '\\' as an escape character. So on OSs where
-		// the path separator character isn't '/', we need to convert paths into Glob syntax before checking whether
-		// they're actually Globs, to prevent misidentification.
-		const normalizedPathStart: string = path.sep === '/' ? pathStart: fg.convertPathToPattern(pathStart);
-		if (fg.isDynamicPattern(normalizedPathStart)) {
+		// If the path a star (*) in it, we assume it's a glob.
+		if (pathStart.includes("*")) {
+			// For the convenience of Windows users, we'll normalize glob paths into UNIX style, so they're valid globs.
+			const normalizedPathStart = pathStart.replace(/[\\/]/g, '/');
 			// Globs and method-level targeting are mutually exclusive.
 			if (path.basename(pathStart).includes('#')) {
 				throw new Error(getMessage(BundleName.PathStartUtil, 'error.glob-method-conflict', [pathStart]));

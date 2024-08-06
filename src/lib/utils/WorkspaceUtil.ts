@@ -1,15 +1,13 @@
-import path from 'node:path';
 import * as fg from 'fast-glob';
 import {CodeAnalyzer, Workspace} from '@salesforce/code-analyzer-core';
 
 export async function createWorkspace(core: CodeAnalyzer, workspacePaths: string[]): Promise<Workspace> {
 	const processedPaths: string[] = [];
 	for (const workspacePath of workspacePaths) {
-		// Globs assume the path separator character is '/' and treat '\\' as an escape character. So on OSs where
-		// the path separator character isn't '/', we need to convert paths into Glob syntax before checking whether
-		// they're actually Globs, to prevent misidentification.
-		const normalizedWorkspacePath: string = path.sep === '/' ? workspacePath : fg.convertPathToPattern(workspacePath);
-		if (fg.isDynamicPattern(normalizedWorkspacePath)) {
+		// If the path has a star (*) in it, we assume it's a glob.
+		if (workspacePath.includes("*")) {
+			// For the convenience of Windows users, we'll normalize glob paths into UNIX style, so they're valid globs.
+			const normalizedWorkspacePath = workspacePath.replace(/[\\/]/g, '/');
 			// NOTE: We're pushing the strict results of the Glob, meaning that the paths will be normalized to UNIX style.
 			processedPaths.push(...await fg.glob(normalizedWorkspacePath));
 		} else {

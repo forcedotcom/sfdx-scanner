@@ -51,7 +51,15 @@ describe('PathStartUtil', () => {
 				expect(output).toBeDefined();
 				expect(output as string[]).toHaveLength(input.length);
 				expect(output as string[]).toEqual(input);
-			})
+			});
+
+			it('File names with brackets are matched as files instead of globs', async () => {
+				const input = [path.join('.', 'path-name[with]brackets.txt')];
+				const output = await PathStartUtil.createPathStarts(input);
+				expect(output).toBeDefined();
+				expect(output as string[]).toHaveLength(input.length);
+				expect(output as string[]).toEqual(input);
+			});
 		});
 
 		describe('Glob matching', () => {
