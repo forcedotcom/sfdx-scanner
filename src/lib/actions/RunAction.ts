@@ -10,8 +10,8 @@ import {
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
-import {PathStartFactory} from '../factories/PathStartFactory';
-import {WorkspaceFactory} from '../factories/WorkspaceFactory';
+import {createPathStarts} from '../utils/PathStartUtil';
+import {createWorkspace} from '../utils/WorkspaceUtil';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
@@ -59,7 +59,7 @@ export class RunAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
-		const workspace: Workspace = await (new WorkspaceFactory()).create(core, input.workspace);
+		const workspace: Workspace = await createWorkspace(core, input.workspace);
 
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.
@@ -67,7 +67,7 @@ export class RunAction {
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {
 			workspace,
-			pathStartPoints: await (new PathStartFactory()).create(input['path-start'])
+			pathStartPoints: await createPathStarts(input['path-start'])
 		};
 		const results: RunResults = await core.run(ruleSelection, runOptions);
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements

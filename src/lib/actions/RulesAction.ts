@@ -1,8 +1,7 @@
 import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
-
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
-import {WorkspaceFactory} from '../factories/WorkspaceFactory';
+import {createWorkspace} from '../utils/WorkspaceUtil';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
@@ -46,7 +45,7 @@ export class RulesAction {
 		];
 		await Promise.all(addEnginePromises);
 		const selectOptions = input.workspace
-			? {workspace: await (new WorkspaceFactory()).create(core, input.workspace)}
+			? {workspace: await createWorkspace(core, input.workspace)}
 			: undefined;
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.
