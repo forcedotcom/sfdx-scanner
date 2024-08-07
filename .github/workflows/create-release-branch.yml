@@ -1,17 +1,6 @@
 name: create-release-branch
 on:
   workflow_dispatch:
-    inputs:
-      # When the workflow is executed manually, the user can select whether the branch should correspond to a major,
-      # minor, or patch release.
-      release-type:
-        type: choice
-        description: what kind of release?
-        options:
-          - major
-          - minor
-          - patch
-        required: true
   schedule:
     # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value,' and multiple values
     # can be specified with comma-separated lists. All times are UTC.
@@ -51,10 +40,10 @@ jobs:
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
-      # Checkout `dev`
+      # Checkout `dev-5`
       - uses: actions/checkout@v4
         with:
-          ref: 'dev'
+          ref: 'dev-5'
       # We need to set up Node and install our Node dependencies.
       - uses: actions/setup-node@v4
         with:
@@ -63,15 +52,7 @@ jobs:
       # Increment the version as desired locally, without actually committing anything.
       - name: Locally increment version
         run: |
-          # A workflow dispatch event lets the user specify what release type they want.
-          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
-            RELEASE_TYPE=${{ github.event.inputs.release-type }}
-          # The regularly scheduled releases are always minor.
-          else
-            RELEASE_TYPE=minor
-          fi
-          # Increment the version as needed.
-          npm --no-git-tag-version version $RELEASE_TYPE
+          npm --no-git-tag-version version prerelease --preid alpha
       # The branch protection rule for `release-x.y.z` branches prevents pushing commits directly. To work around this,
       # we create an interim branch that we _can_ push commits to, and we'll do our version bookkeeping in that branch
       # instead.
@@ -88,7 +69,8 @@ jobs:
       - run: |
           yarn upgrade
       # Use the GraphQL API to create a signed commit with the various changes.
-      - run: |
+      - name: Commit to interim branch
+        run: |
           # GraphQL needs to know what branch to push to.
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           # GraphQL needs a message for the commit.
@@ -139,7 +121,7 @@ jobs:
           git checkout -b release-$NEW_VERSION
           git push --set-upstream origin release-$NEW_VERSION
           # Now that we're done with the interim branch, delete it.
-          git push -d ${NEW_VERSION}-interim
+          git push -d origin ${NEW_VERSION}-interim
           # Output the release branch name so we can use it in later jobs.
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
   # Run all the various tests against the newly created branch.

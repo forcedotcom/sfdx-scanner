@@ -2,7 +2,7 @@ name: create-github-release
 on:
   pull_request:
     branches:
-      - main
+      - main-5
     types:
       # There's no event type for "merged", so we just run any time a PR is closed, and exit early
       # if the PR wasn't actually merged.
@@ -10,7 +10,7 @@ on:
 
 jobs:
   create-github-release:
-    # Since the workflow runs any time a PR against main is closed, we need this
+    # Since the workflow runs any time a PR against main-5 is closed, we need this
     # `if` to make sure that the workflow only does anything meaningful if the PR
     # was actually merged.
     if: github.event.pull_request.merged == true
@@ -18,10 +18,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout main
+      - name: Checkout main-5
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: main-5
       - name: Get version property
         id: get-version-property
         run: |
