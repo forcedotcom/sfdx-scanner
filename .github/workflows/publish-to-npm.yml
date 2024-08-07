@@ -81,7 +81,7 @@ jobs:
           java-version: '11' # For now, Java version is hardcoded.
       # Install SF, and the release candidate version.
       - run: npm install -g @salesforce/cli
-      - run: sf plugins install @salesforce/plugin-code-analyzer@latest-rc
+      - run: sf plugins install @salesforce/plugin-code-analyzer@latest-alpha-rc
       # Log the installed plugins for easier debugging.
       - run: sf plugins
       # Attempt to run the smoke tests.
@@ -102,7 +102,7 @@ jobs:
           node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/plugin-code-analyzer@${{ github.event.release.tag_name || inputs.tag }} latest
+          npm dist-tag add @salesforce/plugin-code-analyzer@${{ github.event.release.tag_name || inputs.tag }} latest-alpha
   # Step 5: Create a Pull Request for merging `main-5` into `dev-5`
   create-main2dev-pull-request:
     needs: promote-to-latest
