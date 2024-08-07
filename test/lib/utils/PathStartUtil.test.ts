@@ -186,6 +186,22 @@ describe('PathStartUtil', () => {
 		});
 
 		describe('Pathological cases', () => {
+			it('Negative globs are not supported', async () => {
+				const input = path.join('!', '.', '**', '*.cls');
+
+				// Typically we'd use Jest's `expect().toThrow()` method, but since we need to assert specific things about
+				// the error, we're doing this instead.
+				let thrownError: Error | null = null;
+				try {
+					await PathStartUtil.createPathStarts([input]);
+				} catch (e) {
+					thrownError = e;
+				}
+				expect(thrownError).toBeInstanceOf(Error);
+				// Expect the error message to mention globs in some capacity.
+				expect((thrownError as Error).message).toContain('glob');
+			});
+
 			it('Method matching and globs are mutually exclusive', async () => {
 				const input = path.join('.', '**', '*.cls#someMethod');
 

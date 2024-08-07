@@ -231,6 +231,24 @@ describe('WorkspaceUtil', () => {
 					}
 				});
 			});
+
+			it('Negative globs are unsupported', async () => {
+				const config: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults();
+				const core: CodeAnalyzer = new CodeAnalyzer(config);
+				const input = path.join('!', '.', 'undotted-file-1.txt');
+
+				// Typically we'd use Jest's `expect().toThrow()` method, but since we need to assert specific things about
+				// the error, we're doing this instead.
+				let thrownError: Error | null = null;
+				try {
+					await WorkspaceUtil.createWorkspace(core, [input]);
+				} catch (e) {
+					thrownError = e;
+				}
+				expect(thrownError).toBeInstanceOf(Error);
+				// Expect the error message to mention globs in some capacity.
+				expect((thrownError as Error).message).toContain('glob');
+			});
 		});
 	});
 });

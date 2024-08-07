@@ -13,7 +13,8 @@ export enum BundleName {
 	RuleViewer = 'rule-viewer',
 	RulesCommand = 'rules-command',
 	RunAction = 'run-action',
-	RunCommand = 'run-command'
+	RunCommand = 'run-command',
+	WorkspaceUtil = 'workspace-util'
 }
 
 class MessageCatalog {

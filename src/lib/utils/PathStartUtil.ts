@@ -8,8 +8,11 @@ export async function createPathStarts(pathStarts?: string[]): Promise<string[]|
 	}
 	const processedPaths: string[] = [];
 	for (const pathStart of pathStarts) {
-		// If the path a star (*) in it, we assume it's a glob.
-		if (pathStart.includes("*")) {
+		// Negative globs are not currently supported.
+		if (pathStart.includes("!")) {
+			throw new Error(getMessage(BundleName.PathStartUtil, 'error.negative-globs-unsupported', [pathStart]));
+		// If the path a star (*) or question mark in it, we assume it's a glob.
+		} else if (/[*?]/.test(pathStart)) {
 			// For the convenience of Windows users, we'll normalize glob paths into UNIX style, so they're valid globs.
 			const normalizedPathStart = pathStart.replace(/[\\/]/g, '/');
 			// Globs and method-level targeting are mutually exclusive.
