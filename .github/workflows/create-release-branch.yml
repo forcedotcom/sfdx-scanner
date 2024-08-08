@@ -40,6 +40,22 @@ jobs:
           # If the workflow wasn't manually triggered, then it should only be allowed to run to completion on the Friday
           # before Release Day.
           [[ $TODAY_DOW != 5 || $NEXT_RELEASE_DATE != $NEXT_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
+  create-alpha-release-branch:
+    runs-on: macos-latest
+    needs: verify-should-run
+    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
+    steps:
+      - name: Invoke alpha workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'create-release-branch.yml',
+              ref: 'dev-5'
+            });
   create-release-branch:
     runs-on: macos-latest
     needs: verify-should-run
