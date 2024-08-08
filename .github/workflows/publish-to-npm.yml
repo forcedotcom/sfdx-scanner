@@ -117,7 +117,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: 'main-5'
-      # Create a new branch based on `main`, so that merge conflicts can be manually resolved if need be.
+      # Create a new branch based on `main-5`, so that merge conflicts can be manually resolved if need be.
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           git checkout -b m2d/v$NEW_VERSION
@@ -128,9 +128,9 @@ jobs:
           # For whatever reason, the version of 'echo' on GHAs doesn't process backspace by default.
           # The non-POSIX-standard -e flag causes it to do that.
           echo -e "This branch and PR were automatically created following the successful release of v$NEW_VERSION.\n\
-          It must be MERGED into dev, NOT SQUASHED OR REBASED. Squashing or rebasing this branch onto dev can cause potentially irreconcilable merge conflicts later.\n\
-          As an additional safeguard and reminder, the title of this PR MUST include the word 'merging' in the description portion of the PR title, e.g., 'Main2Dev @W-XXXXXXX@ Merging main to dev after vX.Y.Z'.\n\
-          If there are conflicts between dev and this branch, you should do the following locally:\n\
+          It must be MERGED into dev-5, NOT SQUASHED OR REBASED. Squashing or rebasing this branch onto dev-5 can cause potentially irreconcilable merge conflicts later.\n\
+          As an additional safeguard and reminder, the title of this PR MUST include the word 'merging' in the description portion of the PR title, e.g., 'Main2Dev @W-XXXXXXX@ Merging main-5 to dev-5 after vX.Y.Z'.\n\
+          If there are conflicts between dev-5 and this branch, you should do the following locally:\n\
           - $ git checkout dev-5\n\
           - $ git pull\n\
           - $ git fetch --all\n\
