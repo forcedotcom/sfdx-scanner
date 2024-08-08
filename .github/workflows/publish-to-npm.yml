@@ -33,8 +33,8 @@ jobs:
         run: |
           echo "Tag commit must match latest commit in main-5. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
-      # Verify that the `package.json`'s version property is 5.Y.Z, as we want to restrict the `dev` and `release`
-      # branches to publishing v4.x.
+      # Verify that the `package.json`'s version property is 5.Y.Z, as we want to restrict the `dev-5` and `main-5`
+      # branches to publishing v5.x.
       - name: Verify major version
         run: |
           MAJOR_VERSION=`cat package.json | jq '.version | split(".") | .[0]' | xargs`
@@ -122,7 +122,7 @@ jobs:
           NEW_VERSION=$(jq -r ".version" package.json)
           git checkout -b m2d/v$NEW_VERSION
           git push --set-upstream origin m2d/v$NEW_VERSION
-      # Create a Pull Request from the new branch into `dev`.
+      # Create a Pull Request from the new branch into `dev-5`.
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           # For whatever reason, the version of 'echo' on GHAs doesn't process backspace by default.
@@ -135,7 +135,7 @@ jobs:
           - $ git pull\n\
           - $ git fetch --all\n\
           - $ git checkout m2d/v$NEW_VERSION\n\
-          - $ git pull origin dev --no-rebase # You MUST include this flag, or someone's day will be ruined.\n\
+          - $ git pull origin dev-5 --no-rebase # You MUST include this flag, or someone's day will be ruined.\n\
           - Resolve the merge conflicts manually. When in doubt, ask the code's author for help.\n\
           - $ git commit\n\
           - $ git push" > body.txt
