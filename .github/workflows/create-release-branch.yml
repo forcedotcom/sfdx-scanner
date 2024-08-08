@@ -5,7 +5,6 @@ on:
 jobs:
   create-release-branch:
     runs-on: macos-latest
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
     env:
       GH_TOKEN: ${{ github.token }}
     permissions:
