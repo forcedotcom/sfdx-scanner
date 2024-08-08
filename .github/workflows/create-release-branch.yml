@@ -12,54 +12,10 @@ on:
           - minor
           - patch
         required: true
-  schedule:
-    # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value,' and multiple values
-    # can be specified with comma-separated lists. All times are UTC.
-    # So this expression means "run at 12 PM UTC, every Friday".
-    - cron: "0 12 * * 5"
 
 jobs:
-  # Depending on circumstances, we may want to exit early instead of running the workflow to completion.
-  verify-should-run:
-    runs-on: macos-latest
-    outputs:
-      should-run: ${{ steps.main.outputs.should_run }}
-    steps:
-      - id: main
-        run: |
-          # If the workflow was manually triggered, then it should always be allowed to run to completion.
-          [[ "${{ github.event_name }}" = "workflow_dispatch" ]] && echo "should_run=true" >> "$GITHUB_OUTPUT" && exit 0
-          # `date -u` returns UTC datetime, and `%u` formats the output to be the day of the week, with 1 being Monday,
-          # 2 being Tuesday, etc.
-          TODAY_DOW=$(date -u +%u)
-          # This `date` expression returns the last Tuesday of the month, which is our Release Day. %d formats the output
-          # as the day of the month (1-31).
-          NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue +%d)
-          # This `date` expression returns next Tuesday, and `%d` formats the output as the day of the month (1-31).
-          NEXT_TUESDAY_DATE=$(date -u -v+tue +%d)
-          # If the workflow wasn't manually triggered, then it should only be allowed to run to completion on the Friday
-          # before Release Day.
-          [[ $TODAY_DOW != 5 || $NEXT_RELEASE_DATE != $NEXT_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
-  create-alpha-release-branch:
-    runs-on: macos-latest
-    needs: verify-should-run
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
-    steps:
-      - name: Invoke alpha workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-release-branch.yml',
-              ref: 'dev-5'
-            });
   create-release-branch:
     runs-on: macos-latest
-    needs: verify-should-run
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
     env:
       GH_TOKEN: ${{ github.token }}
     permissions:
