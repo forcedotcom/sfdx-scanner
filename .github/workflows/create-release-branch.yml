@@ -1,48 +1,10 @@
 name: create-release-branch
 on:
   workflow_dispatch:
-    inputs:
-      # When the workflow is executed manually, the user can select whether the branch should correspond to a major,
-      # minor, or patch release.
-      release-type:
-        type: choice
-        description: what kind of release?
-        options:
-          - major
-          - minor
-          - patch
-        required: true
-  schedule:
-    # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value,' and multiple values
-    # can be specified with comma-separated lists. All times are UTC.
-    # So this expression means "run at 12 PM UTC, every Friday".
-    - cron: "0 12 * * 5"
 
 jobs:
-  # Depending on circumstances, we may want to exit early instead of running the workflow to completion.
-  verify-should-run:
-    runs-on: macos-latest
-    outputs:
-      should-run: ${{ steps.main.outputs.should_run }}
-    steps:
-      - id: main
-        run: |
-          # If the workflow was manually triggered, then it should always be allowed to run to completion.
-          [[ "${{ github.event_name }}" = "workflow_dispatch" ]] && echo "should_run=true" >> "$GITHUB_OUTPUT" && exit 0
-          # `date -u` returns UTC datetime, and `%u` formats the output to be the day of the week, with 1 being Monday,
-          # 2 being Tuesday, etc.
-          TODAY_DOW=$(date -u +%u)
-          # This `date` expression returns the last Tuesday of the month, which is our Release Day. %d formats the output
-          # as the day of the month (1-31).
-          NEXT_RELEASE_DATE=$(date -u -v1d -v+1m -v-1d -v-tue +%d)
-          # This `date` expression returns next Tuesday, and `%d` formats the output as the day of the month (1-31).
-          NEXT_TUESDAY_DATE=$(date -u -v+tue +%d)
-          # If the workflow wasn't manually triggered, then it should only be allowed to run to completion on the Friday
-          # before Release Day.
-          [[ $TODAY_DOW != 5 || $NEXT_RELEASE_DATE != $NEXT_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
   create-release-branch:
     runs-on: macos-latest
-    needs: verify-should-run
     if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
     env:
       GH_TOKEN: ${{ github.token }}
@@ -51,10 +13,10 @@ jobs:
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
-      # Checkout `dev`
+      # Checkout `dev-5`
       - uses: actions/checkout@v4
         with:
-          ref: 'dev'
+          ref: 'dev-5'
       # We need to set up Node and install our Node dependencies.
       - uses: actions/setup-node@v4
         with:
@@ -63,15 +25,7 @@ jobs:
       # Increment the version as desired locally, without actually committing anything.
       - name: Locally increment version
         run: |
-          # A workflow dispatch event lets the user specify what release type they want.
-          if [[ "${{ github.event_name }}" = "workflow_dispatch" ]]; then
-            RELEASE_TYPE=${{ github.event.inputs.release-type }}
-          # The regularly scheduled releases are always minor.
-          else
-            RELEASE_TYPE=minor
-          fi
-          # Increment the version as needed.
-          npm --no-git-tag-version version $RELEASE_TYPE
+          npm --no-git-tag-version version prerelease --preid alpha
       # The branch protection rule for `release-x.y.z` branches prevents pushing commits directly. To work around this,
       # we create an interim branch that we _can_ push commits to, and we'll do our version bookkeeping in that branch
       # instead.
@@ -88,7 +42,8 @@ jobs:
       - run: |
           yarn upgrade
       # Use the GraphQL API to create a signed commit with the various changes.
-      - run: |
+      - name: Commit to interim branch
+        run: |
           # GraphQL needs to know what branch to push to.
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
           # GraphQL needs a message for the commit.
@@ -139,7 +94,7 @@ jobs:
           git checkout -b release-$NEW_VERSION
           git push --set-upstream origin release-$NEW_VERSION
           # Now that we're done with the interim branch, delete it.
-          git push -d ${NEW_VERSION}-interim
+          git push -d origin ${NEW_VERSION}-interim
           # Output the release branch name so we can use it in later jobs.
           echo "branch_name=release-$NEW_VERSION" >> "$GITHUB_OUTPUT"
   # Run all the various tests against the newly created branch.
