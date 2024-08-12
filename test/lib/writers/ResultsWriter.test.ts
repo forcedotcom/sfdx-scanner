@@ -20,8 +20,8 @@ describe('ResultsWriter implementations', () => {
 	describe('ResultsFileWriter', () => {
 		it.each([
 			{ext: '.csv', expectedOutput: `Results formatted as ${OutputFormat.CSV}`},
-			//{ext: '.html', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
-			//{ext: '.htm', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
+			{ext: '.html', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
+			{ext: '.htm', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
 			{ext: '.json', expectedOutput: `Results formatted as ${OutputFormat.JSON}`},
 			//{ext: '.junit', expectedOutput: `Results formatted as ${OutputFormat.JUNIT}`},
 			//{ext: '.junit.xml', expectedOutput: `Results formatted as ${OutputFormat.JUNIT}`},
@@ -48,8 +48,6 @@ describe('ResultsWriter implementations', () => {
 		 * in the case array for the valid format tests.
 		 */
 		it.each([
-			{ext: '.html'},
-			{ext: '.htm'},
 			{ext: '.junit'},
 			{ext: '.junit.xml'},
 			{ext: '.sarif'},

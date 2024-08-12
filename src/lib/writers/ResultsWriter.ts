@@ -33,7 +33,7 @@ export class ResultsFileWriter implements ResultsWriter {
 		if (ext === '.csv') {
 			this.format = OutputFormat.CSV;
 		} else if (['.html', '.htm'].includes(ext)) {
-			throw new Error('TODO: Support HTML-type output');
+			this.format = OutputFormat.HTML;
 		} else if (ext === '.sarif' || file.toLowerCase().endsWith('.sarif.json')) {
 			throw new Error('TODO: Support SARIF-type output');
 		// Check for `.json` AFTER checking for `.sarif.json`!
