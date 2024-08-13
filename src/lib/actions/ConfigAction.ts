@@ -8,7 +8,7 @@ export type ConfigDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
-	writer: ConfigWriter;
+	writer?: ConfigWriter;
 	viewer: ConfigViewer;
 };
 

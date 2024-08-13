@@ -2,7 +2,7 @@ import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {ConfigAction, ConfigDependencies} from '../../lib/actions/ConfigAction';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
-import {CompositeConfigWriter} from '../../lib/writers/ConfigWriter';
+import {ConfigFileWriter} from '../../lib/writers/ConfigWriter';
 import {ConfigDisplayViewer} from '../../lib/viewers/ConfigViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
@@ -49,8 +49,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			summary: getMessage(BundleName.ConfigCommand, 'flags.output-file.summary'),
 			description: getMessage(BundleName.ConfigCommand, 'flags.output-file.description'),
 			char: 'f',
-			multiple: true,
-			delimiter: ',',
 			// TODO: UN-HIDE WHEN ASSOCIATED FEATURES ARE IMPLEMENTED
 			hidden: true
 		})
@@ -63,14 +61,17 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 		await action.execute(parsedFlags);
 	}
 
-	protected createDependencies(outputFiles: string[] = []): ConfigDependencies {
+	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		return {
+		const dependencies: ConfigDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
-			writer: CompositeConfigWriter.fromFiles(outputFiles),
 			viewer: new ConfigDisplayViewer(uxDisplay)
 		};
+		if (outputFile) {
+			dependencies.writer = ConfigFileWriter.fromFile(outputFile);
+		}
+		return dependencies;
 	}
 }

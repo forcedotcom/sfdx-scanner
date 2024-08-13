@@ -2,7 +2,7 @@ import {stubSfCommandUx} from '@salesforce/sf-plugins-core';
 import {TestContext} from '@salesforce/core/lib/testSetup';
 import ConfigCommand from '../../../src/commands/code-analyzer/config';
 import {ConfigAction, ConfigInput} from '../../../src/lib/actions/ConfigAction';
-import {CompositeConfigWriter} from '../../../src/lib/writers/ConfigWriter';
+import {ConfigFileWriter} from '../../../src/lib/writers/ConfigWriter';
 
 describe('`code-analyzer config` tests', () => {
 	const $$ = new TestContext();
@@ -157,15 +157,15 @@ describe('`code-analyzer config` tests', () => {
 
 		describe('--output-file', () => {
 
-			let fromFilesSpy: jest.SpyInstance;
-			let receivedFiles: string[];
+			let fromFileSpy: jest.SpyInstance;
+			let receivedFile: string|null;
 
 			beforeEach(() => {
-				const originalFromFiles = CompositeConfigWriter.fromFiles;
-				fromFilesSpy = jest.spyOn(CompositeConfigWriter, 'fromFiles').mockImplementation(files => {
-					receivedFiles = files;
-					return originalFromFiles(files);
-				})
+				const originalFromFile = ConfigFileWriter.fromFile;
+				fromFileSpy = jest.spyOn(ConfigFileWriter, 'fromFile').mockImplementation(file => {
+					receivedFile = file;
+					return originalFromFile(file);
+				});
 			});
 
 
@@ -174,37 +174,8 @@ describe('`code-analyzer config` tests', () => {
 				await ConfigCommand.run(['--output-file', inputValue]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual([inputValue]);
-			});
-
-			it('Can be supplied once with multiple comma-separated values', async () => {
-				const inputValue =['./somefile.yml', './someotherfile.yml'];
-				await ConfigCommand.run(['--output-file', inputValue.join(',')]);
-				expect(executeSpy).toHaveBeenCalled();
-				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual(inputValue);
-			});
-
-			it('Can be supplied multiple times with one value each', async () => {
-				const inputValue1 = './somefile.yml';
-				const inputValue2 = './someotherfile.yml';
-				await ConfigCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
-				expect(executeSpy).toHaveBeenCalled();
-				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual([inputValue1, inputValue2]);
-			});
-
-			it('Can be supplied multiple times with multiple comma-separated values', async () => {
-				const inputValue1 = ['./somefile.yml', './someotherfile.yml'];
-				const inputValue2 = ['./athirdfile.yml', './afourthfile.yml'];
-				await ConfigCommand.run(['--output-file', inputValue1.join(','), '--output-file', inputValue2.join(',')]);
-				expect(executeSpy).toHaveBeenCalled();
-				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual([...inputValue1, ...inputValue2]);
+				expect(fromFileSpy).toHaveBeenCalled();
+				expect(receivedFile).toEqual(inputValue);
 			});
 
 			it('Can be referenced by its shortname, -f', async () => {
@@ -212,16 +183,23 @@ describe('`code-analyzer config` tests', () => {
 				await ConfigCommand.run(['-f', inputValue]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual([inputValue]);
+				expect(fromFileSpy).toHaveBeenCalled();
+				expect(receivedFile).toEqual(inputValue);
+			});
+
+			it('Cannot be supplied multiple times', async () => {
+				const inputValue1 = './somefile.yml';
+				const inputValue2 = './someotherfile.yml';
+				const executionPromise = ConfigCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
+				await expect(executionPromise).rejects.toThrow(`Flag --output-file can only be specified once`);
+				expect(executeSpy).not.toHaveBeenCalled();
 			});
 
 			it('Is unused if not directly specified', async () => {
 				await ConfigCommand.run([]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(fromFilesSpy).toHaveBeenCalled();
-				expect(receivedFiles).toEqual([]);
+				expect(fromFileSpy).not.toHaveBeenCalled();
 			});
 
 		});
