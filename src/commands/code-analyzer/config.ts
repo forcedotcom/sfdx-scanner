@@ -1,7 +1,5 @@
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {ConfigAction, ConfigDependencies} from '../../lib/actions/ConfigAction';
-import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
-import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {ConfigFileWriter} from '../../lib/writers/ConfigWriter';
 import {ConfigRawYamlViewer} from '../../lib/viewers/ConfigViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
@@ -62,8 +60,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const dependencies: ConfigDependencies = {
-			configFactory: new CodeAnalyzerConfigFactoryImpl(),
-			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			viewer: new ConfigRawYamlViewer(uxDisplay)
 		};
