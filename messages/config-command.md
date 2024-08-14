@@ -10,21 +10,17 @@ To apply a custom configuration with Code Analyzer, either keep your custom conf
 
 # command.examples
 
-- Display the current state configuration for Code Analyzer based on the default recommendations, and a local `code-analyzer.yml` file if such a file exists: 
+- Display the current state of configuration for Code Analyzer using the default behavior: display top level configuration, display the engine and rule override settings associated with all the rules that have a 'Recommended' tag; and automatically apply any existing custom configuration settings found in a "code-analyzer.yml" or "code-analyzer.yaml" file in the current folder: 
 
      <%= config.bin %> <%= command.id %>
 
-- This example is identical to the previous one, if `./code-analyzer.yml` is a real file.
+- This example is identical to the previous one, if `./code-analyzer.yml` exists.
 
      <%= config.bin %> <%= command.id %> --config-file ./code-analyzer.yml --rule-selector Recommended
 
 - Write the current state of configuration to `code-analyzer.yml`, including any configuration from an existing `code-analyzer.yml` file. This preserves all values from the original config, but will overwrite any comments:
 
      <%= config.bin %> <%= command.id %> --config-file ./code-analyzer.yml --output-file code-analyzer.yml
-
-- This example is equivalent to the previous one:
-
-     <%= config.bin %> <%= command.id %> --output-file code-analyzer.yml
 
 - Display the configuration state for all rules, instead of just the recommended ones:
 
@@ -33,13 +29,25 @@ To apply a custom configuration with Code Analyzer, either keep your custom conf
 
      <%= config.bin %> <%= command.id %> --workspace ./src
 
+- Display any relevant configuration settings associated with the rule name 'no-undef' from the 'eslint' engine:
+
+	<%= config.bin %> <%= command.id %> --rule-selection eslint:no-undef
+
+- Load from an existing configuration called 'existing-config.yml', but write to a new configuration file called 'new-config.yml' the configuration state that is applicable to all rules that are relevant to workspace located in current working directory:
+
+  <%= config.bin %> <%= command.id %> --config-file ./existing-config.yml --rule-selection all --workspace . --output-file ./subfolder-config.yml
+
 # flags.workspace.summary
 
 Set of files you want to include in the code analysis.
 
 # flags.workspace.description
 
-Specify this flag to limit the configuration state to rules applicable to the specified files. Typically, a workspace is a single project folder containing all your files, but it can also be a one or more folders, files, or glob patterns.
+If you specify this flag, the command returns a more accurate list of the rules that apply to the files that make up your workspace. Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
+
+This command uses the type of file in the workspace, such as JavaScript or Typescript, to determine the rules to list. For example, if your workspace contains only JavaScript files, the command doesn't list TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+
+Some engines may be configured to add additional rules based on what it finds in your workspace.  For example, if you set the engines.eslint.auto_discover_eslint_config value of your code-analyzer.yml file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
 
 # flags.rule-selector.summary
 
@@ -67,7 +75,7 @@ If this flag is not specified, then by default Code Analyzer will look for and a
 
 # flags.output-file.summary
 
-Output file that contains the final config. Will always be formatted as YAML.
+Output file to write the configuration state to. The file will be written in YAML format.
 
 # flags.output-file.description
 
