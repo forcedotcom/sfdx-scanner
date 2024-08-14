@@ -92,7 +92,7 @@ Code Analyzer has an internal default configuration for its rule and engine prop
 
 We recommend that you name your Code Analyzer configuration file "code-analyzer.yml" or "code-analyzer.yaml" and put it at the root of your workspace. You then don't need to use this flag when you run the `<%= command.id %>` command from the root of your workspace, because it automatically looks for either file in the current folder, and if found, applies its rule overrides and engine settings. If you want to name the file something else, or put it in an alternative folder, then you must specify this flag.
 
-To help you get started, use the `code-analyzer init` command to create your first Code Analyzer configuration file. With it, you can change the severity of an existing rule, change a rule's tags, and so on. Then use this flag to specify the file so that the command takes your customizations into account.
+To help you get started, use the `code-analyzer config` command to create your first Code Analyzer configuration file. With it, you can change the severity of an existing rule, change a rule's tags, and so on. Then use this flag to specify the file so that the command takes your customizations into account.
 
 # flags.view.summary
 

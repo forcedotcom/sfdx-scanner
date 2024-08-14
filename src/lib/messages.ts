@@ -5,7 +5,7 @@ import {Tokens} from '@salesforce/core/lib/messages';
 Messages.importMessagesDirectory(__dirname);
 
 export enum BundleName {
-	InitCommand = 'init-command',
+	ConfigCommand = 'config-command',
 	OutputFileWriter = 'output-file-writer',
 	PathStartUtil = 'path-start-util',
 	ProgressEventListener = 'progress-event-listener',
