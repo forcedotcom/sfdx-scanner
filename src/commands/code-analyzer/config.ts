@@ -3,7 +3,7 @@ import {ConfigAction, ConfigDependencies} from '../../lib/actions/ConfigAction';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {ConfigFileWriter} from '../../lib/writers/ConfigWriter';
-import {ConfigDisplayViewer} from '../../lib/viewers/ConfigViewer';
+import {ConfigRawYamlViewer} from '../../lib/viewers/ConfigViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -48,9 +48,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.output-file.summary'),
 			description: getMessage(BundleName.ConfigCommand, 'flags.output-file.description'),
-			char: 'f',
-			// TODO: UN-HIDE WHEN ASSOCIATED FEATURES ARE IMPLEMENTED
-			hidden: true
+			char: 'f'
 		})
 	};
 
@@ -67,7 +65,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
-			viewer: new ConfigDisplayViewer(uxDisplay)
+			viewer: new ConfigRawYamlViewer(uxDisplay)
 		};
 		if (outputFile) {
 			dependencies.writer = ConfigFileWriter.fromFile(outputFile);
