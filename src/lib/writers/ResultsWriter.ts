@@ -45,7 +45,7 @@ export class ResultsFileWriter implements ResultsWriter {
 		} else if (ext === '.xml') {
 			this.format = OutputFormat.XML;
 		} else {
-			throw new Error(getMessage(BundleName.OutputFileWriter, 'error.unrecognized-file-format', [file]));
+			throw new Error(getMessage(BundleName.ResultsWriter, 'error.unrecognized-file-format', [file]));
 		}
 	}
 
