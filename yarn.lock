@@ -1539,10 +1539,10 @@
   dependencies:
     "@types/node" "^20.0.0"
 
-"@salesforce/code-analyzer-eslint-engine@0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-eslint-engine/-/code-analyzer-eslint-engine-0.8.0.tgz#bb14ab437b1c3ea085e4da531ecaa4f3d2d2146b"
-  integrity sha512-etFqZ8ELEtg3HvCrP7fx7lcu2sbL0SWxPl8kDxXBbCGGmXYJ+fIl4U6AxAq1VSSfKtUVeKnmzm0dEaPs5ekphg==
+"@salesforce/code-analyzer-eslint-engine@0.8.1":
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-eslint-engine/-/code-analyzer-eslint-engine-0.8.1.tgz#8ef685115cc9e198dc4cdc58bbcf9be15c8ca3df"
+  integrity sha512-JNPpqO7tyBEudvwpSpavTNM3xKPINUjvYQ8yuIk0tQTnGBD9/SUmd5KzFT2vlCZJQHMm1HrXruzYJATmuHPG7A==
   dependencies:
     "@babel/core" "^7.24.7"
     "@babel/eslint-parser" "^7.24.7"
