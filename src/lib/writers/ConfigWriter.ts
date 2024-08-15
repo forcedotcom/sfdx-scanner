@@ -11,14 +11,9 @@ export class ConfigFileWriter implements ConfigWriter {
 	private readonly file: string;
 	private readonly format: OutputFormat;
 
-	private constructor(file: string) {
+	private constructor(file: string, format: OutputFormat) {
 		this.file = file;
-		const ext = path.extname(file).toLowerCase();
-		if (ext === '.yaml' || ext === '.yml') {
-			this.format = OutputFormat.YAML;
-		} else {
-			throw new Error(getMessage(BundleName.ConfigWriter, 'error.unrecognized-file-format', [file]));
-		}
+		this.format = format;
 	}
 
 	public write(model: ConfigModel): void {
@@ -26,6 +21,11 @@ export class ConfigFileWriter implements ConfigWriter {
 	}
 
 	public static fromFile(file: string): ConfigFileWriter {
-		return new ConfigFileWriter(file);
+		const ext = path.extname(file).toLowerCase();
+		if (ext === '.yaml' || ext === '.yml') {
+			return new ConfigFileWriter(file, OutputFormat.YAML);
+		} else {
+			throw new Error(getMessage(BundleName.ConfigWriter, 'error.unrecognized-file-format', [file]));
+		}
 	}
 }

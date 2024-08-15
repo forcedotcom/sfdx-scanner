@@ -2,12 +2,14 @@ import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/ac
 import {DummyConfigModel} from '../../../src/lib/models/ConfigModel';
 import {SpyConfigViewer} from '../../stubs/SpyConfigViewer';
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
+import {SpyDisplay} from '../../stubs/SpyDisplay';
 
 describe('ConfigAction tests', () => {
 	describe('Output processing', () => {
 		it('When a ConfigWriter is not provided, only the ConfigViewer is used', async () => {
 			const viewer = new SpyConfigViewer();
 			const dependencies: ConfigDependencies = {
+				display: new SpyDisplay(),
 				logEventListeners: [],
 				viewer
 			};
@@ -29,6 +31,7 @@ describe('ConfigAction tests', () => {
 			const viewer = new SpyConfigViewer();
 			const writer = new SpyConfigWriter();
 			const dependencies: ConfigDependencies = {
+				display: new SpyDisplay(),
 				logEventListeners: [],
 				viewer,
 				writer

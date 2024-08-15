@@ -2,11 +2,13 @@ import {ConfigWriter} from '../writers/ConfigWriter';
 import {ConfigViewer} from '../viewers/ConfigViewer';
 import {LogEventListener} from '../listeners/LogEventListener';
 import {ConfigModel, DummyConfigModel} from '../models/ConfigModel';
+import {Display} from '../Display';
 
 export type ConfigDependencies = {
 	logEventListeners: LogEventListener[];
 	writer?: ConfigWriter;
 	viewer: ConfigViewer;
+	display: Display;
 };
 
 export type ConfigInput = {
@@ -24,6 +26,8 @@ export class ConfigAction {
 	}
 
 	public execute(_input: ConfigInput): Promise<void> {
+		// TODO: This warning is temporary. When it's removed, consider removing the Display as a dependency.
+		this.dependencies.display.displayWarning('This command is still a work-in-progress. Currently it can only generate a fixed config file.');
 		// TODO: Use the input to construct a more intelligent Config Model; possibly depend on a ConfigModelGenerator?
 		const configModel: ConfigModel = new DummyConfigModel();
 

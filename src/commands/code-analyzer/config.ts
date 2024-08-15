@@ -60,6 +60,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const dependencies: ConfigDependencies = {
+			display: uxDisplay,
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			viewer: new ConfigRawYamlViewer(uxDisplay)
 		};
