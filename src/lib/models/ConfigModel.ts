@@ -14,14 +14,15 @@ export class DummyConfigModel {
 }
 
 export const DUMMY_CONFIG: string =
-`# The absolute folder path to which all other path values in this configuration may be relative to.
+`
+# The absolute folder path to which all other path values in this configuration may be relative to.
 # If not specified or if equal to null, then the value is automatically chosen to be the parent folder of your Code Analyzer
 # configuration file if it exists, or the current working directory otherwise.
-config_root: null # Last calculated by the config command as: '/Users/stephen.carter/temp'
+config_root: null # Last calculated by the config command as: <COMING_SOON>
 
 # Folder where to store log files. May be an absolute path or a path relative to config_root.
 # If not specified or if equal to null, then the value is automatically chosen to be your machine's default temporary directory
-log_folder: null  # Last calculated by the config command as: '/var/folders/1x/9xkd2bj500z58k2s5b8f2y980000gp/T/'
+log_folder: null  # Last calculated by the config command as: <COMING_SOON>
 
 # (Use at your own risk. This is an experimental property that is not officially supported.)
 # List of EnginePlugin module paths to dynamically add to Code Analyzer. Each path may be absolute or relative to config_root.
@@ -89,6 +90,7 @@ engines:
   # Custom configuration settings for the 'regex' engine
   # See <LINK_COMING_SOON> to learn more about these settings.
   regex:
+
     # Whether to turn off the 'regex' engine so that it is not included when running Code Analyzer commands
     disable_engine: false
 
@@ -118,13 +120,13 @@ engines:
     #         violation_message: "A comment with a TODO statement was found. Please remove TODO statements from your apex code."
     #         severity: "Info"
     #         tags: ['TechDebt']
-    #
-
     custom_rules: {} # Remove this empty object {} when you are ready to define your first custom rule
 
   # Custom configuration settings for the 'retire-js' engine
   # See <LINK_COMING_SOON> to learn more about these settings.
   retire-js:
+
     # Whether to turn off the 'retire-js' engine so that it is not included when running Code Analyzer commands
     disable_engine: false
+
 `;
