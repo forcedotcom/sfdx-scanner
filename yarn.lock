@@ -1559,13 +1559,14 @@
     eslint-plugin-import "^2.29.1"
     eslint-plugin-jest "^28.6.0"
 
-"@salesforce/code-analyzer-regex-engine@0.8.0":
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-regex-engine/-/code-analyzer-regex-engine-0.8.0.tgz#55413cdbc539d62a0b3a4a603745cf44614be7d1"
-  integrity sha512-V80uM+ni/0TifPK4VwveEZX0tbH2KajG/5lkZ4lFo5CVq4xa89lt/hkaepCAEczh+Azx4U9NSECsnUiqejXScA==
+"@salesforce/code-analyzer-regex-engine@0.8.2":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-regex-engine/-/code-analyzer-regex-engine-0.8.2.tgz#464e0e9f2f807e4f6319de661833166cf456aa52"
+  integrity sha512-xjfQigL2aAUVlKuYVgnITVnM6b4igVGRpJKpgHbNBpgzVRAe9rHz9+mogFZBfi0yjKs5qWU5CM14WowVWUM7Ig==
   dependencies:
     "@salesforce/code-analyzer-engine-api" "0.8.0"
     "@types/node" "^20.0.0"
+    isbinaryfile "^5.0.2"
 
 "@salesforce/code-analyzer-retirejs-engine@0.8.0":
   version "0.8.0"
