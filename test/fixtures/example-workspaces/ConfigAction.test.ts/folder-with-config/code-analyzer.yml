@@ -1,0 +1,6 @@
+
+rules:
+  stubEngine2:
+    stub2RuleA:
+      # This rule normally does not have the Recommended tag. We're adding it.
+      tags: ['CodeStyle', 'Recommended', 'Security']
