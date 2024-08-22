@@ -1,3 +1,4 @@
+import {CodeAnalyzerConfig, RuleSelection} from '@salesforce/code-analyzer-core';
 
 export enum OutputFormat {
 	YAML = "YAML"
@@ -7,9 +8,15 @@ export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
+export type ConfigModelGeneratorFunction = (rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) => ConfigModel;
+
 export class DummyConfigModel {
 	toFormattedOutput(_format: OutputFormat): string {
 		return DUMMY_CONFIG;
+	}
+
+	public static fromSelection(_rawConfig: CodeAnalyzerConfig, _ruleSelection: RuleSelection) {
+		return new DummyConfigModel();
 	}
 }
 

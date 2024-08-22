@@ -1,85 +1,128 @@
+import path from 'node:path';
+import {CodeAnalyzerConfig} from "@salesforce/code-analyzer-core";
+
+import {CodeAnalyzerConfigFactoryImpl} from "../../../src/lib/factories/CodeAnalyzerConfigFactory";
 import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/actions/ConfigAction';
-import {DummyConfigModel} from '../../../src/lib/models/ConfigModel';
+
+import {StubEnginePluginsFactory_withFunctionalStubEngine} from "../../stubs/StubEnginePluginsFactories";
+import {SpyConfigModel} from '../../stubs/StubConfigModel';
 import {SpyConfigViewer} from '../../stubs/SpyConfigViewer';
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
-import {SpyDisplay} from '../../stubs/SpyDisplay';
 
 describe('ConfigAction tests', () => {
-	describe('Output processing', () => {
-		it('When a ConfigWriter is not provided, only the ConfigViewer is used', async () => {
-			const viewer = new SpyConfigViewer();
-			const dependencies: ConfigDependencies = {
-				display: new SpyDisplay(),
-				logEventListeners: [],
-				viewer
-			};
+	const ORIGINAL_DIRECTORY = process.cwd();
 
-			const action = ConfigAction.createAction(dependencies);
+	let spyViewer: SpyConfigViewer;
+	let dependencies: ConfigDependencies;
 
-			const input: ConfigInput = {
-				'rule-selector': []
-			};
+	beforeEach(() => {
+		spyViewer = new SpyConfigViewer();
+		dependencies = {
+			logEventListeners: [],
+			progressEventListeners: [],
+			viewer: spyViewer,
+			configFactory: new CodeAnalyzerConfigFactoryImpl(),
+			modelGenerator: SpyConfigModel.fromSelection,
+			pluginsFactory: new StubEnginePluginsFactory_withFunctionalStubEngine()
+		};
+	});
 
-			await action.execute(input);
+	afterEach(() => {
+		// These tests will involve moving into a new directory, so we should make sure to move back into the original
+		// directory after each test.
+		process.chdir(ORIGINAL_DIRECTORY);
+	});
 
-			const viewerCallHistory = viewer.getCallHistory();
-			expect(viewerCallHistory).toHaveLength(1);
-			expect(viewerCallHistory[0]).toBeInstanceOf(DummyConfigModel);
+	describe('When there is NOT an existing config...', () => {
+		beforeEach(() => {
+			const pathToTestDirectory = path.join(__dirname, '..', '..', 'fixtures', 'example-workspaces', 'ConfigAction.test.ts', 'folder-without-config');
+			process.chdir(pathToTestDirectory);
 		});
 
-		it('When a ConfigWriter is provided, both it and the ConfigViewer are used', async () => {
-			const viewer = new SpyConfigViewer();
-			const writer = new SpyConfigWriter();
-			const dependencies: ConfigDependencies = {
-				display: new SpyDisplay(),
-				logEventListeners: [],
-				viewer,
-				writer
-			};
+		it('The default configuration is used', async () => {
+			await testScenario(dependencies, ['all'], 8, CodeAnalyzerConfig.withDefaults());
+		});
 
-			const action = ConfigAction.createAction(dependencies);
+		it('Rule selections properly synthesize with the default configuration', async () => {
+			await testScenario(dependencies, ['codestyle'], 2, CodeAnalyzerConfig.withDefaults());
+		});
 
-			const input: ConfigInput = {
-				'rule-selector': []
-			};
+		it('If a ConfigWriter is provided, it is used along with the ConfigViewer', async () => {
+			// We need to add a Writer to the dependencies.
+			const spyWriter = new SpyConfigWriter();
+			dependencies.writer = spyWriter;
 
-			await action.execute(input);
+			await testScenario(dependencies, ['all'], 8, CodeAnalyzerConfig.withDefaults());
 
-			const viewerCallHistory = viewer.getCallHistory();
-			expect(viewerCallHistory).toHaveLength(1);
-			expect(viewerCallHistory[0]).toBeInstanceOf(DummyConfigModel);
-			const writerCallHistory = writer.getCallHistory();
+			// Make sure that the Writer was provided the right type of ConfigModel.
+			const writerCallHistory = spyWriter.getCallHistory();
 			expect(writerCallHistory).toHaveLength(1);
-			expect(writerCallHistory[0]).toBeInstanceOf(DummyConfigModel);
+			expect(writerCallHistory[0]).toBeInstanceOf(SpyConfigModel);
+
+			// Make sure that the Writer's ConfigModel was instantiated from the right things.
+			const writtenSpyConfigModel: SpyConfigModel = writerCallHistory[0] as SpyConfigModel;
+			// The engines we're using have a total of 8 rules.
+			expect(writtenSpyConfigModel.getRuleSelection().getCount()).toEqual(8);
+			expect(writtenSpyConfigModel.getRawConfig()).toEqual(CodeAnalyzerConfig.withDefaults());
 		});
 	});
 
-	describe('Base config selection', () => {
-		// TODO: THIS TEST MAY ULTIMATELY BELONG IN A HYPOTHETICAL `ConfigModelFactory.test.ts`
-		xit('When no local config is available, the base config is used', () => {
+	describe('When there IS an existing config...', () => {
+		let expectedBaseConfig: CodeAnalyzerConfig;
 
+		beforeEach(async () => {
+			const pathToTestDirectory = path.join(__dirname, '..', '..', 'fixtures', 'example-workspaces', 'ConfigAction.test.ts', 'folder-with-config');
+			process.chdir(pathToTestDirectory);
+			expectedBaseConfig = CodeAnalyzerConfig.fromFile('code-analyzer.yml');
 		});
 
-		// TODO: THIS TEST MAY ULTIMATELY BELONG IN A HYPOTHETICAL `ConfigModelFactory.test.ts`
-		xit('When a local config is available, it is used instead of the base config', () => {
+		it('The existing configuration overrides the default', async () => {
+			await testScenario(dependencies, ['all'], 8, expectedBaseConfig);
+		});
 
+		it('Rule selections properly synthesize with the existing configuration', async () => {
+			await testScenario(dependencies, ['codestyle'], 3, expectedBaseConfig);
+		});
+
+		it('If a ConfigWriter is provided, it is used along with the ConfigViewer', async () => {
+			// We need to add a Writer to the dependencies.
+			const spyWriter = new SpyConfigWriter();
+			dependencies.writer = spyWriter;
+
+			await testScenario(dependencies, ['all'], 8, expectedBaseConfig);
+
+			// Make sure that the Writer was provided the right type of ConfigModel
+			const writerCallHistory = spyWriter.getCallHistory();
+			expect(writerCallHistory).toHaveLength(1);
+			expect(writerCallHistory[0]).toBeInstanceOf(SpyConfigModel);
+
+			// Make sure that the Writer's ConfigModel was instantiated from the right things.
+			const writtenSpyConfigModel: SpyConfigModel = writerCallHistory[0] as SpyConfigModel;
+			// The engines we're using have a total of 8 rules.
+			expect(writtenSpyConfigModel.getRuleSelection().getCount()).toEqual(8);
+			expect(writtenSpyConfigModel.getRawConfig()).toEqual(expectedBaseConfig);
 		});
 	});
 
-	describe('Config synthesis', () => {
-		// TODO: THIS TEST MAY ULTIMATELY BELONG IN A HYPOTHETICAL `ConfigModelFactory.test.ts`
-		xit('When no selectors or overrides are provided, the base config is used as-is', () => {
+	async function testScenario(dependencies: ConfigDependencies, ruleSelectors: string[], expectedRuleCount: number, expectedBaseConfig: CodeAnalyzerConfig): Promise<void> {
+		// ==== TEST SETUP ====
+		const action = ConfigAction.createAction(dependencies);
 
-		});
+		// ==== TESTED BEHAVIOR ====
+		const input: ConfigInput = {
+			'rule-selector': ruleSelectors
+		};
+		await action.execute(input);
 
-		// TODO: THIS TEST MAY ULTIMATELY BELONG IN A HYPOTHETICAL `ConfigModelFactory.test.ts`
-		xit('Rule selectors are properly synthesized with the base config', () => {
+		// ==== ASSERTIONS ====
+		// Make sure the Viewer was provided the right type of ConfigModel.
+		const viewerCallHistory = spyViewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(1);
+		expect(viewerCallHistory[0]).toBeInstanceOf(SpyConfigModel);
 
-		});
-
-		// TODO: THIS TEST MAY ULTIMATELY BELONG IN A HYPOTHETICAL `ConfigModelFactory.test.ts`
-		xit('Workspace constraints are properly synthesized with the base config', () => {
-
-		});
-	});
+		// Make sure that the Viewer's ConfigModel was instantiated from the right things.
+		const spyConfigModel: SpyConfigModel = viewerCallHistory[0] as SpyConfigModel;
+		expect(spyConfigModel.getRuleSelection().getCount()).toEqual(expectedRuleCount);
+		expect(spyConfigModel.getRawConfig()).toEqual(expectedBaseConfig);
+	}
 })
