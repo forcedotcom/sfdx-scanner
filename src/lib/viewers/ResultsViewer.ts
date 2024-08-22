@@ -1,8 +1,9 @@
 import {Ux} from '@salesforce/sf-plugins-core';
-import {RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
+import {CodeLocation, RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {toStyledHeaderAndBody, toStyledHeader} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
+import path from "node:path";
 
 export interface ResultsViewer {
 	view(results: RunResults): void;
@@ -19,18 +20,11 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 		if (results.getViolationCount() === 0) {
 			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
 		} else {
-			this.displaySummary(results.getViolations());
 			this._view(results);
 		}
 	}
 
-	private displaySummary(violations: Violation[]): void {
-		const violationCount = violations.length;
-		const fileCount = this.countUniqueFiles(violations);
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-results', [violationCount, fileCount]));
-	}
-
-	private countUniqueFiles(violations: Violation[]): number {
+	protected countUniqueFiles(violations: Violation[]): number {
 		const fileSet: Set<string> = new Set();
 		violations.forEach(v => {
 			const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
@@ -49,6 +43,8 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
 
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.found-results', [
+			violations.length, this.countUniqueFiles(violations)]));
 		this.displayDetails(violations);
 		this.display.displayLog('\n');
 		this.displayBreakdown(results);
@@ -125,18 +121,26 @@ const TABLE_COLUMNS: Ux.Table.Columns<ResultRow> = {
 
 export class ResultsTableViewer extends AbstractResultsViewer {
 	protected _view(results: RunResults) {
-		const resultRows: ResultRow[] = sortViolations(results.getViolations())
-			.map((v, idx) => {
+		const violations: Violation[] = sortViolations(results.getViolations());
+		const parentFolder: string = findLongestCommonParentFolderOf(violations.map(v =>
+			getPrimaryLocation(v).getFile()).filter(f => f !== undefined));
+
+		const resultRows: ResultRow[] = violations.map((v, idx) => {
 				const severity = v.getRule().getSeverityLevel();
-				const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
+				const primaryLocation = getPrimaryLocation(v);
+				const relativeFile: string | null = primaryLocation.getFile() ?
+					path.relative(parentFolder, primaryLocation.getFile()!) : null;
 				return {
 					num: idx + 1,
-					location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
+					location: `${relativeFile}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
 					rule: `${v.getRule().getEngineName()}:${v.getRule().getName()}`,
 					severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
 					message: v.getMessage()
 				}
 			});
+
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [
+			violations.length, this.countUniqueFiles(violations), parentFolder]));
 		this.display.displayTable(resultRows, TABLE_COLUMNS);
 	}
 }
@@ -170,4 +174,34 @@ function sortViolations(violations: Violation[]): Violation[] {
 		const v2StartColumn = v2PrimaryLocation.getStartColumn() || 0;
 		return v1StartColumn - v2StartColumn;
 	});
+}
+
+// TODO: We should update core module to have this function directly on the Violation object and then remove this helper
+function getPrimaryLocation(violation: Violation): CodeLocation {
+	return violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
+}
+
+/**
+ * Returns the longest comment parent folder of the file paths provided
+ * Note that this function assumes that all the paths are indeed files and not folders
+ */
+export function findLongestCommonParentFolderOf(filePaths: string[]): string {
+	const roots: string[] = filePaths.map(filePath => path.parse(filePath).root);
+	const commonRoot: string = (new Set(roots)).size === 1 ? roots[0] : '';
+	if (!commonRoot) {
+		return '';
+	}
+	const commonFolders: string[] = [];
+	let depth: number = 0;
+	const explodedPaths: string[][] = filePaths.map(file =>
+		path.dirname(file).slice(commonRoot.length).split(path.sep).filter(v => v.length > 0));
+	while(explodedPaths.every(folders => folders.length > depth)) {
+		const currFolder: string = explodedPaths[0][depth];
+		if (explodedPaths.some(folders => folders[depth] !== currFolder)) {
+			break;
+		}
+		commonFolders.push(currFolder);
+		depth++;
+	}
+	return path.join(commonRoot, ... commonFolders);
 }

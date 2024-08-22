@@ -2,7 +2,7 @@
 
 Found 0 violations.
 
-# summary.found-results
+# summary.detail.found-results
 
 Found %d violation(s) across %d file(s):
 
@@ -21,6 +21,10 @@ Found %d violation(s):
 # summary.detail.breakdown.item
 
 %d %s severity
+
+# summary.table.found-results
+
+Found %d violation(s) across %d file(s) relative to '%s':
 
 # summary.table.num-column
 
