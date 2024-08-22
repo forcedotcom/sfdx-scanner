@@ -96,7 +96,7 @@ Severity level of a found violation that must be met or exceeded to cause this c
 
 # flags.severity-threshold.description
 
-You can specify either a number (2) or its equivalent string (high). 
+You can specify either a number (2) or its equivalent string ("High"). 
 
 # flags.config-file.summary
 
@@ -134,3 +134,7 @@ If you don't specify this flag, the command outputs the results in the terminal.
 - .xml
 
 To output the results to multiple files, specify this flag multiple times.  For example: "--output-file ./out/results.json --output-file ./out/report.html" creates a JSON results file and an HTML file in the "./out" folder. 
+
+# error.invalid-severity-threshold
+
+Expected --severity-threshold=%s to be one of: %s

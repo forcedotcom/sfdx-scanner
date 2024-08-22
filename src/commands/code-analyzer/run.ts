@@ -48,14 +48,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		'severity-threshold': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.severity-threshold.summary'),
 			description: getMessage(BundleName.RunCommand, 'flags.severity-threshold.description'),
-			char: 't',
-			options: [
-				'1', 'critical',
-				'2', 'high',
-				'3', 'moderate',
-				'4', 'low',
-				'5', 'info'
-			]
+			char: 't'
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
@@ -86,10 +79,11 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
-			'path-start': parsedFlags['path-start'],
+			'path-start': parsedFlags['path-start'], // TODO: We should move validation of this here instead of having it in the RunAction.
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace'],
-			'severity-threshold': convertThresholdToEnum(parsedFlags['severity-threshold'])
+			'severity-threshold': parsedFlags['severity-threshold'] === undefined ? undefined :
+				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase())
 		};
 		await action.execute(runInput);
 	}
@@ -109,7 +103,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	}
 }
 
-function convertThresholdToEnum(threshold: string|undefined): SeverityLevel|undefined {
+function convertThresholdToEnum(threshold: string): SeverityLevel {
 	// We could do all sorts of complicated conversion logic, but honestly it's just easier
 	// to do a switch-statement.
 	switch (threshold) {
@@ -129,8 +123,8 @@ function convertThresholdToEnum(threshold: string|undefined): SeverityLevel|unde
 		case 'info':
 			return SeverityLevel.Info;
 		default:
-			// By process of elimination, the only possible option is `undefined`, so give `undefined` right back.
-			return undefined;
+			throw new Error(getMessage(BundleName.RunCommand, 'error.invalid-severity-threshold',
+				[threshold, JSON.stringify(Object.values(SeverityLevel))]));
 	}
 }
 
