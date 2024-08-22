@@ -160,7 +160,7 @@ describe('`code-analyzer run` tests', () => {
 	describe('--severity-threshold', () => {
 		it.each([
 			{sev: '1', exp: 1}, {sev: '2', exp: 2}, {sev: '3', exp: 3}, {sev: '4', exp: 4}, {sev: '5', exp: 5},
-			{sev: 'critical', exp: 1}, {sev: 'high', exp: 2}, {sev: 'moderate', exp: 3}, {sev: 'low', exp: 4} , {sev: 'info', exp: 5}
+			{sev: 'criticAL', exp: 1}, {sev: 'High', exp: 2}, {sev: 'moderate', exp: 3}, {sev: 'low', exp: 4} , {sev: 'info', exp: 5}
 		])('Accepts valid severity value: $sev', async ({sev, exp}) => {
 			await RunCommand.run(['--severity-threshold', sev]);
 			expect(executeSpy).toHaveBeenCalled();
