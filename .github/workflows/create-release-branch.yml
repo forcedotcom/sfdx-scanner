@@ -102,5 +102,4 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
-      java-matrix: "['11', '17']"
       target-branch: ${{ needs.create-release-branch.outputs.branch-name }}
