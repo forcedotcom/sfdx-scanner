@@ -1,20 +1,26 @@
 import path from 'node:path';
 import * as fs from 'node:fs/promises';
 import ansis from 'ansis';
-import {CodeAnalyzer, CodeAnalyzerConfig, SeverityLevel} from '@salesforce/code-analyzer-core';
-import {Engine, RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
+import {CodeAnalyzer, CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
+import {RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
 
-import {ResultsDetailViewer, ResultsTableViewer} from '../../../src/lib/viewers/ResultsViewer';
+import {
+	findLongestCommonParentFolderOf,
+	ResultsDetailViewer,
+	ResultsTableViewer
+} from '../../../src/lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../../src/lib/messages';
 import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import {FunctionalStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
+import {platform} from "node:os";
 
 const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test', 'fixtures', 'comparison-files', 'lib',
 	'viewers', 'ResultsViewer.test.ts');
 
-const PATH_TO_SOME_FILE = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'someFile.cls');
-const PATH_TO_FILE_A = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'fileA.cls');
-const PATH_TO_FILE_Z = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code', 'fileZ.cls');
+const PATH_TO_SAMPLE_CODE = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code');
+const PATH_TO_SOME_FILE = path.resolve(PATH_TO_SAMPLE_CODE, 'someFile.cls');
+const PATH_TO_FILE_A = path.resolve(PATH_TO_SAMPLE_CODE, 'fileA.cls');
+const PATH_TO_FILE_Z = path.resolve(PATH_TO_SAMPLE_CODE, 'fileZ.cls');
 
 describe('ResultsViewer implementations', () => {
 
@@ -133,14 +139,6 @@ describe('ResultsViewer implementations', () => {
 	});
 
 	describe('ResultsTableViewer', () => {
-		type TableRow = {
-			num: number;
-			location: string;
-			rule: string;
-			message: string;
-			severity: string;
-		};
-
 		let viewer: ResultsTableViewer;
 
 		beforeEach(() => {
@@ -186,19 +184,10 @@ describe('ResultsViewer implementations', () => {
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(2);
-			const expectedTableRows = violations.map((v, idx) => {
-				return createTableRowExpectation(rule1, v, engine1, idx);
-			});
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [10, 1])
-			}, {
-				type: DisplayEventType.TABLE,
-				data: JSON.stringify({
-					columns: ['#', 'Severity', 'Rule', 'Location', 'Message'],
-					rows: expectedTableRows
-				})
-			}]);
+			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
+			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [10, 1, PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
+			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":5,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":6,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":7,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":8,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":9,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":10,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
 		});
 
 		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
@@ -225,42 +214,47 @@ describe('ResultsViewer implementations', () => {
 			viewer.view(results);
 
 			// ==== ASSERTIONS ====
-			const expectedRows: TableRow[] = [
-				// Violation 4 has the highest severity, so it goes first.
-				createTableRowExpectation(rule2, violations[3], engine1, 0),
-				// 1, 2, and 3 are tied for severity and 1 and 2 are tied for highest file,
-				// but 2 has the earliest location, so it goes next.
-				createTableRowExpectation(rule1, violations[1], engine1, 1),
-				// Violation 1 is later in the same high-alphabetical file, so it's next.
-				createTableRowExpectation(rule1, violations[0], engine1, 2),
-				// Violation 3 is last.
-				createTableRowExpectation(rule1, violations[2], engine1, 3),
-			]
 			const displayEvents = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(2);
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: getMessage(BundleName.ResultsViewer, 'summary.found-results', [4, 2])
-			}, {
-				type: DisplayEventType.TABLE,
-				data: JSON.stringify({
-					columns: ['#', 'Severity', 'Rule', 'Location', 'Message'],
-					rows: expectedRows
-				})
-			}])
+			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
+			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 2, PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
+			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+		});
+	});
+});
+
+describe('Tests for the findLongestCommonParentFolderOf helper function', () => {
+	it('When a single file is given, then its direct parent is returned', () => {
+		expect(findLongestCommonParentFolderOf([path.resolve(__dirname,'ResultsViewer.test.ts')])).toEqual(__dirname);
+	});
+
+	it('When paths share common parent folders, then longest common folder is returned', () => {
+		const path1 = path.resolve(__dirname,'..','actions','RunAction.test.ts');
+		const path2 = path.resolve(__dirname,'ResultsViewer.test.ts');
+		const path3 = path.resolve(__dirname,'..','actions','RulesAction.test.ts');
+		expect(findLongestCommonParentFolderOf([path1, path2, path3])).toEqual(path.resolve(__dirname,'..'));
+	});
+
+	if(platform() === 'win32') { // The following tests only run on Windows machines
+		it('When paths do not share common root (which can happen on Windows machines), then empty string is returned', () => {
+			const path1 = 'C:\\Windows\\someFile.txt';
+			const path2 = 'D:\\anotherFile.txt';
+			expect(findLongestCommonParentFolderOf([path1, path2])).toEqual('');
 		});
 
-		function createTableRowExpectation(rule: RuleDescription, violation: Violation, engine: Engine, index: number): TableRow {
-			const primaryLocation = violation.codeLocations[violation.primaryLocationIndex];
-			return {
-				num: index + 1,
-				location: `${primaryLocation.file}:${primaryLocation.startLine}:${primaryLocation.startColumn}`,
-				rule: `${engine.getName()}:${rule.name}`,
-				severity: `${rule.severityLevel} (${SeverityLevel[rule.severityLevel]})`,
-				message: violation.message
-			};
-		}
-	});
+		it('When windows paths share common root only, then common root is returned', () => {
+			const path1 = 'C:\\Windows\\someFile.txt';
+			const path2 = 'C:\\Users\\anotherFile.txt';
+			expect(findLongestCommonParentFolderOf([path1, path2])).toEqual('C:\\');
+		});
+	} else { // The following test only runs on Unix-based machines
+		it('When unix paths share common root only, then common root is returned', () => {
+			const path1 = '/temp/someFile.txt';
+			const path2 = '/Users/anotherFile.txt';
+			expect(findLongestCommonParentFolderOf([path1, path2])).toEqual('/');
+		});
+	}
 });
 
 function createViolation(ruleName: string, file: string, startLine: number, startColumn: number): Violation {
