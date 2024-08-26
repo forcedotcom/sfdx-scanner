@@ -35,8 +35,6 @@ function yamlFormatConfig(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSele
 		+ '\n'
 		+ yamlFormatDerivedProperty('log_folder', rawConfig.getLogFolder(), defaultConfig.getLogFolder())
 		+ '\n'
-		+ yamlFormatDerivedProperty('custom_engine_plugin_modules', JSON.stringify(rawConfig.getCustomEnginePluginModules()), '[]')
-		+ '\n'
 		+ yamlFormatRuleSelection(ruleSelection)
 		+ '\n'
 		+ DUMMY_ENGINE_SECTION

@@ -2,8 +2,6 @@
 config_root: __DUMMY_CONFIG_ROOT__
 # Tests should replace the dummy value with whatever value they need.
 log_folder: __DUMMY_LOG_FOLDER__
-# Tests should replace the dummy value with whatever value they need.
-custom_engine_plugin_modules: __DUMMY_CUSTOM_ENGINES__
 rules:
   stubEngine1:
     stub1RuleA:
