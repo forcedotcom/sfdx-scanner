@@ -38,7 +38,8 @@ describe('ConfigModel implementations', () => {
 						.replaceAll('__DUMMY_CONFIG_ROOT__', DEFAULT_CONFIG.getConfigRoot())
 						.replaceAll('__DUMMY_LOG_FOLDER__', DEFAULT_CONFIG.getLogFolder());
 
-					const output: string = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML);
+					// The comparison files all use `\n`, so we need to replace errant carriage returns or else the comparison will fail.
+					const output: string = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML).replaceAll('\r\n', '\n');
 
 					expect(output).toContain(goldFileContents);
 				}
@@ -90,7 +91,8 @@ describe('ConfigModel implementations', () => {
 						.replaceAll('__DUMMY_CONFIG_ROOT__', PATH_TO_COMPARISON_DIR)
 						.replaceAll('__DUMMY_LOG_FOLDER__', PATH_TO_PROJECT_ROOT);
 
-					const output = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML);
+					// The comparison files all use `\n`, so we need to replace errant carriage returns or else the comparison will fail.
+					const output = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML).replaceAll('\r\n', '\n');
 
 					expect(output).toContain(goldFileContents);
 				});
