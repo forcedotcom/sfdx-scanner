@@ -1,0 +1,3 @@
+# Folder where to store log files. May be an absolute path or a path relative to config_root.
+# If not specified or if equal to null, then the value is automatically chosen to be your machine's default temporary directory
+log_folder: __DUMMY_LOG_FOLDER__

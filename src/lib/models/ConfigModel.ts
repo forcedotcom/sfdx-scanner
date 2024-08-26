@@ -30,32 +30,31 @@ export class AnnotatedConfigModel implements ConfigModel {
 }
 
 function yamlFormatConfig(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): string {
-
-	let results = yamlFormatConfigProperty('config_root', rawConfig.getConfigRoot(), true)
+	const defaultConfig = CodeAnalyzerConfig.withDefaults();
+	return yamlFormatDerivedProperty('config_root', rawConfig.getConfigRoot(), defaultConfig.getConfigRoot())
 		+ '\n'
-		+ yamlFormatConfigProperty('log_folder', rawConfig.getLogFolder(), true)
-		+ '\n';
-	const customEngineModules: string[] = rawConfig.getCustomEnginePluginModules();
-	const customEngineModulesString: string = customEngineModules.length > 0
-		? `["${customEngineModules.join('", "')}"]`
-		: `[]`;
-	results += yamlFormatConfigProperty('custom_engine_plugin_modules', customEngineModulesString, false)
+		+ yamlFormatDerivedProperty('log_folder', rawConfig.getLogFolder(), defaultConfig.getLogFolder())
+		+ '\n'
+		+ yamlFormatDerivedProperty('custom_engine_plugin_modules', JSON.stringify(rawConfig.getCustomEnginePluginModules()), '[]')
 		+ '\n'
 		+ yamlFormatRuleSelection(ruleSelection)
 		+ '\n'
 		+ DUMMY_ENGINE_SECTION
 		+ '\n';
-	return results;
 }
 
-function yamlFormatConfigProperty(propertyName: string, propertyValue: string, isCalculated: boolean): string {
-	// Get the annotation and prepend each line with '# ' to make it a YAML comment.
+function yamlFormatDerivedProperty(propertyName: string, actualValue: string, defaultValue: string): string {
+	// Get the annotation and prepend each line with `# ` to make it a YAML comment.
 	const annotation: string = getMessage(BundleName.ConfigModel, `annotation.${propertyName}`)
 		.replace(/^./gm, s => `# ${s}`);
-	const lastCalculatedAs: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [propertyValue]);
+
+
+	const value: string = actualValue === defaultValue
+		? `null # ${getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [actualValue])}`
+		: actualValue;
 
 	return `${annotation}\n`
-		+ `${propertyName}: ${propertyValue}${isCalculated ? ' # ' + lastCalculatedAs : ''}\n`;
+		+ `${propertyName}: ${value}\n`;
 }
 
 function yamlFormatRuleSelection(ruleSelection: RuleSelection): string {

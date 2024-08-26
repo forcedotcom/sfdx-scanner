@@ -2,8 +2,8 @@
 config_root: __DUMMY_CONFIG_ROOT__
 # Tests should replace the dummy value with whatever value they need.
 log_folder: __DUMMY_LOG_FOLDER__
-# The tests never actually try to instantiate the plugins in this array, so they don't need to be valid.
-custom_engine_plugin_modules: ['/this/path/does/not/actually/matter']
+# Tests should replace the dummy value with whatever value they need.
+custom_engine_plugin_modules: __DUMMY_CUSTOM_ENGINES__
 rules:
   stubEngine1:
     stub1RuleA:
@@ -11,7 +11,7 @@ rules:
       tags: ["Recommended"]
     stub1RuleB:
       # This rule's default tags are "Recommended" and "Security", so we're adding the "CodeStyle" tag.
-      tags: ["Recommended", "Security", "CodeStyle"]
+      tags: ["Recommended", "Security", "CodeStyle"] # Modified from whatever
   stubEngine2:
     stub2RuleA:
       # This rule's default tags are "Recommended" and "Security". We're removing both.

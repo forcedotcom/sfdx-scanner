@@ -11,50 +11,98 @@ describe('ConfigModel implementations', () => {
 
 		const PATH_TO_COMPARISON_DIR = path.resolve(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'models', 'ConfigModel.test.ts');
 		const PATH_TO_PROJECT_ROOT = path.resolve(PATH_TO_COMPARISON_DIR, '..', '..', '..', '..', '..', '..');
+		const DEFAULT_CONFIG = CodeAnalyzerConfig.withDefaults();
 		let inputConfig: CodeAnalyzerConfig;
 		let core: CodeAnalyzer;
+		let annotatedConfigModel: AnnotatedConfigModel;
 
-		beforeAll(async () => {
+		async function initializeConfigAndCore(dummyConfigRoot: string, dummyLogFolder: string, dummyCustomEngines:string): Promise<void> {
 			// Read the input file as a string.
 			let inputConfigString: string = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'input-config.yml'), {encoding: 'utf-8'});
 			// Process it so it's usable as a config.
 			inputConfigString = inputConfigString
-				// The config root should be the file's parent directory.
-				.replaceAll('__DUMMY_CONFIG_ROOT__', PATH_TO_COMPARISON_DIR)
-				// The log folder should be a relative path back up to the project root.
-				.replaceAll('__DUMMY_LOG_FOLDER__', PATH_TO_PROJECT_ROOT);
+				.replaceAll('__DUMMY_CONFIG_ROOT__', dummyConfigRoot)
+				.replaceAll('__DUMMY_LOG_FOLDER__', dummyLogFolder)
+				.replaceAll('__DUMMY_CUSTOM_ENGINES__', dummyCustomEngines);
 			inputConfig = CodeAnalyzerConfig.fromYamlString(inputConfigString);
 			core = new CodeAnalyzer(inputConfig);
 			await core.addEnginePlugin(new FunctionalStubEnginePlugin1());
-		});
+		}
 
 		describe('Conversion into YAML', () => {
-			describe('Top-level properties', () => {
 
-				let annotatedConfigModel: AnnotatedConfigModel;
+			describe('Properties with derived defaults', () => {
 
-				beforeAll(async () => {
-					// Just select all rules for these tests, since they don't concern rule resolution.
-					const ruleSelection: RuleSelection = await core.selectRules(['all']);
-					annotatedConfigModel = AnnotatedConfigModel.fromSelection(inputConfig, ruleSelection);
-				});
-
-				it.each([
-					// NOTE: custom_engine_plugin_modules is conspicuously absent from this list. That's because the
-					{propName: 'config_root'},
-					{propName: 'log_folder'},
-					{propName: 'custom_engine_plugin_modules'}
-				])('`$propName` property is present, correct, and well-annotated', async ({propName}) => {
-					const goldFileName = `${propName}-section.yml`;
-					const goldFileContents: string = (await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, goldFileName), {encoding: 'utf-8'}))
-						.replaceAll('__DUMMY_CONFIG_ROOT__', PATH_TO_COMPARISON_DIR)
-						.replaceAll('__DUMMY_LOG_FOLDER__', PATH_TO_PROJECT_ROOT);
+				async function verifyDefaultValues(propName: string): Promise<void> {
+					const goldFileName = `${propName}-section-default.yml`;
+					const goldFileContents = (await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, goldFileName), {encoding: 'utf-8'}))
+						.replaceAll('__DUMMY_CONFIG_ROOT__', DEFAULT_CONFIG.getConfigRoot())
+						.replaceAll('__DUMMY_LOG_FOLDER__', DEFAULT_CONFIG.getLogFolder())
+						.replaceAll('__DUMMY_CUSTOM_ENGINES__', '[]');
 
 					const output: string = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML);
 
 					expect(output).toContain(goldFileContents);
+				}
+
+				it.each([
+					{propName: 'config_root'},
+					{propName: 'log_folder'},
+					{propName: 'custom_engine_plugin_modules'}
+				])('When $propName is null, its output value is null and the derived value is inside a comment', async ({propName}) => {
+					// Set all derivable properties to the string "null".
+					await initializeConfigAndCore("null", "null", "null");
+					// These tests don't care about rule resolution, so just select all rules.
+					const ruleSelection: RuleSelection = await core.selectRules(['all']);
+					annotatedConfigModel = AnnotatedConfigModel.fromSelection(inputConfig, ruleSelection);
+
+					await verifyDefaultValues(propName);
+				});
+
+				it.each([
+					{propName: 'config_root'},
+					{propName: 'log_folder'},
+					{propName: 'custom_engine_plugin_modules'}
+				])('When $propName is hardcoded to its derived default, its output value is null and the derived value is inside a comment', async ({propName}) => {
+					// Set all derivable properties to the default values.
+					await initializeConfigAndCore(DEFAULT_CONFIG.getConfigRoot(), DEFAULT_CONFIG.getLogFolder(), '[]');
+					// These tests don't care about rule resolution, so just select all rules.
+					const ruleSelection: RuleSelection = await core.selectRules(['all']);
+					annotatedConfigModel = AnnotatedConfigModel.fromSelection(inputConfig, ruleSelection);
+
+					await verifyDefaultValues(propName);
+				});
+
+				it.each([
+					{propName: 'config_root'},
+					{propName: 'log_folder'},
+					{propName: 'custom_engine_plugin_modules'}
+				])('When $propName is a non-null, non-default value, that value is rendered as-is with no comment', async ({propName}) => {
+					// Set all derivable properties to non-default values.
+					await initializeConfigAndCore(
+						// Set the config root to the comparison file's directory.
+						PATH_TO_COMPARISON_DIR,
+						// The log folder should be a path back up to the project root.
+						PATH_TO_PROJECT_ROOT,
+						// The custom modules property is never actually used, so its value can be nonsense.
+						'["this/path/does/not/matter"]'
+					);
+					// These tests don't care about rule resolution, so just select all rules.
+					const ruleSelection: RuleSelection = await core.selectRules(['all']);
+					annotatedConfigModel = AnnotatedConfigModel.fromSelection(inputConfig, ruleSelection);
+
+					const goldFileName = `${propName}-section-overridden.yml`;
+					const goldFileContents = (await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, goldFileName), {encoding: 'utf-8'}))
+						.replaceAll('__DUMMY_CONFIG_ROOT__', PATH_TO_COMPARISON_DIR)
+						.replaceAll('__DUMMY_LOG_FOLDER__', PATH_TO_PROJECT_ROOT)
+						.replaceAll('__DUMMY_CUSTOM_ENGINES__', '["this/path/does/not/matter"]');
+
+					const output = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML);
+
+					expect(output).toContain(goldFileContents);
 				});
 			});
+
 
 			describe('`engines` section', () => {
 
