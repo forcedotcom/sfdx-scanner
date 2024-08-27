@@ -11,4 +11,4 @@ jobs:
           node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/plugin-code-analyzer@latest-alpha-rc latest-alpha
+          npm dist-tag add @salesforce/plugin-code-analyzer@5.0.0-alpha.1 latest-alpha
