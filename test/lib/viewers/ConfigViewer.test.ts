@@ -16,7 +16,7 @@ describe('ConfigViewer implementations', () => {
 			viewer = new ConfigRawYamlViewer(spyDisplay);
 		})
 
-		it('When given a config, outputs it as raw YAML', () => {
+		it('When given a config, outputs it as raw YAML with a leading newline', () => {
 			// ==== TEST SETUP ====
 			// Instantiate the config model.
 			const configModel = new StubConfigModel();
@@ -30,7 +30,7 @@ describe('ConfigViewer implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: `Results formatted as YAML`
+				data: `\nResults formatted as YAML`
 			}]);
 		});
 	});

@@ -1,0 +1,16 @@
+# Tests should replace the dummy value with whatever value they need.
+config_root: __DUMMY_CONFIG_ROOT__
+# Tests should replace the dummy value with whatever value they need.
+log_folder: __DUMMY_LOG_FOLDER__
+rules:
+  stubEngine1:
+    stub1RuleA:
+      # This rule's default tags are "Recommended" and "CodeStyle", so we're removing the "CodeStyle" tag.
+      tags: ["Recommended"]
+    stub1RuleB:
+      # This rule's default tags are "Recommended" and "Security", so we're adding the "CodeStyle" tag.
+      tags: ["Recommended", "Security", "CodeStyle"] # Modified from whatever
+  stubEngine2:
+    stub2RuleA:
+      # This rule's default tags are "Recommended" and "Security". We're removing both.
+      tags: []

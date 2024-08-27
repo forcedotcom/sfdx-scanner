@@ -1,92 +1,4 @@
-import {CodeAnalyzerConfig, RuleSelection} from '@salesforce/code-analyzer-core';
-import {BundleName, getMessage} from '../messages';
-
-export enum OutputFormat {
-	YAML = "YAML"
-}
-
-export interface ConfigModel {
-	toFormattedOutput(format: OutputFormat): string;
-}
-
-export type ConfigModelGeneratorFunction = (rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) => ConfigModel;
-
-export class AnnotatedConfigModel implements ConfigModel {
-	private readonly rawConfig: CodeAnalyzerConfig;
-	private readonly ruleSelection: RuleSelection;
-
-	private constructor(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) {
-		this.rawConfig = rawConfig;
-		this.ruleSelection = ruleSelection;
-	}
-
-	toFormattedOutput(_format: OutputFormat): string {
-		return yamlFormatConfig(this.rawConfig, this.ruleSelection);
-	}
-
-	public static fromSelection(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): AnnotatedConfigModel {
-		return new AnnotatedConfigModel(rawConfig, ruleSelection);
-	}
-}
-
-function yamlFormatConfig(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): string {
-	const defaultConfig = CodeAnalyzerConfig.withDefaults();
-	return yamlFormatDerivedProperty('config_root', rawConfig.getConfigRoot(), defaultConfig.getConfigRoot())
-		+ '\n'
-		+ yamlFormatDerivedProperty('log_folder', rawConfig.getLogFolder(), defaultConfig.getLogFolder())
-		+ '\n'
-		+ yamlFormatRuleSelection(ruleSelection)
-		+ '\n'
-		+ DUMMY_ENGINE_SECTION
-		+ '\n';
-}
-
-function yamlFormatDerivedProperty(propertyName: string, actualValue: string, defaultValue: string): string {
-	// Get the annotation and prepend each line with `# ` to make it a YAML comment.
-	const annotation: string = getMessage(BundleName.ConfigModel, `annotation.${propertyName}`)
-		.replace(/^./gm, s => `# ${s}`);
-
-
-	const value: string = actualValue === defaultValue
-		? `null # ${getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [actualValue])}`
-		: actualValue;
-
-	return `${annotation}\n`
-		+ `${propertyName}: ${value}\n`;
-}
-
-function yamlFormatRuleSelection(ruleSelection: RuleSelection): string {
-	// Get the annotation and prepend each line with '# ' to make it a YAML comment.
-	const annotation: string = getMessage(BundleName.ConfigModel, `annotation.rules`)
-		.replace(/^./gm, s => `# ${s}`);
-
-	if (ruleSelection.getCount() === 0) {
-		return `${annotation}\n`
-			+ `rules: {} # Remove this empty object {} when you are ready to specify your first rule override`;
-	}
-
-	let results = annotation + '\n'
-		+ 'rules:\n';
-
-	for (const engine of ruleSelection.getEngineNames()) {
-		results += `  ${engine}:\n`;
-		for (const rule of ruleSelection.getRulesFor(engine)) {
-			const ruleName: string = rule.getName();
-			const severity = `${rule.getSeverityLevel()}`;
-			const tags = rule.getTags();
-			const tagString = tags.length > 0 ? `["${tags.join('", "')}"]` : `[]`;
-			// This section is built by hand instead of using a message, because the message catalog dislikes indentation.
-			results += `    ${ruleName}:\n`
-				+ `      severity: ${severity}\n`
-				+ `      tags: ${tagString}\n`;
-		}
-	}
-
-	return results;
-}
-
-const DUMMY_ENGINE_SECTION: string =
-`# Engine specific custom configuration settings of the format engines.<engine_name>.<property_name> = <value> where
+# Engine specific custom configuration settings of the format engines.<engine_name>.<property_name> = <value> where
 #   <engine_name> is the name of the engine containing the rule that you want to override
 #   <property_name> is the name of a property associated with the engine that you would like to set
 # Each engine will have its own set of properties that will be available that will help you customize that particular engine's
@@ -156,7 +68,7 @@ engines:
     #   regex:
     #     custom_rules:
     #       NoTodoComments:
-    #         regex: /\\/\\/[ \\t]*TODO/gi
+    #         regex: /\/\/[ \t]*TODO/gi
     #         file_extensions: [".cls", ".trigger"]
     #         description: "Prevents TODO comments from being in apex code."
     #         violation_message: "A comment with a TODO statement was found. Please remove TODO statements from your apex code."
@@ -169,4 +81,4 @@ engines:
   retire-js:
 
     # Whether to turn off the 'retire-js' engine so that it is not included when running Code Analyzer commands
-    disable_engine: false`;
+    disable_engine: false

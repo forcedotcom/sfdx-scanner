@@ -14,6 +14,7 @@ export class ConfigRawYamlViewer implements ConfigViewer {
 	}
 
 	public view(configModel: ConfigModel): void {
-		this.display.displayLog(configModel.toFormattedOutput(OutputFormat.YAML));
+		// Prepend a newline to visually separate the output from anything else we've already logged.
+		this.display.displayLog('\n' + configModel.toFormattedOutput(OutputFormat.YAML));
 	}
 }
