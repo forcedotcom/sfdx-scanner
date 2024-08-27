@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-generated on Wed Aug 07 2024
+# Auto-generated on Tue Aug 27 2024
 # This script WILL EVENTUALLY run a smoke test of the entire plugin by running a series of commands that collectively
 # hit a vertical slice of all major features. If they all succeed, then we can reasonably assume that the plugin is
 # approximately stable.
@@ -7,4 +7,4 @@
 # SCRIPT FROM THE PROJECT ROOT!
 set -e
 EXE_NAME=$1
-undefined
+echo "At this point in the alpha, the smoke tests are no-ops and it is fine."
