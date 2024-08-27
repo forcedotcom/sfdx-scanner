@@ -3,11 +3,6 @@ on:
   workflow_call:
 
 jobs:
-  verify-should-run:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          [[ ${{ secrets.ALLOW_MANUAL_PROMOTION }} == true ]] && exit 0 || exit 1
   do-update:
     needs: verify-should-run
     runs-on: ubuntu-latest
