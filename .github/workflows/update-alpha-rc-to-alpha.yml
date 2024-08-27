@@ -3,9 +3,14 @@ on:
   workflow_call:
 
 jobs:
-  do-update:
+  verify-should-run:
     runs-on: ubuntu-latest
-    if: ${{ secrets.ALLOW_MANUAL_PROMOTION == true }}
+    steps:
+      - run: |
+          [[ ${{ secrets.ALLOW_MANUAL_PROMOTION }} == true ]] && exit 0 || exit 1
+  do-update:
+    needs: verify-should-run
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-node@v4
         with:
