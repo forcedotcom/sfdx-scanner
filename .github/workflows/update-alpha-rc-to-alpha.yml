@@ -10,6 +10,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-        run: |
+      - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm dist-tag add @salesforce/plugin-code-analyzer@latest-alpha-rc latest-alpha
