@@ -27,3 +27,5 @@ jobs:
   # Separately, we also need to run all of our tests.
   run_tests:
     uses: ./.github/workflows/run-tests.yml
+  update_tag_just_this_once:
+    uses: ./.github/workflows/update-alpha-rc-to-alpha.yml

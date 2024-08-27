@@ -1,6 +1,6 @@
 name: update-alpha-rc-to-alpha
 on:
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   do-update:
