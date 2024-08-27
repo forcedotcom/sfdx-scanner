@@ -1,0 +1,15 @@
+name: update-alpha-rc-to-alpha
+on:
+  workflow_dispatch:
+
+jobs:
+  do-update:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.ALLOW_MANUAL_PROMOTION == true }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          npm dist-tag add @salesforce/plugin-code-analyzer@latest-alpha-rc latest-alpha
