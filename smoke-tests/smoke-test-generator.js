@@ -35,6 +35,8 @@ function generateScriptBody(isBash, delim) {
 		// Log an explainer that since we're in the Alpha stage, we don't have a fully fleshed out smoke test.
 		`echo "At this point in the alpha, the smoke tests are no-ops and it is fine."`
 	]
+
+	return commands.join('\n');
 }
 
 function generateScript(isBash, delim) {
