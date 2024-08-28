@@ -76,7 +76,7 @@ function yamlFormatRuleSelection(ruleSelection: RuleSelection): string {
 			const tags = rule.getTags();
 			const tagString = tags.length > 0 ? `["${tags.join('", "')}"]` : `[]`;
 			// This section is built by hand instead of using a message, because the message catalog dislikes indentation.
-			results += `    ${ruleName}:\n`
+			results += `    "${ruleName}":\n`
 				+ `      severity: ${severity}\n`
 				+ `      tags: ${tagString}\n`;
 		}

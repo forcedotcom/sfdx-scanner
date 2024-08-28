@@ -135,6 +135,8 @@ describe('ConfigModel implementations', () => {
 					{ruleType: 'Non-overridden rule', ruleName: 'stub1RuleD'}
 				])('Selected rules are present. Case: $ruleType', ({ruleName}) => {
 					const outputString: string = annotatedConfigModel.toFormattedOutput(OutputFormat.YAML);
+					// Verify that the desired rule is present in the output string, and its name is wrapped in quotes.
+					expect(outputString).toContain(`"${ruleName}":`);
 					// Parse the Output into a new Config and validate that it has an explicit override for the expected rule.
 					const parsedOutput: CodeAnalyzerConfig = CodeAnalyzerConfig.fromYamlString(outputString);
 					const tags: string[]|undefined = parsedOutput.getRuleOverrideFor('stubEngine1', ruleName).tags;
@@ -177,6 +179,7 @@ describe('ConfigModel implementations', () => {
 				it('EDGE CASE: When a rule with no tags is selected, its tags property is an empty array', async () => {
 					// Select the tagless rule directly by its name.
 					const ruleSelection: RuleSelection = await core.selectRules(['stub2RuleA']);
+
 					// Validate the assumption about this rule being tagless.
 					const tags = ruleSelection.getRule('stubEngine2', 'stub2RuleA').getTags();
 					if (tags.length > 0) {
@@ -185,6 +188,8 @@ describe('ConfigModel implementations', () => {
 					const model = AnnotatedConfigModel.fromSelection(inputConfig, ruleSelection);
 
 					const outputString: string = model.toFormattedOutput(OutputFormat.YAML);
+					// Verify that the desired rule is present in the output string, and its name is wrapped in quotes.
+					expect(outputString).toContain(`"stub2RuleA":`);
 					// Verify that the tags property is an empty array.
 					expect(outputString).toContain(`tags: []`);
 				});
