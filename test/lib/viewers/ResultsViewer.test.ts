@@ -86,7 +86,7 @@ describe('ResultsViewer implementations', () => {
 			viewer.view(results);
 
 			// ==== ASSERTIONS ====
-			// Compare the text in the events with the text in our comparison file.
+			// Compare the text in the events with the text in our comparison files.
 			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
 			for (const event of actualDisplayEvents) {
 				expect(event.type).toEqual(DisplayEventType.LOG);
@@ -95,7 +95,9 @@ describe('ResultsViewer implementations', () => {
 			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 			const expectedViolationDetails = (await readComparisonFile('four-identical-violations-details.txt'))
 				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE);
-			expect(actualEventText).toEqual(expectedViolationDetails);
+			const expectedViolationSummary = await readComparisonFile('four-identical-violations-summary.txt');
+			expect(actualEventText).toContain(expectedViolationDetails);
+			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 
 		// The reasoning behind this sorting order is so that the Detail view can function as a "show me the N most
@@ -134,7 +136,9 @@ describe('ResultsViewer implementations', () => {
 			const expectedViolationDetails = (await readComparisonFile('four-unique-violations-details.txt'))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
-			expect(actualEventText).toEqual(expectedViolationDetails);
+			const expectedViolationSummary = await readComparisonFile('four-unique-violations-summary.txt');
+			expect(actualEventText).toContain(expectedViolationDetails);
+			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 	});
 
@@ -170,7 +174,7 @@ describe('ResultsViewer implementations', () => {
 			// This test doesn't care about sorting, so just assign our engine several copies of the same violation.
 			const violations: Violation[] = repeatViolation(
 				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1),
-				10
+				4
 			);
 			engine1.resultsToReturn = {violations};
 			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
@@ -183,11 +187,14 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
+			expect(displayEvents).toHaveLength(6);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
-			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [10, 1, PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 1, PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
-			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":5,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":6,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":7,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":8,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":9,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":10,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+			const expectedViolationSummary = await readComparisonFile('four-identical-violations-summary.txt');
+			const actualEventText = ansis.strip(displayEvents.map(e => e.data).join('\n'));
+			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 
 		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
@@ -215,11 +222,14 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
+			expect(displayEvents).toHaveLength(7);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 2, PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
 			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+			const expectedViolationSummary = await readComparisonFile('four-unique-violations-summary.txt');
+			const actualEventText = ansis.strip(displayEvents.map(e => e.data).join('\n'));
+			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 	});
 });

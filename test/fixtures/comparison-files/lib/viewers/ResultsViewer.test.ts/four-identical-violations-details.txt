@@ -26,8 +26,3 @@ Found 4 violation(s) across 1 file(s):
     message:   This is a message
     location:  __PATH_TO_SOME_FILE__:1:1
     resources: https://example.com/stub1RuleA
-
-
-=== Summary
-Found 4 violation(s):
-4 Low severity

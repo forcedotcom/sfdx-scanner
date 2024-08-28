@@ -1,7 +1,7 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {CodeLocation, RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
-import {toStyledHeaderAndBody, toStyledHeader} from '../utils/StylingUtil';
+import {toStyledHeaderAndBody, toStyledHeader, indent} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 import path from "node:path";
 
@@ -21,6 +21,8 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
 		} else {
 			this._view(results);
+			this.display.displayLog('\n');
+			this.displayBreakdown(results);
 		}
 	}
 
@@ -36,6 +38,21 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 		return fileSet.size;
 	}
 
+	private displayBreakdown(results: RunResults): void {
+		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.breakdown.header')));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.breakdown.total', [results.getViolationCount()]));
+		for (const sev of Object.values(SeverityLevel)) {
+			// Some of the keys will be numbers, since the enum is numerical. Skip those.
+			if (typeof sev !== 'string') {
+				continue;
+			}
+			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
+			if (sevCount > 0) {
+				this.display.displayLog(indent(getMessage(BundleName.ResultsViewer, 'summary.breakdown.item', [sevCount, sev])));
+			}
+		}
+	}
+
 	protected abstract _view(results: RunResults): void;
 }
 
@@ -46,8 +63,6 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.found-results', [
 			violations.length, this.countUniqueFiles(violations)]));
 		this.displayDetails(violations);
-		this.display.displayLog('\n');
-		this.displayBreakdown(results);
 	}
 
 	private displayDetails(violations: Violation[]): void {
@@ -75,21 +90,6 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 		};
 		const keys = ['severity', 'engine', 'message', 'location', 'resources'];
 		return toStyledHeaderAndBody(header, body, keys);
-	}
-
-	private displayBreakdown(results: RunResults): void {
-		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header')));
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
-		for (const sev of Object.values(SeverityLevel)) {
-			// Some of the keys will be numbers, since the enum is numerical. Skip those.
-			if (typeof sev !== 'string') {
-				continue;
-			}
-			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
-			if (sevCount > 0) {
-				this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
-			}
-		}
 	}
 }
 

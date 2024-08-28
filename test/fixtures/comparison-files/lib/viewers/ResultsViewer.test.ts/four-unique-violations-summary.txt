@@ -1,0 +1,4 @@
+=== Summary
+Found 4 violation(s):
+    1 High severity violation(s) found
+    3 Low severity violation(s) found
