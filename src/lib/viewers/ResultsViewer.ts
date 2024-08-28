@@ -1,7 +1,7 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {CodeLocation, RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
-import {toStyledHeaderAndBody, toStyledHeader} from '../utils/StylingUtil';
+import {toStyledHeaderAndBody, toStyledHeader, indent} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 import path from "node:path";
 
@@ -39,8 +39,8 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 	}
 
 	private displayBreakdown(results: RunResults): void {
-		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header')));
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
+		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.breakdown.header')));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.breakdown.total', [results.getViolationCount()]));
 		for (const sev of Object.values(SeverityLevel)) {
 			// Some of the keys will be numbers, since the enum is numerical. Skip those.
 			if (typeof sev !== 'string') {
@@ -48,7 +48,7 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 			}
 			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
 			if (sevCount > 0) {
-				this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
+				this.display.displayLog(indent(getMessage(BundleName.ResultsViewer, 'summary.breakdown.item', [sevCount, sev])));
 			}
 		}
 	}

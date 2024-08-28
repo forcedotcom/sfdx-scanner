@@ -2,6 +2,18 @@
 
 Found 0 violations.
 
+# summary.breakdown.header
+
+Summary
+
+# summary.breakdown.total
+
+Found %d violation(s):
+
+# summary.breakdown.item
+
+%d %s severity violation(s) found
+
 # summary.detail.found-results
 
 Found %d violation(s) across %d file(s):
@@ -9,18 +21,6 @@ Found %d violation(s) across %d file(s):
 # summary.detail.violation-header
 
 %d. %s
-
-# summary.detail.breakdown.header
-
-Summary
-
-# summary.detail.breakdown.total
-
-Found %d violation(s):
-
-# summary.detail.breakdown.item
-
-%d %s severity
 
 # summary.table.found-results
 
