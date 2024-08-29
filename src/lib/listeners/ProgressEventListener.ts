@@ -8,7 +8,7 @@ import {Display} from '../Display';
 import {BundleName, getMessage} from '../messages';
 
 export interface ProgressEventListener {
-	listen(codeAnalyzer: CodeAnalyzer): void;
+	listen(...codeAnalyzers: CodeAnalyzer[]): void;
 	stopListening(): void;
 }
 
@@ -74,8 +74,8 @@ abstract class ProgressSpinner {
 
 export class RuleSelectionProgressSpinner extends ProgressSpinner implements ProgressEventListener {
 	private isListening: boolean;
-	private engineNames: string[];
-	private completionPercent: number;
+	private engineNames: Set<string>;
+	private readonly completionPercentages: number[];
 
 	/**
 	 * @param display The display with which to show output to the user
@@ -84,15 +84,21 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 	public constructor(display: Display, tickTime: number = 1000) {
 		super(display, tickTime);
 		this.isListening = false;
+		this.engineNames = new Set();
+		this.completionPercentages = [];
 	}
 
-	public listen(codeAnalyzer: CodeAnalyzer): void {
+	public listen(...codeAnalyzers: CodeAnalyzer[]): void {
 		/* istanbul ignore else: should not be calling listen() twice */
 		if (!this.isListening) {
 			this.isListening = true;
-			this.engineNames = codeAnalyzer.getEngineNames();
-			this.completionPercent = 0;
-			codeAnalyzer.onEvent(EventType.RuleSelectionProgressEvent, (e: RuleSelectionProgressEvent) => this.handleEvent(e));
+			codeAnalyzers.forEach((codeAnalyzer, idx) => {
+				for (const engineName of codeAnalyzer.getEngineNames()) {
+					this.engineNames.add(engineName);
+				}
+				this.completionPercentages.push(0);
+				codeAnalyzer.onEvent(EventType.RuleSelectionProgressEvent, (e: RuleSelectionProgressEvent) => this.handleEvent(e, idx));
+			});
 		}
 	}
 
@@ -103,7 +109,7 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 		}
 	}
 
-	private handleEvent(e: RuleSelectionProgressEvent): void {
+	private handleEvent(e: RuleSelectionProgressEvent, idx: number): void {
 		if (!this.isListening) {
 			return;
 		}
@@ -112,18 +118,21 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 			this.startSpinning(getMessage(BundleName.ProgressEventListener, 'selection-spinner.action'));
 		}
 
-		this.completionPercent = Math.floor(e.percentComplete);
+		this.completionPercentages[idx] = Math.floor(e.percentComplete);
+
 		this.updateSpinner();
 		// Since the events this spinner listens to have one aggregated completion percentage, we can (and should) stop
-		// listening as soon as we get the 100% event, instead of waiting for the `stopListening()` method.
-		if (this.completionPercent === 100) {
+		// listening as soon as all Cores get their 100% event, instead of waiting for the `stopListening()` method.
+		if (this.completionPercentages.every(p => p === 100)) {
 			this.stopListening();
 		}
 	}
 
 	protected createSpinnerStatus(): string {
+		const aggregateCompletionPercentage: number =
+			Math.floor(this.completionPercentages.reduce((prevTotal, next) => prevTotal + next, 0) / this.completionPercentages.length);
 		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.status',
-			[this.engineNames.join(', '), this.completionPercent, this.getSecondsSpentSpinning()]);
+			[[...this.engineNames.keys()].join(', '), aggregateCompletionPercentage, this.getSecondsSpentSpinning()]);
 	}
 }
 
@@ -144,12 +153,17 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 		this.isListening = false;
 	}
 
-	public listen(codeAnalyzer: CodeAnalyzer): void {
+	public listen(...codeAnalyzers: CodeAnalyzer[]): void {
+		if (codeAnalyzers.length > 1) {
+			// It's technically possible to implement multiple-core support for this spinner, but not currently necessary.
+			// So just throw a Developer Error if anyone tries.
+			throw new Error('Developer Error: EngineRunProgressSpinner cannot listen to multiple Code Analyzers');
+		}
 		/* istanbul ignore else: should not be calling listen() twice */
 		if (!this.isListening) {
 			this.isListening = true;
 			this.progressMap = new Map();
-			codeAnalyzer.onEvent(EventType.EngineRunProgressEvent, (e: EngineRunProgressEvent) => this.handleEvent(e));
+			codeAnalyzers[0].onEvent(EventType.EngineRunProgressEvent, (e: EngineRunProgressEvent) => this.handleEvent(e));
 		}
 	}
 
@@ -161,6 +175,7 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 	}
 
 	private handleEvent(e: EngineRunProgressEvent): void {
+		/* istanbul ignore if: no event should be coming in after we're done listening */
 		if (!this.isListening) {
 			return;
 		}
