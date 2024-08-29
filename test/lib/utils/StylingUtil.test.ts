@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
-import {toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList} from '../../../src/lib/utils/StylingUtil';
+import {makeGrey, toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList} from '../../../src/lib/utils/StylingUtil';
 
 const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
 	'utils', 'StylingUtil.test.ts');
@@ -24,13 +24,23 @@ describe('StylingUtil tests', () => {
 		});
 	});
 
+	describe('#makeGrey()', () => {
+		it('Properly styles input', async () => {
+			const input = 'this text is styled as a comment';
+			const styledComment = makeGrey(input);
+
+			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-comment.txt'), {encoding: 'utf-8'}));
+			expect(styledComment).toEqual(expectedOutput);
+
+		});
+	});
+
 	describe('#toStyledHeader()', () => {
 		it('Properly styles input', async () => {
 			const input: string = 'SAMPLE HEADER TEXT';
 			const styledHeader = toStyledHeader(input);
 
-			const expectedHeader = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-header.txt'), {encoding: 'utf-8'}))
-				;
+			const expectedHeader = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-header.txt'), {encoding: 'utf-8'}));
 
 			expect(styledHeader).toEqual(expectedHeader);
 		});

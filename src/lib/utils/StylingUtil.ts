@@ -16,6 +16,10 @@ export function toStyledHeader(header: string): string {
 	return `${ansis.dim('===')} ${ansis.bold(header)}`;
 }
 
+export function makeGrey(str: string): string {
+	return ansis.dim(str);
+}
+
 export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): string {
 	if (body == null || (selectedKeys && selectedKeys.length === 0)) {
 		return '';
