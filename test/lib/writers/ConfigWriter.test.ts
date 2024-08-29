@@ -20,8 +20,8 @@ describe('ConfigWriter implementations', () => {
 		})
 
 		it.each([
-			{ext: '.yaml', expectedOutput: `Results formatted as ${OutputFormat.YAML}`},
-			{ext: '.yml', expectedOutput: `Results formatted as ${OutputFormat.YAML}`}
+			{ext: '.yaml', expectedOutput: `# This is a leading comment\nResults formatted as ${OutputFormat.YAML}`},
+			{ext: '.yml', expectedOutput: `# This is a leading comment\nResults formatted as ${OutputFormat.YAML}`}
 		])('Accepts and outputs valid file format: *$ext', ({ext, expectedOutput}) => {
 			const validFile = `beep${ext}`;
 			const configFileWriter = ConfigFileWriter.fromFile(validFile);
