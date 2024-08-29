@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
-import {toComment, toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList} from '../../../src/lib/utils/StylingUtil';
+import {makeGrey, toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList} from '../../../src/lib/utils/StylingUtil';
 
 const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
 	'utils', 'StylingUtil.test.ts');
@@ -24,10 +24,10 @@ describe('StylingUtil tests', () => {
 		});
 	});
 
-	describe('#toComment()', () => {
+	describe('#makeGrey()', () => {
 		it('Properly styles input', async () => {
 			const input = 'this text is styled as a comment';
-			const styledComment = toComment(input);
+			const styledComment = makeGrey(input);
 
 			const expectedOutput = (await fs.readFile(path.join(PATH_TO_COMPARISON_FILES, 'styled-comment.txt'), {encoding: 'utf-8'}));
 			expect(styledComment).toEqual(expectedOutput);

@@ -16,7 +16,7 @@ export function toStyledHeader(header: string): string {
 	return `${ansis.dim('===')} ${ansis.bold(header)}`;
 }
 
-export function toComment(str: string): string {
+export function makeGrey(str: string): string {
 	return ansis.dim(str);
 }
 
