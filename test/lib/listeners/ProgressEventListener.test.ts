@@ -90,6 +90,42 @@ describe('ProgressEventListener implementations', () => {
 			expect(endEvent.data).toContain('done');
 		});
 
+		it('Properly aggregates percentages across multiple Cores', async () => {
+			// ==== TEST SETUP ====
+			// Instantiate a second Core and assign the standard functional stubs to both instances.
+			const secondCore: CodeAnalyzer = new CodeAnalyzer(CodeAnalyzerConfig.withDefaults());
+			const factory1 = new StubEnginePluginsFactory_withFunctionalStubEngine();
+			for (const enginePlugin of factory1.create()) {
+				await codeAnalyzer.addEnginePlugin(enginePlugin);
+			}
+			const factory2 = new StubEnginePluginsFactory_withFunctionalStubEngine();
+			for (const enginePlugin of factory2.create()) {
+				await secondCore.addEnginePlugin(enginePlugin);
+			}
+
+			// We don't want automated ticking to mess with the messages, so just turn it off for now.
+			spinner = new RuleSelectionProgressSpinner(spyDisplay, -1);
+
+			// ==== TESTED BEHAVIOR ====
+			// Start listening to the spinners, select some rules in each one, then stop listening.
+			spinner.listen(codeAnalyzer, secondCore);
+			await codeAnalyzer.selectRules(['all']);
+			await secondCore.selectRules(['all']);
+			spinner.stopListening();
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			// The first event should have been the Spinner Start setting completion to 0.
+			const startEvent = displayEvents[0];
+			expect(startEvent).toHaveProperty('type', DisplayEventType.SPINNER_START);
+			expect(startEvent.data).toContain(`Eligible engines: ${codeAnalyzer.getEngineNames().join(', ')}; Completion: 0%; Elapsed time: 0s`);
+			const percentagesInOrder = getDedupedCompletionPercentages(displayEvents.slice(0, displayEvents.length - 1));
+			expect(percentagesInOrder).toEqual([0, 12, 25, 50, 62, 75, 100]);
+			const endEvent = displayEvents[displayEvents.length - 1];
+			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
+			expect(endEvent.data).toContain('done');
+		});
+
 		it('Properly interleaves progress updates with ticking', async () => {
 			// ==== TEST SETUP ====
 			// Use a plugin with engines that can be configured to wait a certain amount of time between sending their
@@ -298,6 +334,28 @@ describe('ProgressEventListener implementations', () => {
 			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
 			expect(endEvent.data).toContain('done');
 		}, 10000);
+
+		// There's currently no need for this Spinner to accept multiple Cores, so we've opted to not implement that
+		// functionality. We're locking that in with a test, and we can change this test if we ever decide to support it.
+		it('Rejects multiple Cores', async () => {
+			// ==== TEST SETUP ====
+			// Instantiate a second Core and assign the standard functional stubs to both instances.
+			const secondCore: CodeAnalyzer = new CodeAnalyzer(CodeAnalyzerConfig.withDefaults());
+			const factory1 = new StubEnginePluginsFactory_withFunctionalStubEngine();
+			for (const enginePlugin of factory1.create()) {
+				await codeAnalyzer.addEnginePlugin(enginePlugin);
+			}
+			const factory2 = new StubEnginePluginsFactory_withFunctionalStubEngine();
+			for (const enginePlugin of factory2.create()) {
+				await secondCore.addEnginePlugin(enginePlugin);
+			}
+			// The spinner's tick time doesn't matter for this test, so just turn it off.
+			spinner = new EngineRunProgressSpinner(spyDisplay, -1);
+
+			// ==== TESTED BEHAVIOR ====
+			// Attempt to listen to both Cores, and verify that the expected error is thrown.
+			expect(() => spinner.listen(codeAnalyzer, secondCore)).toThrow(/Developer Error:/);
+		});
 	});
 
 	/**
