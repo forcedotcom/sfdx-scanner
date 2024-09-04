@@ -18,6 +18,9 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	public static readonly description = getMessage(BundleName.RunCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.RunCommand, 'command.examples');
 
+	// TODO: Update when we go to Beta and when we go GA
+	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
+
 	public static readonly flags = {
 		// === Flags pertaining to targeting ===
 		workspace: Flags.string({
@@ -33,7 +36,8 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			description: getMessage(BundleName.RunCommand, 'flags.path-start.description'),
 			char: 's',
 			multiple: true,
-			delimiter: ','
+			delimiter: ',',
+			hidden: true
 		}),
 		// === Flags pertaining to rule selection ===
 		'rule-selector': Flags.string({
@@ -74,6 +78,9 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	};
 
 	public async run(): Promise<void> {
+		// TODO: Update when we go to Beta and when we go GA
+		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
+
 		const parsedFlags = (await this.parse(RunCommand)).flags;
 		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View, parsedFlags['output-file']);
 		const action: RunAction = RunAction.createAction(dependencies);

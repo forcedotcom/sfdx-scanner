@@ -16,6 +16,9 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	public static readonly description = getMessage(BundleName.RulesCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.RulesCommand, 'command.examples');
 
+	// TODO: Update when we go to Beta and when we go GA
+	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
+
 	public static readonly flags = {
 		workspace: Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.workspace.summary'),
@@ -48,6 +51,9 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	};
 
 	public async run(): Promise<void> {
+		// TODO: Update when we go to Beta and when we go GA
+		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
+		
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
 		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
 		const action: RulesAction = RulesAction.createAction(dependencies);

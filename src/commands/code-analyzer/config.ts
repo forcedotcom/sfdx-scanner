@@ -17,8 +17,12 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	public static readonly summary = getMessage(BundleName.ConfigCommand, 'command.summary');
 	public static readonly description = getMessage(BundleName.ConfigCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.ConfigCommand, 'command.examples');
+
 	// TODO: UN-HIDE WHEN COMMAND IS READY
 	public static readonly hidden = true;
+
+	// TODO: Update when we go to Beta and when we go GA
+	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
 	public static readonly flags = {
 		workspace: Flags.string({
@@ -56,7 +60,12 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	};
 
 	public async run(): Promise<void> {
+		// TODO: Update when we go to Beta and when we go GA
+		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
+
+		// TODO: REMOVE WHEN COMMAND IS READY
 		this.warn('This command is still a work-in-progress. Currently it can only generate a fixed config file.');
+
 		const parsedFlags = (await this.parse(ConfigCommand)).flags;
 		const dependencies: ConfigDependencies = this.createDependencies(parsedFlags['output-file']);
 		const action: ConfigAction = ConfigAction.createAction(dependencies);

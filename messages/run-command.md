@@ -50,10 +50,6 @@ If you want to preview the list of rules before you actually run them, use the `
 
     <%= config.bin %> <%= command.id %> --rule-selector eslint:getter-return --rule-selector no-inner-declarations
 
-- Specify three method starting points to be applied to the path-based recommended rules of the Salesforce Graph Engine, "sfge", while specifying the "./src" folder as the workspace to be used to build the source graph:
-
-    <%= config.bin %> <%= command.id %> --rule-selector sfge:Recommended --workspace ./src --path-start ./src/classes/Utils.cls#init --path-start ./src/classes/Helpers.cls#method1;method2
-
 # flags.workspace.summary
 
 Set of files you want to include in the code analysis. 
