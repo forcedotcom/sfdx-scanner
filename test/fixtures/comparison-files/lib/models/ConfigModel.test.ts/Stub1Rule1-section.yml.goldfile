@@ -1,0 +1,6 @@
+    Stub1Rule1:
+      severity: 5
+      tags: # Modified from: ["Recommended","CodeStyle"]
+        - Recommended
+        - CodeStyle
+        - Beep

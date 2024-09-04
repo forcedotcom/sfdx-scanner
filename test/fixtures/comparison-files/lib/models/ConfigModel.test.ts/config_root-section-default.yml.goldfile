@@ -1,4 +1,4 @@
 # The absolute folder path to which all other path values in this configuration may be relative to.
-# If not specified or if equal to null, then the value is automatically chosen to be the parent folder of your Code Analyzer
+# If unspecified, or if specified as null, then the value is automatically chosen to be the parent folder of your Code Analyzer
 # configuration file if it exists, or the current working directory otherwise.
 config_root: null # Last calculated by the config command as: __DUMMY_CONFIG_ROOT__

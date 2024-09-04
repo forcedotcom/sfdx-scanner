@@ -39,5 +39,5 @@ export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): 
 }
 
 export function indent(text: string, indentLength: number = 4): string {
-	return text.replace(/^/gm, ' '.repeat(indentLength));
+	return text.replace(/^.+/gm, m => m.length > 0 ? ' '.repeat(indentLength) + m : m);
 }

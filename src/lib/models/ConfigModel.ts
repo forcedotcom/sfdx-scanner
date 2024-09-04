@@ -1,172 +1,181 @@
-import {CodeAnalyzerConfig, RuleSelection} from '@salesforce/code-analyzer-core';
+import * as yaml from 'js-yaml';
+import {
+	CodeAnalyzer,
+	CodeAnalyzerConfig,
+	ConfigDescription,
+	Rule,
+	RuleSelection,
+	SeverityLevel
+} from '@salesforce/code-analyzer-core';
+import {indent, makeGrey} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 
 export enum OutputFormat {
-	YAML = "YAML"
+	RAW_YAML = "RAW_YAML",
+	STYLED_YAML = "STYLED_YAML"
 }
 
 export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
-export type ConfigModelGeneratorFunction = (rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) => ConfigModel;
+export type ConfigState = {
+	config: CodeAnalyzerConfig;
+	core: CodeAnalyzer;
+	rules: RuleSelection;
+}
+
+export type ConfigModelGeneratorFunction = (userState: ConfigState, defaultState: ConfigState) => ConfigModel;
 
 export class AnnotatedConfigModel implements ConfigModel {
-	private readonly rawConfig: CodeAnalyzerConfig;
-	private readonly ruleSelection: RuleSelection;
+	private readonly userState: ConfigState;
+	private readonly defaultState: ConfigState;
 
-	private constructor(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) {
-		this.rawConfig = rawConfig;
-		this.ruleSelection = ruleSelection;
+	private constructor(userState: ConfigState, defaultState: ConfigState) {
+		this.userState = userState;
+		this.defaultState = defaultState;
 	}
 
-	toFormattedOutput(_format: OutputFormat): string {
-		return yamlFormatConfig(this.rawConfig, this.ruleSelection);
-	}
-
-	public static fromSelection(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): AnnotatedConfigModel {
-		return new AnnotatedConfigModel(rawConfig, ruleSelection);
-	}
-}
-
-function yamlFormatConfig(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): string {
-	const defaultConfig = CodeAnalyzerConfig.withDefaults();
-	return yamlFormatDerivedProperty('config_root', rawConfig.getConfigRoot(), defaultConfig.getConfigRoot())
-		+ '\n'
-		+ yamlFormatDerivedProperty('log_folder', rawConfig.getLogFolder(), defaultConfig.getLogFolder())
-		+ '\n'
-		+ yamlFormatRuleSelection(ruleSelection)
-		+ '\n'
-		+ DUMMY_ENGINE_SECTION
-		+ '\n';
-}
-
-function yamlFormatDerivedProperty(propertyName: string, actualValue: string, defaultValue: string): string {
-	// Get the annotation and prepend each line with `# ` to make it a YAML comment.
-	const annotation: string = getMessage(BundleName.ConfigModel, `annotation.${propertyName}`)
-		.replace(/^./gm, s => `# ${s}`);
-
-
-	const value: string = actualValue === defaultValue
-		? `null # ${getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [actualValue])}`
-		: actualValue;
-
-	return `${annotation}\n`
-		+ `${propertyName}: ${value}\n`;
-}
-
-function yamlFormatRuleSelection(ruleSelection: RuleSelection): string {
-	// Get the annotation and prepend each line with '# ' to make it a YAML comment.
-	const annotation: string = getMessage(BundleName.ConfigModel, `annotation.rules`)
-		.replace(/^./gm, s => `# ${s}`);
-
-	if (ruleSelection.getCount() === 0) {
-		return `${annotation}\n`
-			+ `rules: {} # Remove this empty object {} when you are ready to specify your first rule override`;
-	}
-
-	let results = annotation + '\n'
-		+ 'rules:\n';
-
-	for (const engine of ruleSelection.getEngineNames()) {
-		results += `  ${engine}:\n`;
-		for (const rule of ruleSelection.getRulesFor(engine)) {
-			const ruleName: string = rule.getName();
-			const severity = `${rule.getSeverityLevel()}`;
-			const tags = rule.getTags();
-			const tagString = tags.length > 0 ? `["${tags.join('", "')}"]` : `[]`;
-			// This section is built by hand instead of using a message, because the message catalog dislikes indentation.
-			results += `    "${ruleName}":\n`
-				+ `      severity: ${severity}\n`
-				+ `      tags: ${tagString}\n`;
+	toFormattedOutput(format: OutputFormat): string {
+		// istanbul ignore else: Should be impossible
+		if (format === OutputFormat.STYLED_YAML) {
+			return toYaml(this.userState, this.defaultState, true);
+		} else if (format === OutputFormat.RAW_YAML) {
+			return toYaml(this.userState, this.defaultState, false);
+		} else {
+			throw new Error(`Unsupported`)
 		}
 	}
 
+	public static fromSelection(userState: ConfigState, defaultState: ConfigState): AnnotatedConfigModel {
+		return new AnnotatedConfigModel(userState, defaultState);
+	}
+}
+
+function toYaml(userState: ConfigState, defaultState: ConfigState, styled: boolean): string {
+	let result: string = '';
+
+	// First, add the header.
+	const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
+	result += `${toYamlComment(topLevelDescription.overview!, styled)}\n`;
+	result += '\n';
+
+	// Next add `config_root`
+	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.config_root, styled)}\n`;
+	result += `config_root: ${toYamlWithDerivedValueComment(userState.config.getConfigRoot(), defaultState.config.getConfigRoot(), styled)}\n`;
+	result += '\n';
+
+	// Then `log_folder'
+	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.log_folder, styled)}\n`;
+	result += `log_folder: ${toYamlWithDerivedValueComment(userState.config.getLogFolder(), defaultState.config.getLogFolder(), styled)}\n`;
+	result += '\n';
+
+	// Then the `rules` section
+	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.rules, styled)}\n`;
+	result += `${toYamlRules(userState, defaultState, styled)}\n`;
+	result += '\n';
+
+	// Then the `engines` section
+	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.engines, styled)}\n`;
+	result += `${toYamlEngines(userState, styled)}`;
+
+	return result;
+}
+
+function toYamlComment(comment: string, styled: boolean, indentLength: number = 0): string {
+	// At the start of the string, and at the start of every line...
+	return comment.replace(/^.*/gm, s => {
+		// ...Inject a `# ` at the start to make it a comment...
+		let commented = `# ${s}`;
+		// ...Apply styling if requested...
+		commented = styled ? makeGrey(commented) : commented;
+		// ...And indent to the requested amount
+		return indent(commented, indentLength);
+	});
+}
+
+function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, styled: boolean): string {
+	if (userValue == null || userValue === defaultValue) {
+		const comment = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [defaultValue]);
+		return `null ${toYamlComment(comment, styled)}`;
+	} else {
+		return `${userValue}`;
+	}
+}
+
+function toYamlRules(userState: ConfigState, defaultState: ConfigState, styled: boolean): string {
+	if (userState.rules.getCount() === 0) {
+		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.remove-empty-object');
+		return `rules: {} ${toYamlComment(comment, styled)}`;
+	}
+	let results: string = 'rules:\n';
+	for (const engineName of userState.core.getEngineNames()) {
+		const userRulesForEngine = userState.rules.getRulesFor(engineName);
+		if (userRulesForEngine.length > 0) {
+			results += indent(`${engineName}:\n`, 2);
+			for (const userRule of userRulesForEngine) {
+				const defaultRule = getDefaultRule(defaultState, engineName, userRule.getName());
+				results += indent(toYamlRule(userRule, defaultRule, styled), 4);
+			}
+		}
+	}
 	return results;
 }
 
-const DUMMY_ENGINE_SECTION: string =
-`# Engine specific custom configuration settings of the format engines.<engine_name>.<property_name> = <value> where
-#   <engine_name> is the name of the engine containing the rule that you want to override
-#   <property_name> is the name of a property associated with the engine that you would like to set
-# Each engine will have its own set of properties that will be available that will help you customize that particular engine's
-# behavior. See <LINK_COMING_SOON> to learn more.
-engines:
+function getDefaultRule(defaultState: ConfigState, engineName: string, ruleName: string): Rule|null {
+	try {
+		return defaultState.rules.getRule(engineName, ruleName);
+	} catch (e) {
+		return null;
+	}
+}
 
-  # Custom configuration settings for the 'eslint' engine
-  # See <LINK_COMING_SOON> to learn more about these settings.
-  eslint:
+function toYamlRule(userRule: Rule, defaultRule: Rule|null, styled: boolean): string {
+	const ruleName: string = userRule.getName();
+	const userSeverity: SeverityLevel = userRule.getSeverityLevel();
+	const userTags: string[] = userRule.getTags();
 
-    # Whether to turn off the 'eslint' engine so that it is not included when running Code Analyzer commands
-    disable_engine: false
+	let severityYaml = yaml.dump({severity: userSeverity});
+	let tagsYaml = yaml.dump({tags: userTags});
 
-    # Whether to have Code Analyzer automatically discover/apply any ESLint configuration and ignore files from your workspace
-    auto_discover_eslint_config: false
+	if (defaultRule != null) {
+		const defaultSeverity: SeverityLevel = defaultRule.getSeverityLevel();
+		const defaultTagsJson: string = JSON.stringify(defaultRule.getTags());
 
-    # Your project's main ESLint configuration file. May be an absolute path or a path relative to the config_root.
-    # If null and auto_discover_eslint_config is true, then Code Analyzer will attempt to discover/apply it automatically.
-    # Currently only legacy ESLInt config files are supported.
-    # See https://eslint.org/docs/v8.x/use/configure/configuration-files to learn more.
-    eslint_config_file: null
+		if (userSeverity !== defaultSeverity) {
+			const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultSeverity]);
+			severityYaml = severityYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
+		}
 
-    # Your project's ".eslintignore" file. May be an absolute path or a path relative to the config_root.
-    # If null and auto_discover_eslint_config is true, then Code Analyzer will attempt to discover/apply it automatically.
-    # See https://eslint.org/docs/v8.x/use/configure/ignore#the-eslintignore-file to learn more.
-    eslint_ignore_file: null
+		if (JSON.stringify(userTags) !== defaultTagsJson) {
+			const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultTagsJson]);
+			// The YAML spec requires a trailing newline, so we know that there's at least one newline somewhere in the
+			// string. If we inject a comment before the first newline we encounter, then it will look clean.
+			tagsYaml = tagsYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
+		}
+	}
+	return `${ruleName}:\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
+}
 
-    # Whether to turn off the default base configuration that supplies the standard ESLint rules for javascript files
-    disable_javascript_base_config: false
+function toYamlEngines(userState: ConfigState, styled: boolean): string {
+	let results: string = 'engines:\n'
 
-    # Whether to turn off the default base configuration that supplies the LWC rules for javascript files
-    disable_lwc_base_config: false
+	for (const engineName of userState.core.getEngineNames()) {
+		const engineConfigDescriptor = userState.core.getEngineConfigDescription(engineName);
+		const engineConfig = userState.core.getEngineConfig(engineName);
 
-    # Whether to turn off the default base configuration that supplies the standard rules for typescript files
-    disable_typescript_base_config: false
-
-    # Extensions of the javascript files in your workspace that will be associated with javascript and LWC rules
-    javascript_file_extensions: ['.js', '.cjs', '.mjs']
-
-    # Extensions of the typescript files in your workspace that will be associated with typescript rules
-    typescript_file_extensions: ['.ts']
-
-  # Custom configuration settings for the 'regex' engine
-  # See <LINK_COMING_SOON> to learn more about these settings.
-  regex:
-
-    # Whether to turn off the 'regex' engine so that it is not included when running Code Analyzer commands
-    disable_engine: false
-
-    # Custom rules to be added to the 'regex' engine of the format custom_rules.<rule_name>.<rule_property_name> = <value> where
-    #   * <rule_name> is the name you would like to give to your custom rule
-    #   * <rule_property_name> is the name of one of the rule properties. You may specify the following rule properties:
-    #     'regex'             - The regular expression that triggers a violation when matched against the contents of a file.
-    #     'file_extensions'   - The extensions of the files that you would like to test the regular expression against.
-    #     'description'       - A description of the rule's purpose
-    #     'violation_message' - [Optional] The message emitted when a rule violation occurs.
-    #                           This message is intended to help the user understand the violation.
-    #                           Default: 'A match of the regular expression <regex> was found for rule <rule_name>: <description>'
-    #     'severity'          - [Optional] The severity level to apply to this rule by default.
-    #                           Possible values: 1 or 'Critical', 2 or 'High', 3 or 'Moderate', 4 or 'Low', 5 or 'Info'
-    #                           Default: 'Moderate'
-    #     'tags'              - [Optional] The string array of tag values to apply to this rule by default.
-    #                           Default: ['Recommended']
-    #
-    # [Example usage]:
-    # engines:
-    #   regex:
-    #     custom_rules:
-    #       NoTodoComments:
-    #         regex: /\\/\\/[ \\t]*TODO/gi
-    #         file_extensions: [".cls", ".trigger"]
-    #         description: "Prevents TODO comments from being in apex code."
-    #         violation_message: "A comment with a TODO statement was found. Please remove TODO statements from your apex code."
-    #         severity: "Info"
-    #         tags: ['TechDebt']
-    custom_rules: {} # Remove this empty object {} when you are ready to define your first custom rule
-
-  # Custom configuration settings for the 'retire-js' engine
-  # See <LINK_COMING_SOON> to learn more about these settings.
-  retire-js:
-
-    # Whether to turn off the 'retire-js' engine so that it is not included when running Code Analyzer commands
-    disable_engine: false`;
+		if (engineConfigDescriptor.overview) {
+			results += `${toYamlComment(engineConfigDescriptor.overview, styled, 2)}\n`;
+		}
+		results += indent(`${engineName}:`, 2) + '\n';
+		// By fiat, the field description will always include, at minimum, an entry for "disable_field", so we can
+		// assume that the object is not undefined.
+		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
+			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
+			const fieldValue = engineConfig[configField] ?? null;
+			results += toYamlComment(fieldDescription, styled, 4) + '\n';
+			results += indent(`${yaml.dump({[configField]: fieldValue})}`, 4);
+		}
+	}
+	return results;
+}

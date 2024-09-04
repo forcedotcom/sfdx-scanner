@@ -1,4 +1,3 @@
-import {CodeAnalyzerConfig, RuleSelection} from "@salesforce/code-analyzer-core";
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {ConfigAction, ConfigDependencies} from '../../lib/actions/ConfigAction';
 import {ConfigFileWriter} from '../../lib/writers/ConfigWriter';
@@ -8,7 +7,7 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import {AnnotatedConfigModel} from '../../lib/models/ConfigModel';
+import {AnnotatedConfigModel, ConfigState} from '../../lib/models/ConfigModel';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class ConfigCommand extends SfCommand<void> implements Displayable {
@@ -74,8 +73,8 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		const modelGeneratorFunction = (rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) => {
-			return AnnotatedConfigModel.fromSelection(rawConfig, ruleSelection);
+		const modelGeneratorFunction = (userState: ConfigState, defaultState: ConfigState) => {
+			return AnnotatedConfigModel.fromSelection(userState, defaultState);
 		};
 		const dependencies: ConfigDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),

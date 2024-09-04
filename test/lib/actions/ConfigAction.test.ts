@@ -62,8 +62,8 @@ describe('ConfigAction tests', () => {
 			// Make sure that the Writer's ConfigModel was instantiated from the right things.
 			const writtenSpyConfigModel: SpyConfigModel = writerCallHistory[0] as SpyConfigModel;
 			// The engines we're using have a total of 8 rules.
-			expect(writtenSpyConfigModel.getRuleSelection().getCount()).toEqual(8);
-			expect(writtenSpyConfigModel.getRawConfig()).toEqual(CodeAnalyzerConfig.withDefaults());
+			expect(writtenSpyConfigModel.getUserRuleSelection().getCount()).toEqual(8);
+			expect(writtenSpyConfigModel.getUserConfig()).toEqual(CodeAnalyzerConfig.withDefaults());
 		});
 	});
 
@@ -99,8 +99,8 @@ describe('ConfigAction tests', () => {
 			// Make sure that the Writer's ConfigModel was instantiated from the right things.
 			const writtenSpyConfigModel: SpyConfigModel = writerCallHistory[0] as SpyConfigModel;
 			// The engines we're using have a total of 8 rules.
-			expect(writtenSpyConfigModel.getRuleSelection().getCount()).toEqual(8);
-			expect(writtenSpyConfigModel.getRawConfig()).toEqual(expectedBaseConfig);
+			expect(writtenSpyConfigModel.getUserRuleSelection().getCount()).toEqual(8);
+			expect(writtenSpyConfigModel.getUserConfig()).toEqual(expectedBaseConfig);
 		});
 	});
 
@@ -122,7 +122,7 @@ describe('ConfigAction tests', () => {
 
 		// Make sure that the Viewer's ConfigModel was instantiated from the right things.
 		const spyConfigModel: SpyConfigModel = viewerCallHistory[0] as SpyConfigModel;
-		expect(spyConfigModel.getRuleSelection().getCount()).toEqual(expectedRuleCount);
-		expect(spyConfigModel.getRawConfig()).toEqual(expectedBaseConfig);
+		expect(spyConfigModel.getUserRuleSelection().getCount()).toEqual(expectedRuleCount);
+		expect(spyConfigModel.getUserConfig()).toEqual(expectedBaseConfig);
 	}
 })

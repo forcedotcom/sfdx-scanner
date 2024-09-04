@@ -1,0 +1,25 @@
+# Engine specific custom configuration settings of the format engines.{engine_name}.{property_name} = {value} where:
+#   {engine_name} is the name of the engine containing the setting that you want to override.
+#   {property_name} is the name of a property that you would like to override.
+# Each engine may have its own set of properties available to help customize that particular engine's behavior.
+engines:
+  # This is a generic overview for StubEngine1
+  # It has multiple lines of text
+  # Whee!
+  StubEngine1:
+    # This is the description for Property1
+    Property1: foo
+    # This is the description for Property3
+    Property3: baz
+    # This is the description for Property4
+    Property4:
+      SubProperty1: 42
+      SubProperty2: false
+    # This is the description for Property5
+    Property5:
+      - bada-bing
+      - bada-boom
+    # This is the description for Property6
+    Property6: null
+    # Whether to turn off the 'StubEngine1' engine so that it is not included when running Code Analyzer commands.
+    disable_engine: false

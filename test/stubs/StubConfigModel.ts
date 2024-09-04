@@ -1,5 +1,5 @@
 import {CodeAnalyzerConfig, RuleSelection} from "@salesforce/code-analyzer-core";
-import {ConfigModel, OutputFormat} from '../../src/lib/models/ConfigModel';
+import {ConfigModel, ConfigState, OutputFormat} from '../../src/lib/models/ConfigModel';
 
 export class StubConfigModel implements ConfigModel {
 	public toFormattedOutput(format: OutputFormat): string {
@@ -9,27 +9,25 @@ export class StubConfigModel implements ConfigModel {
 }
 
 export class SpyConfigModel implements ConfigModel {
-	private readonly rawConfig: CodeAnalyzerConfig;
-	private readonly ruleSelection: RuleSelection;
+	private readonly userState: ConfigState;
 
-	private constructor(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection) {
-		this.rawConfig = rawConfig;
-		this.ruleSelection = ruleSelection;
+	private constructor(userState: ConfigState, _defaultState: ConfigState) {
+		this.userState = userState;
 	}
 
 	public toFormattedOutput(format: OutputFormat): string {
 		return `Results formatted as ${format}`;
 	}
 
-	public getRawConfig(): CodeAnalyzerConfig {
-		return this.rawConfig;
+	public getUserConfig(): CodeAnalyzerConfig {
+		return this.userState.config;
 	}
 
-	public getRuleSelection(): RuleSelection {
-		return this.ruleSelection;
+	public getUserRuleSelection(): RuleSelection {
+		return this.userState.rules;
 	}
 
-	public static fromSelection(rawConfig: CodeAnalyzerConfig, ruleSelection: RuleSelection): SpyConfigModel {
-		return new SpyConfigModel(rawConfig, ruleSelection);
+	public static fromSelection(userState: ConfigState, defaultState: ConfigState): SpyConfigModel {
+		return new SpyConfigModel(userState, defaultState);
 	}
 }

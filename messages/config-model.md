@@ -1,6 +1,12 @@
 # template.last-calculated-as
 Last calculated by the config command as: %s
 
+# template.modified-from
+Modified from: %s
+
+# template.yaml.remove-empty-object
+Remove this empty object {} when you are ready to specify your first rule override
+
 # annotation.config_root
 The absolute folder path to which all other path values in this configuration may be relative to.
 If not specified or if equal to null, then the value is automatically chosen to be the parent folder of your Code Analyzer

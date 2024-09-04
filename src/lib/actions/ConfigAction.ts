@@ -63,8 +63,13 @@ export class ConfigAction {
 		// or file handlers that must be gracefully ended.
 		this.dependencies.progressEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
-
-		const configModel: ConfigModel = this.dependencies.modelGenerator(config, ruleSelection);
+		const configState = {
+			config,
+			core,
+			rules: ruleSelection
+		};
+		// TODO: Pass in different ConfigStates instead of the same one twice.
+		const configModel: ConfigModel = this.dependencies.modelGenerator(configState, configState);
 
 		this.dependencies.viewer.view(configModel);
 		this.dependencies.writer?.write(configModel);

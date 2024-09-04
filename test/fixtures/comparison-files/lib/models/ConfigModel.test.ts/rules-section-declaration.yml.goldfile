@@ -1,0 +1,15 @@
+# Rule override settings of the format rules.{engine_name}.{rule_name}.{property_name} = {override_value} where:
+#   {engine_name} is the name of the engine containing the rule that you want to override.
+#   {rule_name} is the name of the rule that you want to override.
+#   {property_name} can either be:
+#     'severity' - [Optional] The severity level value that you want to use to override the default severity level for the rule
+#                  Possible values: 1 or 'Critical', 2 or 'High', 3 or 'Moderate', 4 or 'Low', 5 or 'Info'
+#     'tags'     - [Optional] The string array of tag values that you want to use to override the default tags for the rule
+# ---- [Example usage]: ---------------------
+# rules:
+#   eslint:
+#     sort-vars:
+#       severity: "Info"
+#       tags: ["Recommended", "Suggestion"]
+# -------------------------------------------
+rules:
