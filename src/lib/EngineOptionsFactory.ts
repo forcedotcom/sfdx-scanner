@@ -29,8 +29,8 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		if (this.shouldSfgeRun(inputs)) {
 			const sfgeConfig: SfgeConfig = {
 				projectDirs: this.inputProcessor.resolveProjectDirPaths(inputs),
-				cachepath: inputs.cachepath,
-				enablecaching: inputs.enablecaching
+				cachepath: inputs.cachepath as string,
+				enablecaching: inputs.enablecaching as boolean
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}

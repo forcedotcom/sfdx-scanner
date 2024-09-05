@@ -242,7 +242,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		if (this.ruleDisableWarningViolation != null) {
 			flags.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
 		}
-		if (this.enablecaching) {
+		if (this.enablecaching != null && this.enablecaching) {
 			flags.push(`-DSFGE_DISABLE_CACHING=false`);
 		}
 		if (this.cachepath != null) {
