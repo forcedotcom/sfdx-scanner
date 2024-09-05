@@ -28,7 +28,9 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		const options: Map<string,string> = new Map();
 		if (this.shouldSfgeRun(inputs)) {
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: this.inputProcessor.resolveProjectDirPaths(inputs)
+				projectDirs: this.inputProcessor.resolveProjectDirPaths(inputs),
+				cachepath: inputs.cachepath,
+				enablecaching: inputs.enablecaching
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}
@@ -113,6 +115,12 @@ export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
 		}
 		if (inputs['pathexplimit'] != null) {
 			sfgeConfig.pathexplimit = inputs['pathexplimit'] as number;
+		}
+		if (inputs['enablecaching'] != null) {
+			sfgeConfig.enablecaching = inputs['enablecaching'] as boolean;
+		}
+		if (inputs['cachepath'] != null) {
+			sfgeConfig.cachepath = inputs['cachepath'] as string;
 		}
 		sfgeConfig.ruleDisableWarningViolation = getBooleanEngineOption(inputs, RULE_DISABLE_WARNING_VIOLATION_FLAG);
 		engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));

@@ -33,6 +33,8 @@ type SfgeWrapperOptions = {
 	spinnerManager: SpinnerManager;
 	jvmArgs?: string;
 	pathExpLimit?: number;
+	enablecaching?: boolean;
+	cachepath?: string;
 }
 
 type SfgeCatalogOptions = SfgeWrapperOptions & {
@@ -46,6 +48,8 @@ type SfgeExecuteOptions = SfgeWrapperOptions & {
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;
+	enablecaching?: boolean;
+	cachepath?: string;
 }
 
 type SfgeTarget = {
@@ -57,6 +61,8 @@ type SfgeInput = {
 	targets: SfgeTarget[];
 	projectDirs: string[];
 	rulesToRun: string[];
+	enablecaching?: boolean;
+	cachepath?: string;
 };
 
 class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
@@ -164,6 +170,7 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 		}
 		args.push(...this.getSupplementalFlags(), MAIN_CLASS, this.action, ...(await this.getSupplementalArgs()));
 		this.logger.trace(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
+		console.log(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 	protected async execute(): Promise<string> {
@@ -209,6 +216,8 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
 	private ruleDisableWarningViolation: boolean;
+	private enablecaching: boolean;
+	private cachepath: string;
 
 	constructor(options: SfgeExecuteOptions) {
 		super(options);
@@ -218,6 +227,8 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
 		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
+		this.enablecaching = options.enablecaching;
+		this.cachepath = options.cachepath;
 	}
 
 	protected getSupplementalFlags(): string[] {
@@ -230,6 +241,12 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		}
 		if (this.ruleDisableWarningViolation != null) {
 			flags.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
+		}
+		if (this.enablecaching) {
+			flags.push(`-DSFGE_DISABLE_CACHING=false`);
+		}
+		if (this.cachepath != null) {
+			flags.push(`-DSFGE_FILES_TO_ENTRIES_CACHE_LOCATION=${this.cachepath}`);
 		}
 		return flags;
 	}
@@ -291,7 +308,9 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 			pathExpLimit: sfgeConfig.pathexplimit,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
-			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation
+			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation,
+			cachepath: sfgeConfig.cachepath,
+			enablecaching: sfgeConfig.enablecaching
 		});
 		return wrapper.execute();
 	}
