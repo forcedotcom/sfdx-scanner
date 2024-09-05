@@ -69,7 +69,19 @@ export default class Dfa extends ScannerRunCommand {
 			summary: getMessage(BundleName.RunDfa, 'flags.pathexplimitSummary'),
 			description: getMessage(BundleName.RunDfa, 'flags.pathexplimitDescription'),
 			env: 'SFGE_PATH_EXPANSION_LIMIT'
-		})
+		}),
+		'enablecaching': Flags.boolean({
+			summary: '',
+			description: '',
+			env: 'SFGE_ENABLE_CACHING',
+			hidden: true
+		}),
+		'cachepath': Flags.string({
+			summary: '',
+			description: '',
+			env: 'SFGE_FILES_TO_ENTRIES_CACHE_LOCATION',
+			hidden: true
+		}),
 		// END: Config-overrideable engine flags.
 	};
 

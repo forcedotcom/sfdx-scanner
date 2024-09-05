@@ -46,6 +46,8 @@ type SfgeExecuteOptions = SfgeWrapperOptions & {
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;
+	enablecaching?: boolean;
+	cachepath?: string;
 }
 
 type SfgeTarget = {
@@ -57,6 +59,8 @@ type SfgeInput = {
 	targets: SfgeTarget[];
 	projectDirs: string[];
 	rulesToRun: string[];
+	enablecaching?: boolean;
+	cachepath?: string;
 };
 
 class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
@@ -209,6 +213,8 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
 	private ruleDisableWarningViolation: boolean;
+	private enablecaching: boolean;
+	private cachepath: string;
 
 	constructor(options: SfgeExecuteOptions) {
 		super(options);
@@ -218,6 +224,8 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
 		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
+		this.enablecaching = options.enablecaching;
+		this.cachepath = options.cachepath;
 	}
 
 	protected getSupplementalFlags(): string[] {
@@ -230,6 +238,12 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		}
 		if (this.ruleDisableWarningViolation != null) {
 			flags.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
+		}
+		if (this.enablecaching != null && this.enablecaching) {
+			flags.push(`-DSFGE_DISABLE_CACHING=false`);
+		}
+		if (this.cachepath != null) {
+			flags.push(`-DSFGE_FILES_TO_ENTRIES_CACHE_LOCATION=${this.cachepath}`);
 		}
 		return flags;
 	}
@@ -291,7 +305,9 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 			pathExpLimit: sfgeConfig.pathexplimit,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
-			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation
+			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation,
+			cachepath: sfgeConfig.cachepath,
+			enablecaching: sfgeConfig.enablecaching
 		});
 		return wrapper.execute();
 	}
