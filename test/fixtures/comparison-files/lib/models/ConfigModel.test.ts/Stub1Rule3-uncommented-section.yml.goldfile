@@ -1,4 +1,4 @@
-    Stub1Rule3:
+    "Stub1Rule3":
       severity: 3
       tags:
         - CodeStyle

@@ -123,28 +123,56 @@ describe('ConfigModel implementations', () => {
 			});
 
 			describe('`engines` section', () => {
+				let expectedEnginesHeader: string;
 
-				it('Engines with documented properties are correctly styled', async () => {
+				beforeAll(async () => {
+					expectedEnginesHeader = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'engines-section-header.yml.goldfile'), {encoding: 'utf-8'});
+				});
+
+				it.each([
+					{selectedEngine: 'StubEngine1', unselectedEngine: 'StubEngine2'},
+					{selectedEngine: 'StubEngine2', unselectedEngine: 'StubEngine1'}
+				])('Engines corresponding to selected rules are present and correctly formatted. Engine: $selectedEngine', async ({selectedEngine, unselectedEngine}) => {
 					// ==== SETUP ====
 					// Use "null" for the dummy values, since they're unrelated to this test.
 					await initializeUserConfigAndCore('null', 'null');
 
 					// ==== TESTED BEHAVIOR ====
-					// This test doesn't care about rule selection, so just select all rules
-					const output = await selectRulesAndGenerateOutput(['all']);
+					// Select all rules associated with an engine.
+					const output = await selectRulesAndGenerateOutput([selectedEngine]);
 
 					// ==== ASSERTIONS ====
-					const goldFileContents = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'engines-section.yml.goldfile'), {encoding: 'utf-8'});
+					// Expect the header to always be there.
+					expect(output).toContain(expectedEnginesHeader);
+
+					// The output should make no mention of the engine we didn't select.
+					expect(output).not.toContain(unselectedEngine);
+
+					const goldFileContents = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, `${selectedEngine}-section.yml.goldfile`), {encoding: 'utf-8'});
 					expect(output).toContain(goldFileContents);
+				});
+
+				it('Edge Case: When no rules are selected, `engines` section is an empty object with a comment', async () => {
+					// ==== SETUP ====
+					// Use "null" for the dummy values, since they're unrelated to this test.
+					await initializeUserConfigAndCore('null', 'null');
+
+					// ==== TESTED BEHAVIOR ====
+					// Use a selection that no rules will match.
+					const output: string = await selectRulesAndGenerateOutput(['NoRuleHasThisTag']);
+
+					// ==== ASSERTIONS ====
+					expect(output).toContain(expectedEnginesHeader);
+					expect(output).toContain('engines: {} # Empty object used because rule selection returned no rules');
 				});
 			});
 
 			describe('`rules` section', () => {
 
-				let expectedRulesDeclaration: string;
+				let expectedRulesHeader: string;
 
 				beforeAll(async () => {
-					expectedRulesDeclaration = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'rules-section-declaration.yml.goldfile'), {encoding: 'utf-8'});
+					expectedRulesHeader = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'rules-section-header.yml.goldfile'), {encoding: 'utf-8'});
 				});
 
 				it.each([
@@ -162,7 +190,7 @@ describe('ConfigModel implementations', () => {
 					const output = await selectRulesAndGenerateOutput(['CodeStyle']);
 
 					// ==== ASSERTIONS ====
-					expect(output).toContain(expectedRulesDeclaration);
+					expect(output).toContain(expectedRulesHeader);
 
 					const goldFileContents = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, `${ruleName}-section.yml.goldfile`), {encoding: 'utf-8'});
 					expect(output).toContain(goldFileContents);
@@ -185,7 +213,7 @@ describe('ConfigModel implementations', () => {
 					const output = await selectRulesAndGenerateOutput(['CodeStyle']);
 
 					// ==== ASSERTIONS ====
-					expect(output).toContain(expectedRulesDeclaration);
+					expect(output).toContain(expectedRulesHeader);
 					// The output should make no mention of the expected rule.
 					expect(output).not.toContain(ruleName);
 					// If we parse the output into a new Config, then that Config should have no overrides for the expected rule.
@@ -203,7 +231,7 @@ describe('ConfigModel implementations', () => {
 					const output: string = await selectRulesAndGenerateOutput(['NoRuleHasThisTag']);
 
 					// ==== ASSERTIONS ====
-					expect(output).toContain(expectedRulesDeclaration);
+					expect(output).toContain(expectedRulesHeader);
 					expect(output).toContain('rules: {} # Remove this empty object {} when you are ready to specify your first rule override');
 				});
 
@@ -220,7 +248,7 @@ describe('ConfigModel implementations', () => {
 					const output = await selectRulesAndGenerateOutput([ruleName]);
 
 					// ==== ASSERTIONS ====
-					expect(output).toContain(expectedRulesDeclaration);
+					expect(output).toContain(expectedRulesHeader);
 					const goldFileContents = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, `${ruleName}-section.yml.goldfile`), {encoding: 'utf-8'});
 					expect(output).toContain(goldFileContents);
 				})
@@ -235,7 +263,7 @@ describe('ConfigModel implementations', () => {
 					const output = await selectRulesAndGenerateOutput(['CodeStyle'], ['CodeStyle']);
 
 					// ==== ASSERTIONS ====
-					expect(output).toContain(expectedRulesDeclaration);
+					expect(output).toContain(expectedRulesHeader);
 					const goldFileContents = await fsp.readFile(path.join(PATH_TO_COMPARISON_DIR, 'Stub1Rule3-uncommented-section.yml.goldfile'), {encoding: 'utf-8'});
 					expect(output).toContain(goldFileContents);
 				});
@@ -262,15 +290,18 @@ class StubEnginePlugin extends EngineApi.EnginePluginV1 {
 				'Property6': 'This is the description for Property6'
 			}
 		}
+		// StubEngine2 has no overview and no documented properties.
 	}
 
 	public getAvailableEngineNames(): string[] {
-		return ['StubEngine1'];
+		return ['StubEngine1', 'StubEngine2'];
 	}
 
 	public createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
 		if (engineName === 'StubEngine1') {
 			this.createdEngines.set(engineName, new StubEngine1(config));
+		} else if (engineName === 'StubEngine2') {
+			this.createdEngines.set(engineName, new StubEngine2(config));
 		} else {
 			throw new Error(`No engine named ${engineName}`);
 		}
@@ -364,4 +395,32 @@ class StubEngine1 extends EngineApi.Engine {
 			violations: []
 		});
 	}
+}
+
+class StubEngine2 extends EngineApi.Engine {
+	public constructor(_config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	public getName(): string {
+		return 'StubEngine2';
+	}
+
+	public describeRules(): Promise<EngineApi.RuleDescription[]> {
+		return Promise.resolve([{
+			name: 'Stub2Rule1',
+			severityLevel: EngineApi.SeverityLevel.Moderate,
+			type: EngineApi.RuleType.Standard,
+			tags: ['Security'],
+			description: 'Generic description',
+			resourceUrls: []
+		}]);
+	}
+
+	public runRules(): Promise<EngineApi.EngineRunResults> {
+		return Promise.resolve({
+			violations: []
+		});
+	}
+
 }

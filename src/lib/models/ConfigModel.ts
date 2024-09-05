@@ -57,7 +57,9 @@ function toYaml(userState: ConfigState, defaultState: ConfigState, styled: boole
 
 	// First, add the header.
 	const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
+	result += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled)}\n`
 	result += `${toYamlComment(topLevelDescription.overview!, styled)}\n`;
+	result += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled)}\n`
 	result += '\n';
 
 	// Next add `config_root`
@@ -105,7 +107,7 @@ function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, 
 
 function toYamlRules(userState: ConfigState, defaultState: ConfigState, styled: boolean): string {
 	if (userState.rules.getCount() === 0) {
-		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.remove-empty-object');
+		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 		return `rules: {} ${toYamlComment(comment, styled)}`;
 	}
 	let results: string = 'rules:\n';
@@ -154,26 +156,37 @@ function toYamlRule(userRule: Rule, defaultRule: Rule|null, styled: boolean): st
 			tagsYaml = tagsYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
 		}
 	}
-	return `${ruleName}:\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
+	return `"${ruleName}":\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
 }
 
 function toYamlEngines(userState: ConfigState, styled: boolean): string {
+	if (userState.rules.getCount() === 0) {
+		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
+		return `engines: {} ${toYamlComment(comment, styled)}`;
+	}
+
 	let results: string = 'engines:\n'
 
 	for (const engineName of userState.core.getEngineNames()) {
+		if (!userState.rules.getEngineNames().includes(engineName)) {
+			continue;
+		}
 		const engineConfigDescriptor = userState.core.getEngineConfigDescription(engineName);
 		const engineConfig = userState.core.getEngineConfig(engineName);
 
-		if (engineConfigDescriptor.overview) {
-			results += `${toYamlComment(engineConfigDescriptor.overview, styled, 2)}\n`;
-		}
+		results += `\n${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled, 2)}\n`
+		// Engines are guaranteed to have an overview, even if it's just generic text.
+		results += `${toYamlComment(engineConfigDescriptor.overview!, styled, 2)}\n`;
+		results += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled, 2)}\n`
+
 		results += indent(`${engineName}:`, 2) + '\n';
 		// By fiat, the field description will always include, at minimum, an entry for "disable_field", so we can
 		// assume that the object is not undefined.
 		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
 			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
 			const fieldValue = engineConfig[configField] ?? null;
-			results += toYamlComment(fieldDescription, styled, 4) + '\n';
+			// Add a leading newline to visually break up the property from the previous one.
+			results += '\n' + toYamlComment(fieldDescription, styled, 4) + '\n';
 			results += indent(`${yaml.dump({[configField]: fieldValue})}`, 4);
 		}
 	}
