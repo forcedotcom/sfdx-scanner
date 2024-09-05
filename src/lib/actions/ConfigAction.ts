@@ -1,4 +1,4 @@
-import {CodeAnalyzerConfig, CodeAnalyzer, RuleSelection} from "@salesforce/code-analyzer-core";
+import {CodeAnalyzerConfig, CodeAnalyzer} from "@salesforce/code-analyzer-core";
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ConfigWriter} from '../writers/ConfigWriter';
@@ -7,7 +7,7 @@ import {ConfigViewer} from '../viewers/ConfigViewer';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
-import {ConfigModel, ConfigModelGeneratorFunction} from '../models/ConfigModel';
+import {ConfigModel, ConfigModelGeneratorFunction, ConfigState} from '../models/ConfigModel';
 
 export type ConfigDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
@@ -33,43 +33,71 @@ export class ConfigAction {
 	}
 
 	public async execute(input: ConfigInput): Promise<void> {
-		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
-		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
-		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
+		// We need the user's Config and the default Config.
+		const userConfig: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
+		const defaultConfig: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults();
+
+		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(userConfig);
+		// We always add a Logger Listener to the appropriate listeners list, because we should always be logging.
 		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
 
-		const core: CodeAnalyzer = new CodeAnalyzer(config);
+		// Use each config to instantiate a Core.
+		const userCore: CodeAnalyzer = new CodeAnalyzer(userConfig);
+		const defaultCore: CodeAnalyzer = new CodeAnalyzer(defaultConfig);
 
-		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
-		// events they listen for basically immediately.
-		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
-		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const enginePluginModules = config.getCustomEnginePluginModules();
+		// LogEventListeners should start listening as soon as the Cores are instantiated, since Cores can start emitting
+		// relevant events basically immediately.
+		this.dependencies.logEventListeners.forEach(listener => listener.listen(userCore));
+		this.dependencies.logEventListeners.forEach(listener => listener.listen(defaultCore));
+
+		// Add the standard plugins to both Cores, but only the user Core gets the custom modules.
+		// This is because we can't assume that the default Config is sufficient for the custom plugins.
+		const userEnginePlugins = this.dependencies.pluginsFactory.create();
+		const userEnginePluginModules = userConfig.getCustomEnginePluginModules();
+		const defaultEnginePlugins = this.dependencies.pluginsFactory.create();
+
 		const addEnginePromises: Promise<void>[] = [
-			...enginePlugins.map(enginePlugin => core.addEnginePlugin(enginePlugin)),
-			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
+			...userEnginePlugins.map(enginePlugin => userCore.addEnginePlugin(enginePlugin)),
+			...defaultEnginePlugins.map(enginePlugin => defaultCore.addEnginePlugin(enginePlugin)),
+			...userEnginePluginModules.map(pluginModule => userCore.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
 
-		const selectOptions = input.workspace
-			? {workspace: await createWorkspace(core, input.workspace)}
+		const userSelectOptions = input.workspace
+			? {workspace: await createWorkspace(userCore, input.workspace)}
 			: undefined;
-		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
-		// that's when progress events can start being emitted.
-		this.dependencies.progressEventListeners.forEach(listener => listener.listen(core));
-		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], selectOptions);
+		const defaultSelectOptions = input.workspace
+			? {workspace: await createWorkspace(defaultCore, input.workspace)}
+			: undefined;
 
-		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
-		// or file handlers that must be gracefully ended.
+		// EngineProgressListeners should start listening right before we call the Cores' `.selectRules()` methods, since
+		// that's when progress events can start being emitted.
+		this.dependencies.progressEventListeners.forEach(listener => listener.listen(userCore, defaultCore));
+
+		const [userRules, defaultRules] = await Promise.all([
+			// The user Core should respect the user's selection criteria.
+			userCore.selectRules(input['rule-selector'], userSelectOptions),
+			// The default Core should always use "all", to minimize the likelihood of a rule's default state being unavailable
+			// for comparison.
+			defaultCore.selectRules(['all'], defaultSelectOptions)
+		]);
+
+		// After the Cores are done running, the listeners need to be told to stop, since some of them have persistent UI
+		// elements or file handlers that must be gracefully ended.
 		this.dependencies.progressEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
-		const configState = {
-			config,
-			core,
-			rules: ruleSelection
+
+		const userConfigState: ConfigState = {
+			config: userConfig,
+			core: userCore,
+			rules: userRules
 		};
-		// TODO: Pass in different ConfigStates instead of the same one twice.
-		const configModel: ConfigModel = this.dependencies.modelGenerator(configState, configState);
+		const defaultConfigState: ConfigState = {
+			config: defaultConfig,
+			core: defaultCore,
+			rules: defaultRules
+		};
+		const configModel: ConfigModel = this.dependencies.modelGenerator(userConfigState, defaultConfigState);
 
 		this.dependencies.viewer.view(configModel);
 		this.dependencies.writer?.write(configModel);

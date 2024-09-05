@@ -122,7 +122,11 @@ describe('ConfigAction tests', () => {
 
 		// Make sure that the Viewer's ConfigModel was instantiated from the right things.
 		const spyConfigModel: SpyConfigModel = viewerCallHistory[0] as SpyConfigModel;
+		// The User state should depend on the user's input.
 		expect(spyConfigModel.getUserRuleSelection().getCount()).toEqual(expectedRuleCount);
 		expect(spyConfigModel.getUserConfig()).toEqual(expectedBaseConfig);
+		// The Default state should always be the same, using the Default config and selecting All rules.
+		expect(spyConfigModel.getDefaultRuleSelection().getCount()).toEqual(8);
+		expect(spyConfigModel.getDefaultConfig()).toEqual(CodeAnalyzerConfig.withDefaults());
 	}
 })

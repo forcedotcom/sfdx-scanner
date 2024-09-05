@@ -17,9 +17,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	public static readonly description = getMessage(BundleName.ConfigCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.ConfigCommand, 'command.examples');
 
-	// TODO: UN-HIDE WHEN COMMAND IS READY
-	public static readonly hidden = true;
-
 	// TODO: Update when we go to Beta and when we go GA
 	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
@@ -29,9 +26,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			description: getMessage(BundleName.ConfigCommand, 'flags.workspace.description'),
 			char: 'w',
 			multiple: true,
-			delimiter: ',',
-			// TODO: UN-HIDE WHEN ASSOCIATED FEATURES ARE IMPLEMENTED
-			hidden: true
+			delimiter: ','
 		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.rule-selector.summary'),
@@ -39,17 +34,13 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
-			default: ["Recommended"],
-			// TODO: UN-HIDE WHEN ASSOCIATED FEATURES ARE IMPLEMENTED
-			hidden: true
+			default: ["Recommended"]
 		}),
 		'config-file': Flags.file({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.config-file.summary'),
 			description: getMessage(BundleName.ConfigCommand, 'flags.config-file.description'),
 			char: 'c',
-			exists: true,
-			// TODO: UN-HIDE WHEN ASSOCIATED FEATURES ARE IMPLEMENTED
-			hidden: true
+			exists: true
 		}),
 		'output-file': Flags.string({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.output-file.summary'),
@@ -61,9 +52,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	public async run(): Promise<void> {
 		// TODO: Update when we go to Beta and when we go GA
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
-
-		// TODO: REMOVE WHEN COMMAND IS READY
-		this.warn('This command is still a work-in-progress. Currently it can only generate a fixed config file.');
 
 		const parsedFlags = (await this.parse(ConfigCommand)).flags;
 		const dependencies: ConfigDependencies = this.createDependencies(parsedFlags['output-file']);
