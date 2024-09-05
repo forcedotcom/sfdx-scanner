@@ -33,8 +33,6 @@ type SfgeWrapperOptions = {
 	spinnerManager: SpinnerManager;
 	jvmArgs?: string;
 	pathExpLimit?: number;
-	enablecaching?: boolean;
-	cachepath?: string;
 }
 
 type SfgeCatalogOptions = SfgeWrapperOptions & {
@@ -170,7 +168,6 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 		}
 		args.push(...this.getSupplementalFlags(), MAIN_CLASS, this.action, ...(await this.getSupplementalArgs()));
 		this.logger.trace(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
-		console.log(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 	protected async execute(): Promise<string> {

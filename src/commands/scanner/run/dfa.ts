@@ -73,12 +73,14 @@ export default class Dfa extends ScannerRunCommand {
 		'enablecaching': Flags.boolean({
 			summary: '',
 			description: '',
-			env: 'SFGE_ENABLE_CACHING'
+			env: 'SFGE_ENABLE_CACHING',
+			hidden: true
 		}),
 		'cachepath': Flags.string({
 			summary: '',
 			description: '',
-			env: 'SFGE_FILES_TO_ENTRIES_CACHE_LOCATION'
+			env: 'SFGE_FILES_TO_ENTRIES_CACHE_LOCATION',
+			hidden: true
 		}),
 		// END: Config-overrideable engine flags.
 	};
