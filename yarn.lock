@@ -1581,6 +1581,16 @@
     eslint-plugin-import "^2.29.1"
     eslint-plugin-jest "^28.6.0"
 
+"@salesforce/code-analyzer-pmd-engine@^0.10.0":
+  version "0.10.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.10.0.tgz#d70e03b5953e9533ccf09574b3135052b638762f"
+  integrity sha512-WnazyWouDH4rBvmwk/Gp6z6E1J9sUmVVzqAEUz/81DDBYM/PUXuwTIlIo+TLTkQjFZGB0ZGJw6EmsYPzOuEi0g==
+  dependencies:
+    "@salesforce/code-analyzer-engine-api" "0.10.0"
+    "@types/node" "^20.0.0"
+    "@types/tmp" "^0.2.6"
+    tmp "^0.2.3"
+
 "@salesforce/code-analyzer-regex-engine@^0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-regex-engine/-/code-analyzer-regex-engine-0.10.0.tgz#8728a00be3117b21c0b1ac50d1eb140aed052459"
