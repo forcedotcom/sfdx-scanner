@@ -1542,7 +1542,7 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/code-analyzer-core@0.13.1":
+"@salesforce/code-analyzer-core@^0.13.1":
   version "0.13.1"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.13.1.tgz#f0a8a6ef7cd73190031ad9df8eb5a3c2974c8015"
   integrity sha512-3SG5nnJWcv3+ligSoKtNLFpwCMyjmebd1njFOWFokfpZgUhcTySmwDICPO83NDZGXWPtSvhWQpQGFIyNy7v7Iw==

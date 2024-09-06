@@ -7,7 +7,7 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import {AnnotatedConfigModel, ConfigState} from '../../lib/models/ConfigModel';
+import {AnnotatedConfigModel, ConfigContext} from '../../lib/models/ConfigModel';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class ConfigCommand extends SfCommand<void> implements Displayable {
@@ -61,8 +61,8 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		const modelGeneratorFunction = (userState: ConfigState, defaultState: ConfigState) => {
-			return AnnotatedConfigModel.fromSelection(userState, defaultState);
+		const modelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => {
+			return AnnotatedConfigModel.fromSelection(relevantEngines, userContext, defaultContext);
 		};
 		const dependencies: ConfigDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),

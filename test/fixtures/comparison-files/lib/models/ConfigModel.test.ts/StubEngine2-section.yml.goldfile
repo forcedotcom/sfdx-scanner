@@ -1,7 +1,0 @@
-  # ===========================
-  # STUBENGINE2 ENGINE CONFIGURATION
-  # ===========================
-  StubEngine2:
-
-    # Whether to turn off the 'StubEngine2' engine so that it is not included when running Code Analyzer commands.
-    disable_engine: false

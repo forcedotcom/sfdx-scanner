@@ -12,6 +12,8 @@ engines:
       SubProperty2: false
     Property5: ['bada-bing', 'bada-boom']
     # Property6 is not set, so it should default to null
+  StubEngine3:
+    disable_engine: true
 rules:
   StubEngine1:
     Stub1Rule1:

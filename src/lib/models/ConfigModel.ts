@@ -19,69 +19,75 @@ export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
-export type ConfigState = {
+export type ConfigContext = {
 	config: CodeAnalyzerConfig;
 	core: CodeAnalyzer;
 	rules: RuleSelection;
 }
 
-export type ConfigModelGeneratorFunction = (userState: ConfigState, defaultState: ConfigState) => ConfigModel;
+export type ConfigModelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => ConfigModel;
 
 export class AnnotatedConfigModel implements ConfigModel {
-	private readonly userState: ConfigState;
-	private readonly defaultState: ConfigState;
+	private readonly relevantEngines: Set<string>;
+	private readonly userContext: ConfigContext;
+	private readonly defaultContext: ConfigContext;
 
-	private constructor(userState: ConfigState, defaultState: ConfigState) {
-		this.userState = userState;
-		this.defaultState = defaultState;
+	private constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+		this.relevantEngines = relevantEngines;
+		this.userContext = userContext;
+		this.defaultContext = defaultContext;
 	}
 
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return toYaml(this.userState, this.defaultState, true);
+			return toYaml(this.relevantEngines, this.userContext, this.defaultContext, true);
 		} else if (format === OutputFormat.RAW_YAML) {
-			return toYaml(this.userState, this.defaultState, false);
+			return toYaml(this.relevantEngines, this.userContext, this.defaultContext, false);
 		} else {
 			throw new Error(`Unsupported`)
 		}
 	}
 
-	public static fromSelection(userState: ConfigState, defaultState: ConfigState): AnnotatedConfigModel {
-		return new AnnotatedConfigModel(userState, defaultState);
+	public static fromSelection(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext): AnnotatedConfigModel {
+		return new AnnotatedConfigModel(relevantEngines, userContext, defaultContext);
 	}
 }
 
-function toYaml(userState: ConfigState, defaultState: ConfigState, styled: boolean): string {
+function toYaml(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
 	let result: string = '';
 
 	// First, add the header.
 	const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
-	result += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled)}\n`
+	result += `${toYamlComment(getYamlSectionWrapper(), styled)}\n`
 	result += `${toYamlComment(topLevelDescription.overview!, styled)}\n`;
-	result += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled)}\n`
+	result += `${toYamlComment(getYamlSectionWrapper(), styled)}\n`
 	result += '\n';
 
 	// Next add `config_root`
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.config_root, styled)}\n`;
-	result += `config_root: ${toYamlWithDerivedValueComment(userState.config.getConfigRoot(), defaultState.config.getConfigRoot(), styled)}\n`;
+	result += `config_root: ${toYamlWithDerivedValueComment(userContext.config.getConfigRoot(), process.cwd(), styled)}\n`;
 	result += '\n';
 
 	// Then `log_folder'
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.log_folder, styled)}\n`;
-	result += `log_folder: ${toYamlWithDerivedValueComment(userState.config.getLogFolder(), defaultState.config.getLogFolder(), styled)}\n`;
+	result += `log_folder: ${toYamlWithDerivedValueComment(userContext.config.getLogFolder(), defaultContext.config.getLogFolder(), styled)}\n`;
 	result += '\n';
 
 	// Then the `rules` section
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.rules, styled)}\n`;
-	result += `${toYamlRules(userState, defaultState, styled)}\n`;
+	result += `${toYamlRules(relevantEngines, userContext, defaultContext, styled)}\n`;
 	result += '\n';
 
 	// Then the `engines` section
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.engines, styled)}\n`;
-	result += `${toYamlEngines(userState, styled)}`;
+	result += `${toYamlEngines(relevantEngines, userContext, styled)}`;
 
 	return result;
+}
+
+function getYamlSectionWrapper(): string {
+	return '='.repeat(70);
 }
 
 function toYamlComment(comment: string, styled: boolean, indentLength: number = 0): string {
@@ -105,18 +111,18 @@ function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, 
 	}
 }
 
-function toYamlRules(userState: ConfigState, defaultState: ConfigState, styled: boolean): string {
-	if (userState.rules.getCount() === 0) {
+function toYamlRules(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
+	if (userContext.rules.getCount() === 0) {
 		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 		return `rules: {} ${toYamlComment(comment, styled)}`;
 	}
 	let results: string = 'rules:\n';
-	for (const engineName of userState.core.getEngineNames()) {
-		const userRulesForEngine = userState.rules.getRulesFor(engineName);
+	for (const engineName of relevantEngines.keys()) {
+		const userRulesForEngine = userContext.rules.getRulesFor(engineName);
 		if (userRulesForEngine.length > 0) {
 			results += indent(`${engineName}:\n`, 2);
 			for (const userRule of userRulesForEngine) {
-				const defaultRule = getDefaultRule(defaultState, engineName, userRule.getName());
+				const defaultRule = getDefaultRule(defaultContext, engineName, userRule.getName());
 				results += indent(toYamlRule(userRule, defaultRule, styled), 4);
 			}
 		}
@@ -124,10 +130,11 @@ function toYamlRules(userState: ConfigState, defaultState: ConfigState, styled: 
 	return results;
 }
 
-function getDefaultRule(defaultState: ConfigState, engineName: string, ruleName: string): Rule|null {
+function getDefaultRule(defaultContext: ConfigContext, engineName: string, ruleName: string): Rule|null {
 	try {
-		return defaultState.rules.getRule(engineName, ruleName);
+		return defaultContext.rules.getRule(engineName, ruleName);
 	} catch (e) {
+		// istanbul ignore next
 		return null;
 	}
 }
@@ -159,28 +166,25 @@ function toYamlRule(userRule: Rule, defaultRule: Rule|null, styled: boolean): st
 	return `"${ruleName}":\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
 }
 
-function toYamlEngines(userState: ConfigState, styled: boolean): string {
-	if (userState.rules.getCount() === 0) {
+function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext, styled: boolean): string {
+	if (userContext.rules.getCount() === 0) {
 		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
 		return `engines: {} ${toYamlComment(comment, styled)}`;
 	}
 
 	let results: string = 'engines:\n'
 
-	for (const engineName of userState.core.getEngineNames()) {
-		if (!userState.rules.getEngineNames().includes(engineName)) {
-			continue;
-		}
-		const engineConfigDescriptor = userState.core.getEngineConfigDescription(engineName);
-		const engineConfig = userState.core.getEngineConfig(engineName);
+	for (const engineName of relevantEngines.keys()) {
+		const engineConfigDescriptor = userContext.core.getEngineConfigDescription(engineName);
+		const engineConfig = userContext.core.getEngineConfig(engineName);
 
-		results += `\n${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled, 2)}\n`
+		results += `\n${toYamlComment('='.repeat(70), styled, 2)}\n`
 		// Engines are guaranteed to have an overview, even if it's just generic text.
 		results += `${toYamlComment(engineConfigDescriptor.overview!, styled, 2)}\n`;
-		results += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.yaml.section-wrapper'), styled, 2)}\n`
+		results += `${toYamlComment('='.repeat(70), styled, 2)}\n`
 
 		results += indent(`${engineName}:`, 2) + '\n';
-		// By fiat, the field description will always include, at minimum, an entry for "disable_field", so we can
+		// By fiat, the field description will always include, at minimum, an entry for "disable_engine", so we can
 		// assume that the object is not undefined.
 		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
 			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
