@@ -1,4 +1,4 @@
-import {CodeAnalyzerConfig, CodeAnalyzer, RuleSelection} from "@salesforce/code-analyzer-core";
+import {CodeAnalyzerConfig, CodeAnalyzer} from "@salesforce/code-analyzer-core";
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {ConfigWriter} from '../writers/ConfigWriter';
@@ -7,7 +7,7 @@ import {ConfigViewer} from '../viewers/ConfigViewer';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
-import {ConfigModel, ConfigModelGeneratorFunction} from '../models/ConfigModel';
+import {ConfigModel, ConfigModelGeneratorFunction, ConfigContext} from '../models/ConfigModel';
 
 export type ConfigDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
@@ -33,38 +33,89 @@ export class ConfigAction {
 	}
 
 	public async execute(input: ConfigInput): Promise<void> {
-		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
-		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
-		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
-		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
+		// We need the user's Config and the default Config.
+		const userConfig: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
+		const defaultConfig: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults();
 
-		const core: CodeAnalyzer = new CodeAnalyzer(config);
+		// We always add a Logger Listener to the appropriate listeners list, because we should always be logging.
+		const logEventLogger: LogEventLogger = new LogEventLogger(await LogFileWriter.fromConfig(userConfig));
+		this.dependencies.logEventListeners.push(logEventLogger);
 
-		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
-		// events they listen for basically immediately.
-		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
+		// The User's config produces one Core.
+		const userCore: CodeAnalyzer = new CodeAnalyzer(userConfig);
+		// The Default config produces two Cores, since we have to run two selections.
+		const defaultCoreForAllRules: CodeAnalyzer = new CodeAnalyzer(defaultConfig);
+		const defaultCoreForSelectRules: CodeAnalyzer = new CodeAnalyzer(defaultConfig);
+
+		// LogEventListeners should start listening as soon as the User Core is instantiated, since it can start emitting
+		// relevant events basically immediately.
+		this.dependencies.logEventListeners.forEach(listener => listener.listen(userCore));
+		// Only the File Logger should listen to the Default Cores, since we don't want to bother the user with redundant
+		// logs printed to the console.
+		logEventLogger.listen(defaultCoreForAllRules);
+		logEventLogger.listen(defaultCoreForSelectRules);
+
 		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const enginePluginModules = config.getCustomEnginePluginModules();
+		const enginePluginModules = userConfig.getCustomEnginePluginModules();
+
 		const addEnginePromises: Promise<void>[] = [
-			...enginePlugins.map(enginePlugin => core.addEnginePlugin(enginePlugin)),
-			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
+			// Assumption: It's safe for the different cores to share the same plugins, because all currently existent
+			// plugins return unique engines every time. This code may fail or behave unexpectedly if a plugin reuses engines.
+			...enginePlugins.map(enginePlugin => userCore.addEnginePlugin(enginePlugin)),
+			...enginePlugins.map(enginePlugin => defaultCoreForAllRules.addEnginePlugin(enginePlugin)),
+			...enginePlugins.map(enginePlugin => defaultCoreForSelectRules.addEnginePlugin(enginePlugin)),
+			...enginePluginModules.map(pluginModule => userCore.dynamicallyAddEnginePlugin(pluginModule)),
+			// Assumption: Every engine's default configuration is sufficient to allow that engine to be instantiated,
+			// or throw a clear error indicating the problem.
+			...enginePluginModules.map(pluginModule => defaultCoreForAllRules.dynamicallyAddEnginePlugin(pluginModule)),
+			...enginePluginModules.map(pluginModule => defaultCoreForSelectRules.dynamicallyAddEnginePlugin(pluginModule)),
 		];
 		await Promise.all(addEnginePromises);
 
-		const selectOptions = input.workspace
-			? {workspace: await createWorkspace(core, input.workspace)}
+		const userSelectOptions = input.workspace
+			? {workspace: await createWorkspace(userCore, input.workspace)}
 			: undefined;
-		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
-		// that's when progress events can start being emitted.
-		this.dependencies.progressEventListeners.forEach(listener => listener.listen(core));
-		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], selectOptions);
+		const defaultSelectOptionsForAllRules = input.workspace
+			? {workspace: await createWorkspace(defaultCoreForAllRules, input.workspace)}
+			: undefined;
+		const defaultSelectOptionsForSelectRules = input.workspace
+			? {workspace: await createWorkspace(defaultCoreForSelectRules, input.workspace)}
+			: undefined;
 
-		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
-		// or file handlers that must be gracefully ended.
+		// EngineProgressListeners should start listening right before we call the Cores' `.selectRules()` methods, since
+		// that's when progress events can start being emitted.
+		this.dependencies.progressEventListeners.forEach(listener => listener.listen(userCore, defaultCoreForAllRules, defaultCoreForSelectRules));
+
+		const [userRules, allDefaultRules, selectedDefaultRules] = await Promise.all([
+			// The user Core should respect the user's selection criteria.
+			userCore.selectRules(input['rule-selector'], userSelectOptions),
+			// One of the Default Cores should always use "all", to minimize the likelihood of a rule's default state
+			// being unavailable for comparison.
+			defaultCoreForAllRules.selectRules(['all'], defaultSelectOptionsForAllRules),
+			// One of the Default Cores should use the same selectors as the User Core, so we know what rules are available
+			// by default.
+			defaultCoreForSelectRules.selectRules(input['rule-selector'], defaultSelectOptionsForSelectRules)
+		]);
+
+		// After the Cores are done running, the listeners need to be told to stop, since some of them have persistent UI
+		// elements or file handlers that must be gracefully ended.
 		this.dependencies.progressEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 
-		const configModel: ConfigModel = this.dependencies.modelGenerator(config, ruleSelection);
+		// We need the Set of all Engines that returned rules for the user's selection on both the Default and User Cores.
+		const relevantEngines: Set<string> = new Set([...userRules.getEngineNames(), ...selectedDefaultRules.getEngineNames()]);
+
+		const userConfigContext: ConfigContext = {
+			config: userConfig,
+			core: userCore,
+			rules: userRules
+		};
+		const defaultConfigContext: ConfigContext = {
+			config: defaultConfig,
+			core: defaultCoreForAllRules,
+			rules: allDefaultRules
+		};
+		const configModel: ConfigModel = this.dependencies.modelGenerator(relevantEngines, userConfigContext, defaultConfigContext);
 
 		this.dependencies.viewer.view(configModel);
 		this.dependencies.writer?.write(configModel);

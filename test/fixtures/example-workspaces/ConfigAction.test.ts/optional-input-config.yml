@@ -1,0 +1,35 @@
+# Tests should replace the dummy value with whatever value they need.
+config_root: __DUMMY_CONFIG_ROOT__
+# Tests should replace the dummy value with whatever value they need.
+log_folder: __DUMMY_LOG_FOLDER__
+engines:
+  StubEngine1:
+    Property1: "foo"
+    Property2: "bar"
+    Property3: "baz"
+    Property4:
+      SubProperty1: 42
+      SubProperty2: false
+    Property5: ['bada-bing', 'bada-boom']
+    # Property6 is not set, so it should default to null
+  StubEngine3:
+    disable_engine: true
+rules:
+  StubEngine1:
+    Stub1Rule1:
+      # This rule's default tags are "Recommended" and "CodeStyle", so we're adding the "Beep" tag.
+      tags: ["Recommended", "CodeStyle", "Beep"]
+    Stub1Rule2:
+      # This rule's default severity is "Moderate", and we're overriding it to "High"
+      severity: "high"
+    Stub1Rule3:
+      # This rule's only default tag is "BestPractices", so we're adding the "CodeStyle" tag.
+      tags: ["CodeStyle", "BestPractices"]
+      # This rule's default severity is "Low", and we're overriding it to "Moderate"
+      severity: "Moderate"
+    Stub1Rule5:
+      # This rule's default tags are "Recommended" and "CodeStyle", so we're removing the "CodeStyle" tag.
+      tags: ["Recommended"]
+    Stub1Rule8:
+      # This rule's default tag is "Recommended", and we're overriding it to remove its tags altogether
+      tags: []

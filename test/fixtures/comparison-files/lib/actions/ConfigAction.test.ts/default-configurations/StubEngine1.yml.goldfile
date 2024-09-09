@@ -1,0 +1,29 @@
+
+  # ======================================================================
+  # This is a generic overview for StubEngine1
+  # It has multiple lines of text
+  # Whee!
+  # ======================================================================
+  StubEngine1:
+
+    # Whether to turn off the 'StubEngine1' engine so that it is not included when running Code Analyzer commands.
+    disable_engine: false
+
+    # This is the description for Property1
+    Property1: default1
+
+    # This is the description for Property3
+    Property3: default3
+
+    # This is the description for Property4
+    Property4:
+      SubProperty1: 10
+      SubProperty2: true
+
+    # This is the description for Property5
+    Property5:
+      - arr1
+      - arr2
+
+    # This is the description for Property6
+    Property6: null

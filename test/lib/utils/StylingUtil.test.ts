@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
-import {makeGrey, toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList} from '../../../src/lib/utils/StylingUtil';
+import {makeGrey, toStyledHeaderAndBody, toStyledHeader, toStyledPropertyList, indent} from '../../../src/lib/utils/StylingUtil';
 
 const PATH_TO_COMPARISON_FILES = path.resolve('.', 'test', 'fixtures', 'comparison-files', 'lib',
 	'utils', 'StylingUtil.test.ts');
@@ -108,6 +108,12 @@ describe('StylingUtil tests', () => {
 			const actualOutput = toStyledPropertyList(null);
 
 			expect(actualOutput).toEqual('');
+		});
+	});
+
+	describe('#indent()', () => {
+		it('Applies indentation to non-empty lines only', () => {
+			expect(indent('line1\n\nline3\n    line4\n    ')).toEqual('    line1\n\n    line3\n        line4\n        ');
 		});
 	});
 });

@@ -1,0 +1,10 @@
+  # ======================================================================
+  # STUBENGINE1 ENGINE RULE OVERRIDES
+  # ======================================================================
+  StubEngine1:
+    "Stub1Rule1":
+      severity: 5
+      tags: # Modified from: ["Recommended","CodeStyle"]
+        - Recommended
+        - CodeStyle
+        - Beep

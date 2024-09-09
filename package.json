@@ -6,7 +6,7 @@
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
 		"@oclif/core": "^3.3.2",
-		"@salesforce/code-analyzer-core": "^0.13.0",
+		"@salesforce/code-analyzer-core": "^0.13.1",
 		"@salesforce/code-analyzer-engine-api": "^0.10.0",
 		"@salesforce/code-analyzer-eslint-engine": "^0.10.0",
 		"@salesforce/code-analyzer-pmd-engine": "^0.10.0",
@@ -15,9 +15,11 @@
 		"@salesforce/core": "^5",
 		"@salesforce/sf-plugins-core": "^5.0.4",
 		"@salesforce/ts-types": "^2.0.9",
+		"@types/js-yaml": "^4.0.9",
 		"@types/node": "^17",
 		"ansis": "^3.2.0",
 		"fast-glob": "^3.3.2",
+		"js-yaml": "^4.1.0",
 		"ts-node": "^10",
 		"tslib": "^2"
 	},
