@@ -1554,14 +1554,14 @@
     js-yaml "^4.1.0"
     xmlbuilder "^15.1.1"
 
-"@salesforce/code-analyzer-engine-api@0.10.0", "@salesforce/code-analyzer-engine-api@^0.10.0":
+"@salesforce/code-analyzer-engine-api@0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-engine-api/-/code-analyzer-engine-api-0.10.0.tgz#28675d8300c49bc6316cdd468ee42ea1f16ef15a"
   integrity sha512-PyFJgGLOc7Wi+epOEtKg7MHQUlUhOCoKGOEXtcJWh5iaj+b1LCHxhwrN4jZvOPTN9NfB0fcVIH/5JvCdCdqkVA==
   dependencies:
     "@types/node" "^20.0.0"
 
-"@salesforce/code-analyzer-eslint-engine@^0.10.0":
+"@salesforce/code-analyzer-eslint-engine@0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-eslint-engine/-/code-analyzer-eslint-engine-0.10.0.tgz#dabde01da4e0a37d97f0f6301b02b9e08ee94f94"
   integrity sha512-wXCzSBuGsXvJ27b5Wrabkziurl4Pdj037bPcXf4EmLUFff5kv0P0ZhzDB2okW7yWtcQAG+UyVSCqTUHhy4Y5vQ==
@@ -1581,17 +1581,17 @@
     eslint-plugin-import "^2.29.1"
     eslint-plugin-jest "^28.6.0"
 
-"@salesforce/code-analyzer-pmd-engine@^0.10.0":
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.10.0.tgz#d70e03b5953e9533ccf09574b3135052b638762f"
-  integrity sha512-WnazyWouDH4rBvmwk/Gp6z6E1J9sUmVVzqAEUz/81DDBYM/PUXuwTIlIo+TLTkQjFZGB0ZGJw6EmsYPzOuEi0g==
+"@salesforce/code-analyzer-pmd-engine@0.10.1":
+  version "0.10.1"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.10.1.tgz#ec63c66f7d752188b1ef6240c9d9391a32c4ddbd"
+  integrity sha512-X8lFTMzq5Nk6xlaod0YDkXo9BXEIulJL1PH/Jq+GAB1gDRYjnETWchk/sIo9BnbHsw8mSCK9TgtEOlRq9DVz2Q==
   dependencies:
     "@salesforce/code-analyzer-engine-api" "0.10.0"
     "@types/node" "^20.0.0"
     "@types/tmp" "^0.2.6"
     tmp "^0.2.3"
 
-"@salesforce/code-analyzer-regex-engine@^0.10.0":
+"@salesforce/code-analyzer-regex-engine@0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-regex-engine/-/code-analyzer-regex-engine-0.10.0.tgz#8728a00be3117b21c0b1ac50d1eb140aed052459"
   integrity sha512-e/WZYko1o1aFodnyLGdMQFSJQ/dqOosqgTpJJNd8ltrgVdLS/J9B2XyqyKBDRcTviLEcCJVNVQi7CRDIBFctIw==
@@ -1600,7 +1600,7 @@
     "@types/node" "^20.0.0"
     isbinaryfile "^5.0.2"
 
-"@salesforce/code-analyzer-retirejs-engine@^0.10.0":
+"@salesforce/code-analyzer-retirejs-engine@0.10.0":
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-retirejs-engine/-/code-analyzer-retirejs-engine-0.10.0.tgz#62b521bb13af9a88ae2a5b0af08c44f64eac847f"
   integrity sha512-SPbCFkdijPGoK8dsVIhEGSBlb27grahUWt7pGZrnFyhCgWmZ7hwmQ7FaSBBX7V8invV6VavvQh0SD+10ygoLxw==
