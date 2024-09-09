@@ -118,6 +118,10 @@ function toYamlRules(userContext: ConfigContext, defaultContext: ConfigContext, 
 	}
 	let results: string = 'rules:\n';
 	for (const engineName of userContext.rules.getEngineNames()) {
+		results += `\n${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`;
+		results += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.rule-overrides-section', [engineName.toUpperCase()]), styled, 2)}\n`;
+		results += `${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`;
+		results += indent(`${engineName}:`, 2) + '\n';
 		for (const userRule of userContext.rules.getRulesFor(engineName)) {
 			const defaultRule = getDefaultRule(defaultContext, engineName, userRule.getName());
 			results += indent(toYamlRule(userRule, defaultRule, styled), 4);
@@ -175,10 +179,10 @@ function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext,
 		const userEngineConfig = userContext.core.getEngineConfig(engineName);
 		const defaultEngineConfig = defaultContext.core.getEngineConfig(engineName);
 
-		results += `\n${toYamlComment('='.repeat(70), styled, 2)}\n`
+		results += `\n${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`
 		// Engines are guaranteed to have an overview, even if it's just generic text.
 		results += `${toYamlComment(engineConfigDescriptor.overview!, styled, 2)}\n`;
-		results += `${toYamlComment('='.repeat(70), styled, 2)}\n`
+		results += `${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`
 
 		results += indent(`${engineName}:`, 2) + '\n';
 		// By fiat, the field description will always include, at minimum, an entry for "disable_engine", so we can

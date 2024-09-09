@@ -4,6 +4,9 @@ Last calculated by the config command as: %s
 # template.modified-from
 Modified from: %s
 
+# template.rule-overrides-section
+%s ENGINE RULE OVERRIDES
+
 # template.yaml.no-engines-selected
 Empty object used because rule selection returned no rules
 
