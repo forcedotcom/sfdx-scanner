@@ -111,20 +111,16 @@ function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, 
 	}
 }
 
-function toYamlRules(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
+function toYamlRules(_relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
 	if (userContext.rules.getCount() === 0) {
 		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 		return `rules: {} ${toYamlComment(comment, styled)}`;
 	}
 	let results: string = 'rules:\n';
-	for (const engineName of relevantEngines.keys()) {
-		const userRulesForEngine = userContext.rules.getRulesFor(engineName);
-		if (userRulesForEngine.length > 0) {
-			results += indent(`${engineName}:\n`, 2);
-			for (const userRule of userRulesForEngine) {
-				const defaultRule = getDefaultRule(defaultContext, engineName, userRule.getName());
-				results += indent(toYamlRule(userRule, defaultRule, styled), 4);
-			}
+	for (const engineName of userContext.rules.getEngineNames()) {
+		for (const userRule of userContext.rules.getRulesFor(engineName)) {
+			const defaultRule = getDefaultRule(defaultContext, engineName, userRule.getName());
+			results += indent(toYamlRule(userRule, defaultRule, styled), 4);
 		}
 	}
 	return results;
