@@ -10,18 +10,18 @@
     disable_engine: false
 
     # This is the description for Property1
-    Property1: foo
+    Property1: foo # Modified from: "default1"
 
     # This is the description for Property3
-    Property3: baz
+    Property3: baz # Modified from: "default3"
 
     # This is the description for Property4
-    Property4:
+    Property4: # Modified from: {"SubProperty1":10,"SubProperty2":true}
       SubProperty1: 42
       SubProperty2: false
 
     # This is the description for Property5
-    Property5:
+    Property5: # Modified from: ["arr1","arr2"]
       - bada-bing
       - bada-boom
 

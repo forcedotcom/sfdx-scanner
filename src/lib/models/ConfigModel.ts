@@ -76,12 +76,12 @@ function toYaml(relevantEngines: Set<string>, userContext: ConfigContext, defaul
 
 	// Then the `rules` section
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.rules, styled)}\n`;
-	result += `${toYamlRules(relevantEngines, userContext, defaultContext, styled)}\n`;
+	result += `${toYamlRules(userContext, defaultContext, styled)}\n`;
 	result += '\n';
 
 	// Then the `engines` section
 	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.engines, styled)}\n`;
-	result += `${toYamlEngines(relevantEngines, userContext, styled)}`;
+	result += `${toYamlEngines(relevantEngines, userContext, defaultContext, styled)}`;
 
 	return result;
 }
@@ -111,7 +111,7 @@ function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, 
 	}
 }
 
-function toYamlRules(_relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
+function toYamlRules(userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
 	if (userContext.rules.getCount() === 0) {
 		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 		return `rules: {} ${toYamlComment(comment, styled)}`;
@@ -162,8 +162,8 @@ function toYamlRule(userRule: Rule, defaultRule: Rule|null, styled: boolean): st
 	return `"${ruleName}":\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
 }
 
-function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext, styled: boolean): string {
-	if (userContext.rules.getCount() === 0) {
+function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
+	if (relevantEngines.size === 0) {
 		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
 		return `engines: {} ${toYamlComment(comment, styled)}`;
 	}
@@ -172,7 +172,8 @@ function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext,
 
 	for (const engineName of relevantEngines.keys()) {
 		const engineConfigDescriptor = userContext.core.getEngineConfigDescription(engineName);
-		const engineConfig = userContext.core.getEngineConfig(engineName);
+		const userEngineConfig = userContext.core.getEngineConfig(engineName);
+		const defaultEngineConfig = defaultContext.core.getEngineConfig(engineName);
 
 		results += `\n${toYamlComment('='.repeat(70), styled, 2)}\n`
 		// Engines are guaranteed to have an overview, even if it's just generic text.
@@ -184,11 +185,18 @@ function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext,
 		// assume that the object is not undefined.
 		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
 			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
-			const fieldValue = engineConfig[configField] ?? null;
+			const defaultFieldValue = defaultEngineConfig[configField] ?? null;
+			const userFieldValue = userEngineConfig[configField] ?? defaultFieldValue;
 			// Add a leading newline to visually break up the property from the previous one.
 			results += '\n' + toYamlComment(fieldDescription, styled, 4) + '\n';
-			results += indent(`${yaml.dump({[configField]: fieldValue})}`, 4);
+			let fieldYaml = indent(`${yaml.dump({[configField]: userFieldValue})}`, 4);
+			if(JSON.stringify(userFieldValue) !== JSON.stringify(defaultFieldValue)) {
+				const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultFieldValue)]);
+				fieldYaml = fieldYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
+			}
+			results += fieldYaml;
 		}
 	}
 	return results;
 }
+
