@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'path';
 import ansis from 'ansis';
-import {RuleDetailViewer, RuleTableViewer} from '../../../src/lib/viewers/RuleViewer';
+import {RuleDetailDisplayer, RuleTableDisplayer} from '../../../src/lib/viewers/RuleViewer';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
 
@@ -9,10 +9,10 @@ const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test
 	'viewers', 'RuleViewer.test.ts');
 
 describe('RuleViewer implementations', () => {
-	describe('RuleDetailViewer', () => {
+	describe('RuleDetailDisplayer', () => {
 		it('When given no rules, outputs summary and nothing else', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleDetailViewer(display);
+			const viewer = new RuleDetailDisplayer(display);
 
 			viewer.view([]);
 
@@ -26,7 +26,7 @@ describe('RuleViewer implementations', () => {
 
 		it('When given one rule, outputs correct summary and correctly styled rule data', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleDetailViewer(display);
+			const viewer = new RuleDetailDisplayer(display);
 			const rule = new StubRules.StubRule1();
 
 			viewer.view([
@@ -47,7 +47,7 @@ describe('RuleViewer implementations', () => {
 
 		it('When given multiple rules, outputs correct summary and correctly styled rule data', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleDetailViewer(display);
+			const viewer = new RuleDetailDisplayer(display);
 			const rule1 = new StubRules.StubRule1();
 			const rule2 = new StubRules.StubRule2();
 
@@ -69,10 +69,10 @@ describe('RuleViewer implementations', () => {
 		});
 	});
 
-	describe('RuleTableViewer', () => {
+	describe('RuleTableDisplayer', () => {
 		it('When given no rules, outputs summary and nothing else', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleTableViewer(display);
+			const viewer = new RuleTableDisplayer(display);
 
 			viewer.view([]);
 
@@ -86,7 +86,7 @@ describe('RuleViewer implementations', () => {
 
 		it('When given one rule, outputs correct summary and rule data', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleTableViewer(display);
+			const viewer = new RuleTableDisplayer(display);
 			const rule = new StubRules.StubRule1();
 
 			viewer.view([
@@ -115,7 +115,7 @@ describe('RuleViewer implementations', () => {
 
 		it('When given multiple rules, outputs correct summary and rule data', () => {
 			const display = new SpyDisplay();
-			const viewer = new RuleTableViewer(display);
+			const viewer = new RuleTableDisplayer(display);
 			const rule1 = new StubRules.StubRule1();
 			const rule2 = new StubRules.StubRule2();
 

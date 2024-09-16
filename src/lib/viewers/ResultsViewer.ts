@@ -9,7 +9,7 @@ export interface ResultsViewer {
 	view(results: RunResults): void;
 }
 
-abstract class AbstractResultsViewer implements ResultsViewer {
+abstract class AbstractResultsDisplayer implements ResultsViewer {
 	protected display: Display;
 
 	public constructor(display: Display) {
@@ -56,7 +56,7 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 	protected abstract _view(results: RunResults): void;
 }
 
-export class ResultsDetailViewer extends AbstractResultsViewer {
+export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
 
@@ -119,7 +119,7 @@ const TABLE_COLUMNS: Ux.Table.Columns<ResultRow> = {
 	}
 };
 
-export class ResultsTableViewer extends AbstractResultsViewer {
+export class ResultsTableDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults) {
 		const violations: Violation[] = sortViolations(results.getViolations());
 		const parentFolder: string = findLongestCommonParentFolderOf(violations.map(v =>

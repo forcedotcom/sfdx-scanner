@@ -6,8 +6,8 @@ import {RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
 
 import {
 	findLongestCommonParentFolderOf,
-	ResultsDetailViewer,
-	ResultsTableViewer
+	ResultsDetailDisplayer,
+	ResultsTableDisplayer
 } from '../../../src/lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../../src/lib/messages';
 import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
@@ -41,11 +41,11 @@ describe('ResultsViewer implementations', () => {
 		rule2 = (await engine1.describeRules())[1];
 	});
 
-	describe('ResultsDetailViewer', () => {
-		let viewer: ResultsDetailViewer;
+	describe('ResultsDetailDisplayer', () => {
+		let viewer: ResultsDetailDisplayer;
 
 		beforeEach(() => {
-			viewer = new ResultsDetailViewer(spyDisplay);
+			viewer = new ResultsDetailDisplayer(spyDisplay);
 		});
 
 		it('When given no results, outputs top-level count and nothing else', async () => {
@@ -142,11 +142,11 @@ describe('ResultsViewer implementations', () => {
 		});
 	});
 
-	describe('ResultsTableViewer', () => {
-		let viewer: ResultsTableViewer;
+	describe('ResultsTableDisplayer', () => {
+		let viewer: ResultsTableDisplayer;
 
 		beforeEach(() => {
-			viewer = new ResultsTableViewer(spyDisplay);
+			viewer = new ResultsTableDisplayer(spyDisplay);
 		})
 
 		it('When given no results, outputs top-level count and nothing else', async () => {

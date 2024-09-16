@@ -9,7 +9,7 @@ export interface RuleViewer {
 }
 
 
-abstract class AbstractRuleViewer implements RuleViewer {
+abstract class AbstractRuleDisplayer implements RuleViewer {
 	protected display: Display;
 
 	public constructor(display: Display) {
@@ -28,7 +28,7 @@ abstract class AbstractRuleViewer implements RuleViewer {
 	protected abstract _view(rules: Rule[]): void;
 }
 
-export class RuleDetailViewer extends AbstractRuleViewer {
+export class RuleDetailDisplayer extends AbstractRuleDisplayer {
 	protected _view(rules: Rule[]): void {
 		const styledRules: string[] = [];
 		for (let i = 0; i < rules.length; i++) {
@@ -76,7 +76,7 @@ const TABLE_COLUMNS: Ux.Table.Columns<RuleRow> = {
 	}
 };
 
-export class RuleTableViewer extends AbstractRuleViewer {
+export class RuleTableDisplayer extends AbstractRuleDisplayer {
 	protected _view(rules: Rule[]): void {
 		const ruleJsons: RuleRow[] = rules.map((rule, idx) => {
 			const severity = rule.getSeverityLevel();
