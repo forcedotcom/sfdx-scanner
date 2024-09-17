@@ -295,14 +295,14 @@ describe('`code-analyzer run` tests', () => {
 			const inputValue = 'table';
 			await RunCommand.run(['--view', inputValue]);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('ResultsTableDisplayer');
+			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsTableDisplayer');
 		});
 
 		it('Accepts the value, "detail"', async () => {
 			const inputValue = 'detail';
 			await RunCommand.run(['--view', inputValue]);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('ResultsDetailDisplayer');
+			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsDetailDisplayer');
 		});
 
 		it('Rejects all other values', async () => {
@@ -315,7 +315,7 @@ describe('`code-analyzer run` tests', () => {
 		it('Defaults to value of "table"', async () => {
 			await RunCommand.run([]);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('ResultsTableDisplayer');
+			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsTableDisplayer');
 		});
 
 		it('Can be supplied only once', async () => {
@@ -331,7 +331,7 @@ describe('`code-analyzer run` tests', () => {
 			const inputValue = 'detail';
 			await RunCommand.run(['-v', inputValue]);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('ResultsDetailDisplayer');
+			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsDetailDisplayer');
 		});
 	});
 });

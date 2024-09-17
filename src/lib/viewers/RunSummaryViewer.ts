@@ -16,20 +16,24 @@ export class RunSummaryDisplayer {
 
 	public view(results: RunResults, config: CodeAnalyzerConfig, outfiles: string[]): void {
 		this.display.displayLog(toStyledHeader(getMessage(BundleName.RunSummaryViewer, 'summary.header')));
+		// Use empty line as a visual separator
+		this.display.displayLog('');
 
 		if (results.getViolationCount() === 0) {
 			this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.found-no-violations'));
 		} else {
 			this.displayResultsSummary(results);
 		}
-		this.display.displayLog('\n');
+		// Use empty line as a visual separator
+		this.display.displayLog('');
 
 		if (outfiles.length === 0) {
 			this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.no-outfiles'));
 		} else {
 			this.displayOutfiles(outfiles);
 		}
-		this.display.displayLog('\n');
+		// Use empty line as a visual separator
+		this.display.displayLog('');
 
 		this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.log-file-location'));
 		this.display.displayLog(indent(config.getLogFolder()));

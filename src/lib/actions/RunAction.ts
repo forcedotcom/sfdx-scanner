@@ -13,6 +13,7 @@ import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {createPathStarts} from '../utils/PathStartUtil';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {ResultsViewer} from '../viewers/ResultsViewer';
+import {RunSummaryViewer} from '../viewers/RunSummaryViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
@@ -25,15 +26,18 @@ export type RunDependencies = {
 	logEventListeners: LogEventListener[];
 	progressListeners: ProgressEventListener[];
 	writer: ResultsWriter;
-	viewer: ResultsViewer;
+	resultsViewer: ResultsViewer;
+	runSummaryViewer: RunSummaryViewer;
 }
 
 export type RunInput = {
 	'config-file'?: string;
+	'output-file': string[];
 	'path-start'?: string[];
 	'rule-selector': string[];
 	'severity-threshold'?: SeverityLevel;
 	workspace: string[];
+
 }
 
 export class RunAction {
@@ -75,7 +79,8 @@ export class RunAction {
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
-		this.dependencies.viewer.view(results);
+		this.dependencies.resultsViewer.view(results);
+		this.dependencies.runSummaryViewer.view(results, config, input['output-file']);
 
 		const thresholdValue = input['severity-threshold'];
 		if (thresholdValue) {
