@@ -1,3 +1,0 @@
-=== Summary
-Found 4 violation(s):
-    4 Low severity violation(s) found
