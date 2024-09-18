@@ -12,7 +12,7 @@ Found %d violation(s):
 
 # summary.violations-item
 
-%d %s severity violation(s) found
+%d %s severity violation(s) found.
 
 # summary.no-outfiles
 
