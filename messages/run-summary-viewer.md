@@ -20,8 +20,8 @@ No results files were specified.
 
 # summary.outfiles-total
 
-Results were written to:
+Results written to:
 
 # summary.log-file-location
 
-Additional log information was written to:
+Additional log information written to:

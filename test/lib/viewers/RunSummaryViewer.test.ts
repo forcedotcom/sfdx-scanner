@@ -111,7 +111,7 @@ describe('RunSummaryViewer implementations', () => {
 
 			it('When outfiles were provided, they are properly listed', () => {
 				const contents = nonEmptyInputsDisplayEvents.map(e => e.data).join('\n');
-				const expectation = `Results were written to:\n` +
+				const expectation = `Results written to:\n` +
 					`    ${PATH_TO_OUTFILE1}\n` +
 					`    ${PATH_TO_OUTFILE2}\n`;
 				expect(contents).toContain(expectation);
@@ -120,7 +120,7 @@ describe('RunSummaryViewer implementations', () => {
 
 		describe('Logging breakdown', () => {
 			it('Logfile is correctly displayed', () => {
-				const expectation = `Additional log information was written to:\n` +
+				const expectation = `Additional log information written to:\n` +
 					`    ${config.getLogFolder()}`;
 				const emptyContents = emptyInputsDisplayEvents.map(e => e.data).join('\n');
 				const nonEmptyContents = nonEmptyInputsDisplayEvents.map(e => e.data).join('\n');
