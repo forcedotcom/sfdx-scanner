@@ -6,8 +6,8 @@ import {RuleDescription, Violation} from '@salesforce/code-analyzer-engine-api';
 
 import {
 	findLongestCommonParentFolderOf,
-	ResultsDetailViewer,
-	ResultsTableViewer
+	ResultsDetailDisplayer,
+	ResultsTableDisplayer
 } from '../../../src/lib/viewers/ResultsViewer';
 import {BundleName, getMessage} from '../../../src/lib/messages';
 import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
@@ -41,14 +41,14 @@ describe('ResultsViewer implementations', () => {
 		rule2 = (await engine1.describeRules())[1];
 	});
 
-	describe('ResultsDetailViewer', () => {
-		let viewer: ResultsDetailViewer;
+	describe('ResultsDetailDisplayer', () => {
+		let viewer: ResultsDetailDisplayer;
 
 		beforeEach(() => {
-			viewer = new ResultsDetailViewer(spyDisplay);
+			viewer = new ResultsDetailDisplayer(spyDisplay);
 		});
 
-		it('When given no results, outputs top-level count and nothing else', async () => {
+		it('When given no results, outputs nothing', async () => {
 			// ==== TEST SETUP ====
 			// "Run" the plugin without assigning any violations.
 			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
@@ -60,13 +60,9 @@ describe('ResultsViewer implementations', () => {
 			viewer.view(results);
 
 			// ==== ASSERTIONS ====
-			// Assert against our messages.
+			// Expect nothing to have been displayed.
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(1);
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: getMessage(BundleName.ResultsViewer, 'summary.found-no-results')
-			}]);
+			expect(displayEvents).toHaveLength(0);
 		});
 
 		it(`When there are violations, all are shown`, async () => {
@@ -95,9 +91,7 @@ describe('ResultsViewer implementations', () => {
 			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 			const expectedViolationDetails = (await readComparisonFile('four-identical-violations-details.txt'))
 				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE);
-			const expectedViolationSummary = await readComparisonFile('four-identical-violations-summary.txt');
 			expect(actualEventText).toContain(expectedViolationDetails);
-			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 
 		// The reasoning behind this sorting order is so that the Detail view can function as a "show me the N most
@@ -136,37 +130,32 @@ describe('ResultsViewer implementations', () => {
 			const expectedViolationDetails = (await readComparisonFile('four-unique-violations-details.txt'))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
-			const expectedViolationSummary = await readComparisonFile('four-unique-violations-summary.txt');
 			expect(actualEventText).toContain(expectedViolationDetails);
-			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 	});
 
-	describe('ResultsTableViewer', () => {
-		let viewer: ResultsTableViewer;
+	describe('ResultsTableDisplayer', () => {
+		let viewer: ResultsTableDisplayer;
 
 		beforeEach(() => {
-			viewer = new ResultsTableViewer(spyDisplay);
+			viewer = new ResultsTableDisplayer(spyDisplay);
 		})
 
-		it('When given no results, outputs top-level count and nothing else', async () => {
-			// ==== SETUP ====
+		it('When given no results, outputs nothing', async () => {
+			// ==== TEST SETUP ====
+			// "Run" the plugin without assigning any violations.
 			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
-			const rules = await codeAnalyzerCore.selectRules(['all']);
-			// Run without having assigned any violations.
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
 			const results = await codeAnalyzerCore.run(rules, {workspace});
 
-			// ==== TESTED BEHAVIOR ====
-			// Pass the empty results object into the viewer.
+			// ==== TESTED METHOD ====
+			// Pass the empty result object into the viewer.
 			viewer.view(results);
 
 			// ==== ASSERTIONS ====
+			// Expect nothing to have been displayed.
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(1);
-			expect(displayEvents).toEqual([{
-				type: DisplayEventType.LOG,
-				data: getMessage(BundleName.ResultsViewer, 'summary.found-no-results')
-			}]);
+			expect(displayEvents).toHaveLength(0);
 		});
 
 		it('When given violations, they are displayed as a table', async () => {
@@ -187,14 +176,11 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(6);
+			expect(displayEvents).toHaveLength(3);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 1, PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
 			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
-			const expectedViolationSummary = await readComparisonFile('four-identical-violations-summary.txt');
-			const actualEventText = ansis.strip(displayEvents.map(e => e.data).join('\n'));
-			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 
 		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
@@ -222,14 +208,11 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(7);
+			expect(displayEvents).toHaveLength(3);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 2, PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
 			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
-			const expectedViolationSummary = await readComparisonFile('four-unique-violations-summary.txt');
-			const actualEventText = ansis.strip(displayEvents.map(e => e.data).join('\n'));
-			expect(actualEventText).toContain(expectedViolationSummary);
 		});
 	});
 });

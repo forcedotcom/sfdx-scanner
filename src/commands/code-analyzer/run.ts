@@ -5,7 +5,8 @@ import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
-import {ResultsDetailViewer, ResultsTableViewer} from '../../lib/viewers/ResultsViewer';
+import {ResultsDetailDisplayer, ResultsTableDisplayer} from '../../lib/viewers/ResultsViewer';
+import {RunSummaryDisplayer} from '../../lib/viewers/RunSummaryViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
@@ -86,6 +87,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
+			'output-file': parsedFlags['output-file'] ?? [],
 			'path-start': parsedFlags['path-start'], // TODO: We should move validation of this here instead of having it in the RunAction.
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace'],
@@ -103,9 +105,10 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
-			viewer: view === View.TABLE
-				? new ResultsTableViewer(uxDisplay)
-				: new ResultsDetailViewer(uxDisplay)
+			resultsViewer: view === View.TABLE
+				? new ResultsTableDisplayer(uxDisplay)
+				: new ResultsDetailDisplayer(uxDisplay),
+			runSummaryViewer: new RunSummaryDisplayer(uxDisplay)
 		};
 	}
 }

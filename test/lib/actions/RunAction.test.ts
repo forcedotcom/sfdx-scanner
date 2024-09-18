@@ -2,6 +2,7 @@ import path from 'node:path';
 import {SfError} from '@salesforce/core';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
+import {SpyRunSummaryViewer} from '../../stubs/SpyRunSummaryViewer';
 import {SpyResultsWriter} from '../../stubs/SpyResultsWriter';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
 import {ConfigurableStubEnginePlugin1, StubEngine1, TargetDependentEngine1} from '../../stubs/StubEnginePlugins';
@@ -18,7 +19,8 @@ describe('RunAction tests', () => {
 	let stubEnginePlugin: ConfigurableStubEnginePlugin1;
 	let pluginsFactory: StubEnginePluginsFactory_withPreconfiguredStubEngines;
 	let writer: SpyResultsWriter;
-	let viewer: SpyResultsViewer;
+	let resultsViewer: SpyResultsViewer;
+	let runSummaryViewer: SpyRunSummaryViewer;
 	let dependencies: RunDependencies;
 	let action: RunAction;
 
@@ -30,9 +32,10 @@ describe('RunAction tests', () => {
 		pluginsFactory = new StubEnginePluginsFactory_withPreconfiguredStubEngines();
 		pluginsFactory.addPreconfiguredEnginePlugin(stubEnginePlugin);
 
-		// Set up the writer and viewer.
+		// Set up the writer and viewers.
 		writer = new SpyResultsWriter();
-		viewer = new SpyResultsViewer();
+		resultsViewer = new SpyResultsViewer();
+		runSummaryViewer = new SpyRunSummaryViewer();
 
 		// Initialize our dependency object.
 		dependencies = {
@@ -41,7 +44,8 @@ describe('RunAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			writer,
-			viewer
+			resultsViewer,
+			runSummaryViewer
 		};
 		// Create the action.
 		action = RunAction.createAction(dependencies);
@@ -58,7 +62,9 @@ describe('RunAction tests', () => {
 			// Use the selector provided by the test
 			'rule-selector': [selector],
 			// Use the current directory, for convenience.
-			'workspace': ['.']
+			'workspace': ['.'],
+			// Outfiles can just be an empty list.
+			'output-file': []
 		};
 		// Configure the engine to return a violation for the first expected rule.
 		engine1.resultsToReturn = {
@@ -86,8 +92,10 @@ describe('RunAction tests', () => {
 		// Verify that the expected results were passed into the Viewer and Writer.
 		expect(writer.getCallHistory()[0].getViolationCount()).toEqual(1);
 		expect(writer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
-		expect(viewer.getCallHistory()[0].getViolationCount()).toEqual(1);
-		expect(viewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
+		expect(resultsViewer.getCallHistory()[0].getViolationCount()).toEqual(1);
+		expect(resultsViewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
+		expect(runSummaryViewer.getCallHistory()[0].results.getViolationCount()).toEqual(1);
+		expect(runSummaryViewer.getCallHistory()[0].results.getViolations()[0].getMessage()).toEqual('Fake message');
 	});
 
 	it('Engines with target-dependent rules run the right rules', async () => {
@@ -101,7 +109,8 @@ describe('RunAction tests', () => {
 		const input: RunInput = {
 			// Select only rules in the target-dependent engine.
 			"rule-selector": [targetDependentEngine.getName()],
-			"workspace": targetedFilesAndFolders
+			"workspace": targetedFilesAndFolders,
+			'output-file': []
 		};
 
 		// ==== TESTED BEHAVIOR ====
@@ -132,7 +141,8 @@ describe('RunAction tests', () => {
 			// Use 'all' to select all rules.
 			'rule-selector': ['all'],
 			// Use the current directory, for convenience.
-			'workspace': ['.']
+			'workspace': ['.'],
+			'output-file': []
 		};
 		// Configure the engine to return a violation for a rule with a known severity.
 		engine1.resultsToReturn = {
@@ -171,7 +181,8 @@ describe('RunAction tests', () => {
 			// Use 'all' to select all rules.
 			'rule-selector': ['all'],
 			// Use the current directory, for convenience.
-			'workspace': ['.']
+			'workspace': ['.'],
+			'output-file': []
 		};
 		// Configure the engine to return a violation for a rule with a known severity.
 		engine1.resultsToReturn = {
@@ -205,14 +216,16 @@ describe('RunAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			writer,
-			viewer
+			resultsViewer,
+			runSummaryViewer
 		};
 		// Instantiate our action, intentionally using a different instance than the one set up in
 		// the before-each.
 		const action = RunAction.createAction(dependencies);
 		const input: RunInput = {
 			'rule-selector': ['all'],
-			'workspace': ['.']
+			'workspace': ['.'],
+			'output-file': []
 		};
 
 		// ==== TESTED BEHAVIOR ====

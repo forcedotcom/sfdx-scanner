@@ -1,19 +1,3 @@
-# summary.found-no-results
-
-Found 0 violations.
-
-# summary.breakdown.header
-
-Summary
-
-# summary.breakdown.total
-
-Found %d violation(s):
-
-# summary.breakdown.item
-
-%d %s severity violation(s) found
-
 # summary.detail.found-results
 
 Found %d violation(s) across %d file(s):
