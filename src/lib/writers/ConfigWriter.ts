@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import {exists} from '../utils/FileUtil';
 import {ConfigModel, OutputFormat} from '../models/ConfigModel';
 import {BundleName, getMessage} from '../messages';
 
@@ -17,6 +18,10 @@ export class ConfigFileWriter implements ConfigWriter {
 	}
 
 	public write(model: ConfigModel): void {
+		if (exists(this.file)) {
+			fs.copyFileSync(this.file, `${this.file}-${Date.now()}.bak`)
+
+		}
 		fs.writeFileSync(this.file, model.toFormattedOutput(this.format));
 	}
 
