@@ -33,6 +33,12 @@ export interface Display {
 	 */
 	displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void;
 
+	/**
+	 * Prompt the user to confirm that the described action should be carried out, and block until they respond (or a timeout
+	 * elapses). Resolves to {@code true} if the user confirms, or {@code false} if they don't.
+	 */
+	confirm(message: string): Promise<boolean>;
+
 	spinnerStart(msg: string, status?: string): void;
 
 	spinnerUpdate(status: string): void;
@@ -71,6 +77,10 @@ export class UxDisplay implements Display {
 		this.displayable.table(data, columns);
 	}
 
+	public confirm(message: string): Promise<boolean> {
+		return this.displayable.confirm(message);
+	}
+
 	public spinnerStart(msg: string, status?: string): void {
 		this.spinner.start(msg, status);
 	}
@@ -99,6 +109,9 @@ export interface Displayable {
 
 	// Output message to stdout at log-level (non-blocking) only when "--json" flag is not present.  [Implemented by Command]
 	log(message?: string): void;
+
+	// Prompt the user to confirm that the described action should be performed.                     [Implemented by SfCommand]
+	confirm(message: string): Promise<boolean>;
 
 	// Output table to stdout only when "--json" flag is not present.                                [Implemented by SfCommand]
 	table<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>, options?: Ux.Table.Options): void;

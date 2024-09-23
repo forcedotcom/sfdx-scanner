@@ -73,7 +73,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			viewer: new ConfigStyledYamlViewer(uxDisplay)
 		};
 		if (outputFile) {
-			dependencies.writer = ConfigFileWriter.fromFile(outputFile);
+			dependencies.writer = ConfigFileWriter.fromFile(outputFile, uxDisplay);
 		}
 		return dependencies;
 	}

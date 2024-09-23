@@ -118,7 +118,7 @@ export class ConfigAction {
 		const configModel: ConfigModel = this.dependencies.modelGenerator(relevantEngines, userConfigContext, defaultConfigContext);
 
 		this.dependencies.viewer.view(configModel);
-		this.dependencies.writer?.write(configModel);
+		await this.dependencies.writer?.write(configModel);
 		return Promise.resolve();
 	}
 
