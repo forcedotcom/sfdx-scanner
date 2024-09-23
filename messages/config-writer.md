@@ -4,4 +4,4 @@ The output file %s has an unsupported extension. Valid extensions include: .yaml
 
 # prompt.overwrite-existing-file
 
-A file named %s already exists. Overwrite?
+A file named %s already exists. Do you want to overwrite it?

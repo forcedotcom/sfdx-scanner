@@ -58,7 +58,7 @@ describe('ConfigWriter implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			// The user should be prompted to confirm override.
 			expect(displayEvents[0].type).toEqual(DisplayEventType.CONFIRM);
-			expect(displayEvents[0].data).toContain('Overwrite');
+			expect(displayEvents[0].data).toContain('overwrite');
 			expect(writeFileSpy).toHaveBeenCalledTimes(expectedCallCount);
 		});
 
