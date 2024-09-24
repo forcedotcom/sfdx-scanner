@@ -2,7 +2,7 @@ import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
-import {RuleDetailViewer, RuleTableViewer} from '../../lib/viewers/RuleViewer';
+import {RuleDetailDisplayer, RuleTableDisplayer} from '../../lib/viewers/RuleViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -15,6 +15,9 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	public static readonly summary = getMessage(BundleName.RulesCommand, 'command.summary');
 	public static readonly description = getMessage(BundleName.RulesCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.RulesCommand, 'command.examples');
+
+	// TODO: Update when we go to Beta and when we go GA
+	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
 	public static readonly flags = {
 		workspace: Flags.string({
@@ -48,6 +51,9 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	};
 
 	public async run(): Promise<void> {
+		// TODO: Update when we go to Beta and when we go GA
+		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
+
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
 		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
 		const action: RulesAction = RulesAction.createAction(dependencies);
@@ -61,7 +67,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
-			viewer: view === View.TABLE ? new RuleTableViewer(uxDisplay) : new RuleDetailViewer(uxDisplay)
+			viewer: view === View.TABLE ? new RuleTableDisplayer(uxDisplay) : new RuleDetailDisplayer(uxDisplay)
 		};
 	}
 }

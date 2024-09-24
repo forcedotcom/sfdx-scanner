@@ -23,7 +23,7 @@ export class ConfigFileWriter implements ConfigWriter {
 	public static fromFile(file: string): ConfigFileWriter {
 		const ext = path.extname(file).toLowerCase();
 		if (ext === '.yaml' || ext === '.yml') {
-			return new ConfigFileWriter(file, OutputFormat.YAML);
+			return new ConfigFileWriter(file, OutputFormat.RAW_YAML);
 		} else {
 			throw new Error(getMessage(BundleName.ConfigWriter, 'error.unrecognized-file-format', [file]));
 		}

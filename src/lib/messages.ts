@@ -6,6 +6,7 @@ Messages.importMessagesDirectory(__dirname);
 
 export enum BundleName {
 	ConfigCommand = 'config-command',
+	ConfigModel = 'config-model',
 	ConfigWriter = 'config-writer',
 	PathStartUtil = 'path-start-util',
 	ProgressEventListener = 'progress-event-listener',
@@ -15,6 +16,8 @@ export enum BundleName {
 	ResultsWriter = 'results-writer',
 	RunAction = 'run-action',
 	RunCommand = 'run-command',
+	RunSummaryViewer = 'run-summary-viewer',
+	Shared = 'shared',
 	WorkspaceUtil = 'workspace-util'
 }
 

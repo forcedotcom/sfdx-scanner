@@ -1,7 +1,7 @@
 import {Ux} from '@salesforce/sf-plugins-core';
 import {CodeLocation, RunResults, SeverityLevel, Violation} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
-import {toStyledHeaderAndBody, toStyledHeader} from '../utils/StylingUtil';
+import {toStyledHeaderAndBody} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 import path from "node:path";
 
@@ -9,7 +9,7 @@ export interface ResultsViewer {
 	view(results: RunResults): void;
 }
 
-abstract class AbstractResultsViewer implements ResultsViewer {
+abstract class AbstractResultsDisplayer implements ResultsViewer {
 	protected display: Display;
 
 	public constructor(display: Display) {
@@ -18,9 +18,10 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 
 	public view(results: RunResults): void {
 		if (results.getViolationCount() === 0) {
-			this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.found-no-results'));
+			return;
 		} else {
 			this._view(results);
+			this.display.displayLog('\n');
 		}
 	}
 
@@ -39,15 +40,13 @@ abstract class AbstractResultsViewer implements ResultsViewer {
 	protected abstract _view(results: RunResults): void;
 }
 
-export class ResultsDetailViewer extends AbstractResultsViewer {
+export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
 
 		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.found-results', [
 			violations.length, this.countUniqueFiles(violations)]));
 		this.displayDetails(violations);
-		this.display.displayLog('\n');
-		this.displayBreakdown(results);
 	}
 
 	private displayDetails(violations: Violation[]): void {
@@ -75,21 +74,6 @@ export class ResultsDetailViewer extends AbstractResultsViewer {
 		};
 		const keys = ['severity', 'engine', 'message', 'location', 'resources'];
 		return toStyledHeaderAndBody(header, body, keys);
-	}
-
-	private displayBreakdown(results: RunResults): void {
-		this.display.displayLog(toStyledHeader(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.header')));
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.total', [results.getViolationCount()]));
-		for (const sev of Object.values(SeverityLevel)) {
-			// Some of the keys will be numbers, since the enum is numerical. Skip those.
-			if (typeof sev !== 'string') {
-				continue;
-			}
-			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
-			if (sevCount > 0) {
-				this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.breakdown.item', [sevCount, sev]));
-			}
-		}
 	}
 }
 
@@ -119,7 +103,7 @@ const TABLE_COLUMNS: Ux.Table.Columns<ResultRow> = {
 	}
 };
 
-export class ResultsTableViewer extends AbstractResultsViewer {
+export class ResultsTableDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults) {
 		const violations: Violation[] = sortViolations(results.getViolations());
 		const parentFolder: string = findLongestCommonParentFolderOf(violations.map(v =>

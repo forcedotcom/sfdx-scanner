@@ -21,3 +21,6 @@ indent_size = 2
 [*.kts]
 indent_style = space
 indent_size = 2
+
+[*.goldfile]
+insert_final_newline = false

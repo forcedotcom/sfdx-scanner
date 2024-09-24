@@ -110,7 +110,7 @@ describe('`code-analyzer rules` tests', () => {
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableViewer');
+			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
 
 		it('Accepts the value, "detail"', async () => {
@@ -119,7 +119,7 @@ describe('`code-analyzer rules` tests', () => {
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailViewer');
+			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});
 
 		it('Rejects all other values', async () => {
@@ -134,7 +134,7 @@ describe('`code-analyzer rules` tests', () => {
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', 'table');
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableViewer');
+			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
 
 		it('Can be supplied only once', async () => {
@@ -152,7 +152,7 @@ describe('`code-analyzer rules` tests', () => {
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailViewer');
+			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});
 	});
 

@@ -1,0 +1,4 @@
+    "Stub1Rule2":
+      severity: 2 # Modified from: 3
+      tags:
+        - CodeStyle

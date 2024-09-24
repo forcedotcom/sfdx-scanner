@@ -1,0 +1,7 @@
+  # ======================================================================
+  # STUBENGINE3 ENGINE CONFIGURATION
+  # ======================================================================
+  StubEngine3:
+
+    # Whether to turn off the 'StubEngine3' engine so that it is not included when running Code Analyzer commands.
+    disable_engine: true # Modified from: false

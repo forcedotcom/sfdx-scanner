@@ -8,12 +8,16 @@ type Styleable = null | undefined | {[key: string]: string};
 
 export function toStyledHeaderAndBody(header: string, body: Styleable, keys?: string[]): string {
 	const styledHeader: string = toStyledHeader(header);
-	const styledBody: string = indent(toStyledPropertyList(body, keys), 4);
+	const styledBody: string = indent(toStyledPropertyList(body, keys));
 	return `${styledHeader}\n${styledBody}`;
 }
 
 export function toStyledHeader(header: string): string {
 	return `${ansis.dim('===')} ${ansis.bold(header)}`;
+}
+
+export function makeGrey(str: string): string {
+	return ansis.dim(str);
 }
 
 export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): string {
@@ -34,6 +38,6 @@ export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): 
 	return output.join('\n');
 }
 
-function indent(text: string, indentLength: number): string {
-	return text.replace(/^/gm, ' '.repeat(indentLength));
+export function indent(text: string, indentLength: number = 4): string {
+	return text.replace(/^.+/gm, m => m.length > 0 ? ' '.repeat(indentLength) + m : m);
 }

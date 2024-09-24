@@ -1,0 +1,1 @@
+[2mthis text is styled as a comment[22m

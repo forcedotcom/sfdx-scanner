@@ -1,0 +1,5 @@
+    "Stub1Rule1":
+      severity: 5
+      tags:
+        - Recommended
+        - CodeStyle
