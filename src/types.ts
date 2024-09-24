@@ -204,4 +204,6 @@ export type SfgeConfig = {
 	ruleDisableWarningViolation?: boolean;
 	jvmArgs?: string;
 	pathexplimit?: number;
+	enablecaching?: boolean;
+	cachepath?: string;
 };

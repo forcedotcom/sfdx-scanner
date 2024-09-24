@@ -114,6 +114,12 @@ export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
 		if (inputs['pathexplimit'] != null) {
 			sfgeConfig.pathexplimit = inputs['pathexplimit'] as number;
 		}
+		if (inputs['enablecaching'] != null) {
+			sfgeConfig.enablecaching = inputs['enablecaching'] as boolean;
+		}
+		if (inputs['cachepath'] != null) {
+			sfgeConfig.cachepath = inputs['cachepath'] as string;
+		}
 		sfgeConfig.ruleDisableWarningViolation = getBooleanEngineOption(inputs, RULE_DISABLE_WARNING_VIOLATION_FLAG);
 		engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 
