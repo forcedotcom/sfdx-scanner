@@ -3,6 +3,7 @@ import {TestContext} from '@salesforce/core/lib/testSetup';
 import ConfigCommand from '../../../src/commands/code-analyzer/config';
 import {ConfigAction, ConfigInput} from '../../../src/lib/actions/ConfigAction';
 import {ConfigFileWriter} from '../../../src/lib/writers/ConfigWriter';
+import {SpyDisplay} from '../../stubs/SpyDisplay';
 
 describe('`code-analyzer config` tests', () => {
 	const $$ = new TestContext();
@@ -164,7 +165,7 @@ describe('`code-analyzer config` tests', () => {
 				const originalFromFile = ConfigFileWriter.fromFile;
 				fromFileSpy = jest.spyOn(ConfigFileWriter, 'fromFile').mockImplementation(file => {
 					receivedFile = file;
-					return originalFromFile(file);
+					return originalFromFile(file, new SpyDisplay());
 				});
 			});
 

@@ -7,6 +7,12 @@ import {Ux} from '@salesforce/sf-plugins-core';
 export class SpyDisplay implements Display {
 	private displayEvents: DisplayEvent[] = [];
 
+	private readonly confirmReturnValue: boolean;
+
+	public constructor(confirmReturnValue: boolean = true) {
+		this.confirmReturnValue = confirmReturnValue;
+	}
+
 	/**
 	 * Track that the provided message was displayed as an Error-level output.
 	 */
@@ -58,6 +64,14 @@ export class SpyDisplay implements Display {
 		});
 	}
 
+	public confirm(message: string): Promise<boolean> {
+		this.displayEvents.push({
+			type: DisplayEventType.CONFIRM,
+			data: message
+		});
+		return Promise.resolve(this.confirmReturnValue);
+	}
+
 	/**
 	 * Track that the spinner was started with the provided message, and optionally status.
 	 */
@@ -103,6 +117,7 @@ export enum DisplayEventType {
 	INFO,
 	LOG,
 	TABLE,
+	CONFIRM,
 	SPINNER_START,
 	SPINNER_UPDATE,
 	SPINNER_STOP
