@@ -1,8 +1,11 @@
 # selection-spinner.action
 Selecting rules
 
-# selection-spinner.status
+# selection-spinner.in-progress-status
 Eligible engines: %s; Completion: %d%; Elapsed time: %ds
+
+# selection-spinner.finished-status
+done. Selected rules from %s.
 
 # execution-spinner.action
 Executing rules
@@ -13,6 +16,5 @@ Executing rules
 # execution-spinner.engine-status
  - %s at %d% completion.
 
-# base-spinner.done
-done
-
+# execution-spinner.finished-status
+done. Executed rules from %s.
