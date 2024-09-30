@@ -13,6 +13,10 @@ export class SpyLogWriter implements LogWriter {
 		this.log += message;
 	}
 
+	public getLogDestination(): string {
+		return 'this value does not matter';
+	}
+
 	public closeLog(): void {
 		this.isClosed = true;
 	}

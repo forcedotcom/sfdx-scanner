@@ -63,14 +63,15 @@ describe('RunSummaryViewer implementations', () => {
 		// Create Displayers for the empty-input and non-empty-input cases.
 		const emptyInputsDisplayer: RunSummaryDisplayer = new RunSummaryDisplayer(emptyInputsSpyDisplay);
 		const nonEmptyInputsDisplayer: RunSummaryDisplayer = new RunSummaryDisplayer(nonEmptyInputsSpyDisplay);
+		const fakeLogFile: string = path.join('path', 'to', 'fakelogfile.log');
 
 		let emptyInputsDisplayEvents: DisplayEvent[];
 		let nonEmptyInputsDisplayEvents: DisplayEvent[];
 
 		beforeAll(() => {
-			emptyInputsDisplayer.view(emptyResults, config, []);
+			emptyInputsDisplayer.view(emptyResults, fakeLogFile, []);
 			emptyInputsDisplayEvents = emptyInputsSpyDisplay.getDisplayEvents();
-			nonEmptyInputsDisplayer.view(nonEmptyResults, config, [PATH_TO_OUTFILE1, PATH_TO_OUTFILE2])
+			nonEmptyInputsDisplayer.view(nonEmptyResults, fakeLogFile, [PATH_TO_OUTFILE1, PATH_TO_OUTFILE2])
 			nonEmptyInputsDisplayEvents = nonEmptyInputsSpyDisplay.getDisplayEvents();
 		});
 
@@ -121,7 +122,7 @@ describe('RunSummaryViewer implementations', () => {
 		describe('Logging breakdown', () => {
 			it('Logfile is correctly displayed', () => {
 				const expectation = `Additional log information written to:\n` +
-					`    ${config.getLogFolder()}`;
+					`    ${fakeLogFile}`;
 				const emptyContents = emptyInputsDisplayEvents.map(e => e.data).join('\n');
 				const nonEmptyContents = nonEmptyInputsDisplayEvents.map(e => e.data).join('\n');
 				expect(emptyContents).toContain(expectation);
