@@ -1,20 +1,20 @@
-import {CodeAnalyzerConfig, RunResults, SeverityLevel} from '@salesforce/code-analyzer-core';
+import {RunResults, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {indent, toStyledHeader} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 
 export interface RunSummaryViewer {
-	view(results: RunResults, config: CodeAnalyzerConfig, outfiles: string[]): void;
+	view(results: RunResults, logFile: string, outfiles: string[]): void;
 }
 
-export class RunSummaryDisplayer {
+export class RunSummaryDisplayer implements RunSummaryViewer {
 	protected display: Display;
 
 	public constructor(display: Display) {
 		this.display = display;
 	}
 
-	public view(results: RunResults, config: CodeAnalyzerConfig, outfiles: string[]): void {
+	public view(results: RunResults, logFile: string, outfiles: string[]): void {
 		this.display.displayLog(toStyledHeader(getMessage(BundleName.RunSummaryViewer, 'summary.header')));
 		// Use empty line as a visual separator
 		this.display.displayLog('');
@@ -36,7 +36,7 @@ export class RunSummaryDisplayer {
 		this.display.displayLog('');
 
 		this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.log-file-location'));
-		this.display.displayLog(indent(config.getLogFolder()));
+		this.display.displayLog(indent(logFile));
 	}
 
 	private displayResultsSummary(results: RunResults): void {
