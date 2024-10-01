@@ -31,20 +31,20 @@ abstract class ProgressSpinner {
 			return;
 		}
 		this.startTime = Date.now();
-		this.display.spinnerStart(action, this.createSpinnerStatus());
+		this.display.spinnerStart(action, this.createInProgressSpinnerStatus());
 		if (this.tickTime > 0) {
 			// `setInterval` means the callback will be called repeatedly. This allows us to automatically refresh the
 			// spinner on a regular interval even if nothing happened. This is primarily useful for incrementing a timer,
 			// so the user doesn't feel like the system is frozen.
 			this.tickIntervalId = setInterval(() => {
-				this.display.spinnerUpdate(this.createSpinnerStatus());
+				this.display.spinnerUpdate(this.createInProgressSpinnerStatus());
 			}, this.tickTime);
 		}
 		this._isSpinning = true;
 	}
 
 	protected updateSpinner(): void {
-		this.display.spinnerUpdate(this.createSpinnerStatus());
+		this.display.spinnerUpdate(this.createInProgressSpinnerStatus());
 	}
 
 	protected stopSpinning(): void {
@@ -52,7 +52,7 @@ abstract class ProgressSpinner {
 			clearInterval(this.tickIntervalId);
 		}
 		if (this._isSpinning) {
-			this.display.spinnerStop(getMessage(BundleName.ProgressEventListener, 'base-spinner.done'));
+			this.display.spinnerStop(this.createFinishedSpinnerStatus());
 			this._isSpinning = false;
 		}
 	}
@@ -69,7 +69,9 @@ abstract class ProgressSpinner {
 		return Math.floor((Date.now() - this.startTime) / 1000);
 	}
 
-	protected abstract createSpinnerStatus(): string;
+	protected abstract createInProgressSpinnerStatus(): string;
+
+	protected abstract createFinishedSpinnerStatus(): string;
 }
 
 export class RuleSelectionProgressSpinner extends ProgressSpinner implements ProgressEventListener {
@@ -128,11 +130,16 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 		}
 	}
 
-	protected createSpinnerStatus(): string {
+	protected createInProgressSpinnerStatus(): string {
 		const aggregateCompletionPercentage: number =
 			Math.floor(this.completionPercentages.reduce((prevTotal, next) => prevTotal + next, 0) / this.completionPercentages.length);
-		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.status',
+		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.in-progress-status',
 			[[...this.engineNames.keys()].join(', '), aggregateCompletionPercentage, this.getSecondsSpentSpinning()]);
+	}
+
+	protected createFinishedSpinnerStatus(): string {
+		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.finished-status',
+			[[...this.engineNames.keys()].join(', ')]);
 	}
 }
 
@@ -189,7 +196,7 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 		this.updateSpinner();
 	}
 
-	protected createSpinnerStatus(): string {
+	protected createInProgressSpinnerStatus(): string {
 		const secondsRunning = this.getSecondsSpentSpinning();
 		const totalEngines = this.progressMap.size;
 		let unfinishedEngines = 0;
@@ -204,5 +211,10 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 			getMessage(BundleName.ProgressEventListener, 'execution-spinner.progress-summary', [unfinishedEngines, totalEngines, secondsRunning]),
 			...engineLines
 		].join('\n');
+	}
+
+	protected createFinishedSpinnerStatus(): string {
+		return getMessage(BundleName.ProgressEventListener, 'execution-spinner.finished-status',
+			[[...this.progressMap.keys()].join(', ')]);
 	}
 }
