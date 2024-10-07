@@ -1,1 +1,1 @@
-config_root: __DUMMY_CONFIG_ROOT__
+config_root: __DUMMY_CONFIG_ROOT__ # Modified from: __DUMMY_DEFAULT_CONFIG_ROOT__

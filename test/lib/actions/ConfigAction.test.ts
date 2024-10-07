@@ -72,9 +72,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -209,9 +210,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -228,9 +230,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -249,9 +252,12 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-non-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
-					.replaceAll('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory);
+					.replace('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
+					.replace('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory)
+					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()))
 				expect(output).toContain(goldFileContents);
 			});
 
