@@ -92,10 +92,12 @@ abstract class YamlFormatter {
 			return this.toYamlUncheckedFieldWithInlineComment(fieldName, null, commentText);
 		} else if (JSON.stringify(userValue) === JSON.stringify(defaultValue)) {
 			return this.toYamlUncheckedField(fieldName, userValue);
-		} else {
-			const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
-			return this.toYamlUncheckedFieldWithInlineComment(fieldName, userValue, commentText);
 		}
+
+		userValue = replaceAbsolutePathsWithRelativePathsWherePossible(userValue, this.userContext.config.getConfigRoot() + path.sep);
+
+		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
+		return this.toYamlUncheckedFieldWithInlineComment(fieldName, userValue, commentText);
 	}
 
 	toYaml(): string {
@@ -216,4 +218,27 @@ class StyledYamlFormatter extends YamlFormatter {
 
 function looksLikeAPathValue(value: unknown) {
 	return typeof(value) === 'string' && !value.includes('\n') && value.includes(path.sep);
+}
+
+function replaceAbsolutePathsWithRelativePathsWherePossible(value: unknown, parentFolder: string): unknown {
+	if (typeof value === 'string') {
+		// Check if the string starts with the parent folder
+		if (value.startsWith(parentFolder)) {
+			// Strip the parent folder from the start of the string
+			return value.substring(parentFolder.length);
+		}
+		return value; // Return unchanged if it doesn't start with the parent folder
+	} else if (Array.isArray(value)) {
+		// If value is an array, recursively process each element
+		return value.map(item => replaceAbsolutePathsWithRelativePathsWherePossible(item, parentFolder));
+	} else if (typeof value === 'object' && value !== null) {
+		// If value is an object, recursively process each key-value pair
+		const updatedObject: object = {};
+		for (const key in value) {
+			updatedObject[key] = replaceAbsolutePathsWithRelativePathsWherePossible(value[key], parentFolder);
+		}
+		return updatedObject;
+	}
+	// Return the value unchanged if it's a number, boolean, or null
+	return value;
 }
