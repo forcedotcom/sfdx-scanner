@@ -1,7 +1,7 @@
 import {RunResults} from '@salesforce/code-analyzer-core';
-import {RunSummaryViewer} from '../../src/lib/viewers/RunSummaryViewer'
+import {RunActionSummaryViewer} from '../../src/lib/viewers/RunActionSummaryViewer'
 
-export class SpyRunSummaryViewer implements RunSummaryViewer {
+export class SpyRunActionSummaryViewer implements RunActionSummaryViewer {
 	private callHistory: {results: RunResults, logFile: string, outfiles: string[]}[] = [];
 
 	public view(results: RunResults, logFile: string, outfiles: string[]): void {

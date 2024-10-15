@@ -3,11 +3,11 @@ import {Display} from '../Display';
 import {indent, toStyledHeader} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
 
-export interface RunSummaryViewer {
+export interface RunActionSummaryViewer {
 	view(results: RunResults, logFile: string, outfiles: string[]): void;
 }
 
-export class RunSummaryDisplayer implements RunSummaryViewer {
+export class RunActionSummaryDisplayer implements RunActionSummaryViewer {
 	protected display: Display;
 
 	public constructor(display: Display) {
@@ -15,12 +15,12 @@ export class RunSummaryDisplayer implements RunSummaryViewer {
 	}
 
 	public view(results: RunResults, logFile: string, outfiles: string[]): void {
-		this.display.displayLog(toStyledHeader(getMessage(BundleName.RunSummaryViewer, 'summary.header')));
+		this.display.displayLog(toStyledHeader(getMessage(BundleName.RunActionSummaryViewer, 'summary.header')));
 		// Use empty line as a visual separator
 		this.display.displayLog('');
 
 		if (results.getViolationCount() === 0) {
-			this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.found-no-violations'));
+			this.display.displayLog(getMessage(BundleName.RunActionSummaryViewer, 'summary.found-no-violations'));
 		} else {
 			this.displayResultsSummary(results);
 		}
@@ -28,19 +28,19 @@ export class RunSummaryDisplayer implements RunSummaryViewer {
 		this.display.displayLog('');
 
 		if (outfiles.length === 0) {
-			this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.no-outfiles'));
+			this.display.displayLog(getMessage(BundleName.RunActionSummaryViewer, 'summary.no-outfiles'));
 		} else {
 			this.displayOutfiles(outfiles);
 		}
 		// Use empty line as a visual separator
 		this.display.displayLog('');
 
-		this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.log-file-location'));
+		this.display.displayLog(getMessage(BundleName.RunActionSummaryViewer, 'summary.log-file-location'));
 		this.display.displayLog(indent(logFile));
 	}
 
 	private displayResultsSummary(results: RunResults): void {
-		this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.violations-total', [results.getViolationCount()]));
+		this.display.displayLog(getMessage(BundleName.RunActionSummaryViewer, 'summary.violations-total', [results.getViolationCount()]));
 		for (const sev of Object.values(SeverityLevel)) {
 			// Some of the keys will be numbers, since the enum is numerical. Skip those.
 			if (typeof sev !== 'string') {
@@ -48,13 +48,13 @@ export class RunSummaryDisplayer implements RunSummaryViewer {
 			}
 			const sevCount = results.getViolationCountOfSeverity(SeverityLevel[sev] as SeverityLevel);
 			if (sevCount > 0) {
-				this.display.displayLog(indent(getMessage(BundleName.RunSummaryViewer, 'summary.violations-item', [sevCount, sev])));
+				this.display.displayLog(indent(getMessage(BundleName.RunActionSummaryViewer, 'summary.violations-item', [sevCount, sev])));
 			}
 		}
 	}
 
 	private displayOutfiles(outfiles: string[]): void {
-		this.display.displayLog(getMessage(BundleName.RunSummaryViewer, 'summary.outfiles-total'));
+		this.display.displayLog(getMessage(BundleName.RunActionSummaryViewer, 'summary.outfiles-total'));
 		for (const outfile of outfiles) {
 			this.display.displayLog(indent(outfile));
 		}

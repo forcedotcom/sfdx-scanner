@@ -2,7 +2,7 @@ import path from 'node:path';
 import {SfError} from '@salesforce/core';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
-import {SpyRunSummaryViewer} from '../../stubs/SpyRunSummaryViewer';
+import {SpyRunActionSummaryViewer} from '../../stubs/SpyRunActionSummaryViewer';
 import {SpyResultsWriter} from '../../stubs/SpyResultsWriter';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
 import {ConfigurableStubEnginePlugin1, StubEngine1, TargetDependentEngine1} from '../../stubs/StubEnginePlugins';
@@ -20,7 +20,7 @@ describe('RunAction tests', () => {
 	let pluginsFactory: StubEnginePluginsFactory_withPreconfiguredStubEngines;
 	let writer: SpyResultsWriter;
 	let resultsViewer: SpyResultsViewer;
-	let runSummaryViewer: SpyRunSummaryViewer;
+	let actionSummaryViewer: SpyRunActionSummaryViewer;
 	let dependencies: RunDependencies;
 	let action: RunAction;
 
@@ -35,7 +35,7 @@ describe('RunAction tests', () => {
 		// Set up the writer and viewers.
 		writer = new SpyResultsWriter();
 		resultsViewer = new SpyResultsViewer();
-		runSummaryViewer = new SpyRunSummaryViewer();
+		actionSummaryViewer = new SpyRunActionSummaryViewer();
 
 		// Initialize our dependency object.
 		dependencies = {
@@ -45,7 +45,7 @@ describe('RunAction tests', () => {
 			progressListeners: [],
 			writer,
 			resultsViewer,
-			runSummaryViewer
+			actionSummaryViewer: actionSummaryViewer
 		};
 		// Create the action.
 		action = RunAction.createAction(dependencies);
@@ -94,8 +94,8 @@ describe('RunAction tests', () => {
 		expect(writer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 		expect(resultsViewer.getCallHistory()[0].getViolationCount()).toEqual(1);
 		expect(resultsViewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
-		expect(runSummaryViewer.getCallHistory()[0].results.getViolationCount()).toEqual(1);
-		expect(runSummaryViewer.getCallHistory()[0].results.getViolations()[0].getMessage()).toEqual('Fake message');
+		expect(actionSummaryViewer.getCallHistory()[0].results.getViolationCount()).toEqual(1);
+		expect(actionSummaryViewer.getCallHistory()[0].results.getViolations()[0].getMessage()).toEqual('Fake message');
 	});
 
 	it('Engines with target-dependent rules run the right rules', async () => {
@@ -217,7 +217,7 @@ describe('RunAction tests', () => {
 			progressListeners: [],
 			writer,
 			resultsViewer,
-			runSummaryViewer
+			actionSummaryViewer: actionSummaryViewer
 		};
 		// Instantiate our action, intentionally using a different instance than the one set up in
 		// the before-each.

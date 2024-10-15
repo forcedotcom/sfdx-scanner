@@ -4,20 +4,20 @@ import ansis from 'ansis';
 import {CodeAnalyzer, CodeAnalyzerConfig, RunResults} from '@salesforce/code-analyzer-core';
 import {Violation} from "@salesforce/code-analyzer-engine-api";
 
-import {RunSummaryDisplayer} from '../../../src/lib/viewers/RunSummaryViewer';
+import {RunActionSummaryDisplayer} from '../../../src/lib/viewers/RunActionSummaryViewer';
 
 import {DisplayEvent, DisplayEventType, SpyDisplay} from "../../stubs/SpyDisplay";
 import {FunctionalStubEnginePlugin1, StubEngine1} from '../../stubs/StubEnginePlugins';
 
 const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test', 'fixtures', 'comparison-files', 'lib',
-	'viewers', 'RunSummaryViewer.test.ts');
+	'viewers', 'RunActionSummaryViewer.test.ts');
 const PATH_TO_SAMPLE_CODE = path.resolve(__dirname, '..', '..', '..', 'test', 'sample-code');
 const PATH_TO_OUTFILE1 = path.join('the', 'specifics', 'of', 'this', 'path', 'do', 'not', 'matter.csv');
 const PATH_TO_OUTFILE2 = path.join('neither', 'do', 'the', 'specifics', 'of', 'this', 'one.json');
 const PATH_TO_FILE_A = path.resolve(PATH_TO_SAMPLE_CODE, 'fileA.cls');
 const PATH_TO_FILE_Z = path.resolve(PATH_TO_SAMPLE_CODE, 'fileZ.cls');
 
-describe('RunSummaryViewer implementations', () => {
+describe('RunActionSummaryViewer implementations', () => {
 	// We need SpyDisplays for the cases where inputs are empty and non-empty.
 	const emptyInputsSpyDisplay: SpyDisplay = new SpyDisplay();
 	const nonEmptyInputsSpyDisplay: SpyDisplay = new SpyDisplay();
@@ -61,8 +61,8 @@ describe('RunSummaryViewer implementations', () => {
 
 	describe('RunSummaryDisplayer', () => {
 		// Create Displayers for the empty-input and non-empty-input cases.
-		const emptyInputsDisplayer: RunSummaryDisplayer = new RunSummaryDisplayer(emptyInputsSpyDisplay);
-		const nonEmptyInputsDisplayer: RunSummaryDisplayer = new RunSummaryDisplayer(nonEmptyInputsSpyDisplay);
+		const emptyInputsDisplayer: RunActionSummaryDisplayer = new RunActionSummaryDisplayer(emptyInputsSpyDisplay);
+		const nonEmptyInputsDisplayer: RunActionSummaryDisplayer = new RunActionSummaryDisplayer(nonEmptyInputsSpyDisplay);
 		const fakeLogFile: string = path.join('path', 'to', 'fakelogfile.log');
 
 		let emptyInputsDisplayEvents: DisplayEvent[];
