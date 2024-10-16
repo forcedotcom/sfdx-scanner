@@ -14,10 +14,12 @@ import {ConfigStyledYamlViewer} from '../../../lib/lib/viewers/ConfigViewer';
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 
-const PATH_TO_EXAMPLE_WORKSPACE = path.join(__dirname, '..', '..', 'fixtures', 'example-workspaces', 'ConfigAction.test.ts');
+const PATH_TO_FIXTURES = path.join(__dirname, '..', '..', 'fixtures');
+
+const PATH_TO_EXAMPLE_WORKSPACE = path.join(PATH_TO_FIXTURES, 'example-workspaces', 'ConfigAction.test.ts');
 
 describe('ConfigAction tests', () => {
-	const PATH_TO_COMPARISON_DIR = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'ConfigAction.test.ts');
+	const PATH_TO_COMPARISON_DIR = path.join(PATH_TO_FIXTURES, 'comparison-files', 'lib', 'actions', 'ConfigAction.test.ts');
 
 	let spyDisplay: SpyDisplay;
 	let dependencies: ConfigDependencies;
@@ -26,7 +28,7 @@ describe('ConfigAction tests', () => {
 
 		describe('When there IS NOT an existing config...', () => {
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				spyDisplay = new SpyDisplay();
 				dependencies = {
 					logEventListeners: [],
@@ -148,7 +150,7 @@ describe('ConfigAction tests', () => {
 
 			let stubConfigFactory: AlternativeStubCodeAnalyzerConfigFactory;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				stubConfigFactory = new AlternativeStubCodeAnalyzerConfigFactory();
 				spyDisplay = new SpyDisplay();
 				dependencies = {
@@ -362,11 +364,24 @@ describe('ConfigAction tests', () => {
 				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `${ruleName}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
+
+			it('If config is provided with relative path to config_root, then it remains relative in config output even though core makes it absolute for engines', async () => {
+				// ==== SETUP ====
+				stubConfigFactory.setDummyConfigRoot(PATH_TO_EXAMPLE_WORKSPACE);
+				stubConfigFactory.setDummyLogFolder('null');
+
+				// ==== TESTED BEHAVIOR ====
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['Stub2Rule1']);
+
+				// ==== ASSERTIONS ====
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `StubEngine2_forConfigWithRelativePathScenario.yml.goldfile`));
+				expect(output).toContain(goldFileContents);
+			});
 		});
 	});
 
 	describe('File Creation', () => {
-		beforeEach(async () => {
+		beforeEach(() => {
 			spyDisplay = new SpyDisplay();
 			dependencies = {
 				logEventListeners: [],
@@ -397,11 +412,12 @@ describe('ConfigAction tests', () => {
 		return fsp.readFile(goldFilePath, {encoding: 'utf-8'});
 	}
 
-	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[]): Promise<string> {
+	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string): Promise<string> {
 		// ==== SETUP ====
 		const action = ConfigAction.createAction(dependencies);
 		const input: ConfigInput = {
-			'rule-selector': ruleSelectors
+			'rule-selector': ruleSelectors,
+			'config-file': configFile
 		};
 
 		// ==== TESTED BEHAVIOR ====
@@ -436,11 +452,13 @@ class AlternativeStubCodeAnalyzerConfigFactory implements CodeAnalyzerConfigFact
 	}
 
 	public create(): CodeAnalyzerConfig {
-		const rawConfigFileContents = fs.readFileSync(path.join(PATH_TO_EXAMPLE_WORKSPACE, 'optional-input-config.yml'), {encoding: 'utf-8'});
+		const rawConfigFileContents = fs.readFileSync(path.join(PATH_TO_EXAMPLE_WORKSPACE, 'optional-input-config.yml'), 'utf-8');
 		const validatedConfigFileContents = rawConfigFileContents
 			.replaceAll('__DUMMY_CONFIG_ROOT__', this.dummyConfigRoot)
-			.replaceAll('__DUMMY_LOG_FOLDER__', this.dummyLogFolder);
-		return CodeAnalyzerConfig.fromYamlString(validatedConfigFileContents, process.cwd());
+			.replaceAll('__DUMMY_LOG_FOLDER__', this.dummyLogFolder)
+			.replaceAll('__DUMMY_STUBENGINE2_SUBFIELD__', this.dummyConfigRoot && this.dummyConfigRoot !== 'null' ?
+				path.join(this.dummyConfigRoot, 'optional-input-config.yml') : 'dummy');
+		return CodeAnalyzerConfig.fromYamlString(validatedConfigFileContents,  process.cwd());
 	}
 }
 
@@ -467,8 +485,13 @@ class StubEnginePlugin extends EngineApi.EnginePluginV1 {
 				'Property5': 'This is the description for Property5',
 				'Property6': 'This is the description for Property6'
 			}
+		},
+		StubEngine2: {
+			overview: 'Some overview for StubEngine2',
+			fieldDescriptions: {
+				'top_field': 'Some description for top_field'
+			}
 		}
-		// StubEngine2 has no overview and no documented properties.
 		// StubEngine3 also has no overview or documented properties.
 	}
 
