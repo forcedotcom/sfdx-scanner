@@ -12,4 +12,4 @@ No output file was specified.
 
 # config-action.outfile-location
 
-Config written to:
+Configuration written to:
