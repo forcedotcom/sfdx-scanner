@@ -31,8 +31,9 @@ describe('ConfigWriter implementations', () => {
 
 			const stubbedConfig = new StubConfigModel();
 
-			await configFileWriter.write(stubbedConfig);
+			const result: boolean = await configFileWriter.write(stubbedConfig);
 
+			expect(result).toEqual(true);
 			expect(spyDisplay.getDisplayEvents()).toHaveLength(0);
 
 			expect(writeFileSpy).toHaveBeenCalled();
@@ -52,10 +53,11 @@ describe('ConfigWriter implementations', () => {
 
 			const stubbedConfig = new StubConfigModel();
 
-			await configFileWriter.write(stubbedConfig);
+			const result: boolean = await configFileWriter.write(stubbedConfig);
 
 			const displayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
 			expect(displayEvents).toHaveLength(1);
+			expect(result).toEqual(confirmation);
 			// The user should be prompted to confirm override.
 			expect(displayEvents[0].type).toEqual(DisplayEventType.CONFIRM);
 			expect(displayEvents[0].data).toContain('overwrite');

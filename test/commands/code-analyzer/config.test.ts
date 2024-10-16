@@ -177,6 +177,7 @@ describe('`code-analyzer config` tests', () => {
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFileSpy).toHaveBeenCalled();
 				expect(receivedFile).toEqual(inputValue);
+				expect(receivedActionInput).toHaveProperty('output-file', inputValue);
 			});
 
 			it('Can be referenced by its shortname, -f', async () => {
@@ -186,6 +187,7 @@ describe('`code-analyzer config` tests', () => {
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFileSpy).toHaveBeenCalled();
 				expect(receivedFile).toEqual(inputValue);
+				expect(receivedActionInput).toHaveProperty('output-file', inputValue);
 			});
 
 			it('Cannot be supplied multiple times', async () => {
@@ -201,6 +203,7 @@ describe('`code-analyzer config` tests', () => {
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFileSpy).not.toHaveBeenCalled();
+				expect(receivedActionInput['output-file']).toBeUndefined();
 			});
 
 		});
