@@ -6,7 +6,7 @@ import {Display} from '../Display';
 import {exists} from '../utils/FileUtil';
 
 export interface ConfigWriter {
-	write(model: ConfigModel): Promise<void>;
+	write(model: ConfigModel): Promise<boolean>;
 }
 
 export class ConfigFileWriter implements ConfigWriter {
@@ -20,10 +20,13 @@ export class ConfigFileWriter implements ConfigWriter {
 		this.display = display;
 	}
 
-	public async write(model: ConfigModel): Promise<void> {
+	public async write(model: ConfigModel): Promise<boolean> {
 		// Only write to the file if it doesn't already exist, or if the user confirms that they want to overwrite it.
 		if (!(await exists(this.file)) || await this.display.confirm(getMessage(BundleName.ConfigWriter, 'prompt.overwrite-existing-file', [this.file]))) {
 			fs.writeFileSync(this.file, model.toFormattedOutput(this.format));
+			return true;
+		} else {
+			return false;
 		}
 	}
 

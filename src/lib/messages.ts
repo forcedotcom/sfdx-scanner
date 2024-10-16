@@ -5,6 +5,7 @@ import {Tokens} from '@salesforce/core/lib/messages';
 Messages.importMessagesDirectory(__dirname);
 
 export enum BundleName {
+	ActionSummaryViewer = 'action-summary-viewer',
 	ConfigCommand = 'config-command',
 	ConfigModel = 'config-model',
 	ConfigWriter = 'config-writer',

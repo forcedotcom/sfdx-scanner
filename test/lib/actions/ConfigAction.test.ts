@@ -9,7 +9,8 @@ import {CodeAnalyzerConfigFactory} from "../../../src/lib/factories/CodeAnalyzer
 import {EnginePluginsFactory} from '../../../src/lib/factories/EnginePluginsFactory';
 import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/actions/ConfigAction';
 import {AnnotatedConfigModel} from '../../../src/lib/models/ConfigModel';
-import {ConfigStyledYamlViewer} from '../../../lib/lib/viewers/ConfigViewer';
+import {ConfigStyledYamlViewer} from '../../../src/lib/viewers/ConfigViewer';
+import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
@@ -36,6 +37,7 @@ describe('ConfigAction tests', () => {
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
 					modelGenerator: AnnotatedConfigModel.fromSelection,
+					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
 			});
@@ -159,6 +161,7 @@ describe('ConfigAction tests', () => {
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
 					modelGenerator: AnnotatedConfigModel.fromSelection,
+					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
 			});
@@ -389,6 +392,7 @@ describe('ConfigAction tests', () => {
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
 				modelGenerator: AnnotatedConfigModel.fromSelection,
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
 		});
@@ -406,6 +410,74 @@ describe('ConfigAction tests', () => {
 			expect(spyWriter.getCallHistory()).toHaveLength(1);
 		});
 	});
+
+	describe('Summary generation', () => {
+		beforeEach(() => {
+			spyDisplay = new SpyDisplay();
+			dependencies = {
+				logEventListeners: [],
+				progressEventListeners: [],
+				viewer: new ConfigStyledYamlViewer(spyDisplay),
+				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
+				modelGenerator: AnnotatedConfigModel.fromSelection,
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
+				pluginsFactory: new StubEnginePluginFactory()
+			}
+		});
+
+		it('When an Outfile is created, it is mentioned by the Summarizer', async () => {
+			// ==== SETUP ====
+			// Assign a Writer to the dependencies.
+			dependencies.writer = new SpyConfigWriter(true);
+
+			// ==== TESTED BEHAVIOR ====
+			// Invoke the action, specifying an outfile.
+			const action = ConfigAction.createAction(dependencies);
+			const input: ConfigInput = {
+				'rule-selector': ['all'],
+				'output-file': 'out-config.yml'
+			};
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+
+			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'outfile-created.txt.goldfile'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
+
+		it.each([
+			{case: 'an Outfile is specified but not written', writer: new SpyConfigWriter(false), outfile: 'out-config.yml'},
+			{case: 'an Outfile is not specified at all', writer: undefined, outfile: undefined}
+		])('When $case, the Summarizer mentions no outfile', async ({writer, outfile}) => {
+			// ==== SETUP ====
+			// Add the specified Writer (or lack-of-Writer) to the dependencies.
+			dependencies.writer = writer;
+
+			// ==== TESTED BEHAVIOR ====
+			// Invoke the action, specifying an outfile (or lack of one).
+			const action = ConfigAction.createAction(dependencies);
+			const input: ConfigInput = {
+				'rule-selector': ['all'],
+				'output-file': outfile
+			};
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+
+			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'no-outfile-created.txt.goldfile'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
+	})
 	// ====== HELPER FUNCTIONS ======
 
 	async function readGoldFile(goldFilePath: string): Promise<string> {
@@ -425,7 +497,6 @@ describe('ConfigAction tests', () => {
 
 		// ==== OUTPUT PROCESSING ====
 		const displayEvents = spyDisplay.getDisplayEvents();
-		expect(displayEvents).toHaveLength(1);
 		expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 		return ansis.strip(displayEvents[0].data);
 	}
