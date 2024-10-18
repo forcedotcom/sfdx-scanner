@@ -98,6 +98,8 @@ jobs:
           java-version: '11'
       # Install SF CLI via NPM
       - run: npm install -g @salesforce/cli
+      - run: node --version
+      - run: sf --version
       # Download and install the Tarball artifact
       - uses: actions/download-artifact@v4
         id: download
