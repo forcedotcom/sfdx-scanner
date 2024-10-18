@@ -1,0 +1,20 @@
+
+engines:
+  regex:
+    custom_rules:
+      NoTodos:
+        regex: "/todo/gi"
+        file_extensions:
+          - ".ts"
+        description: "detects todos"
+        tags: ["recommended", "beep"]
+
+rules:
+  pmd:
+    WhileLoopsMustUseBraces:
+      severity: HIGH
+      tags:
+        - CodeStyle
+        - Recommended
+        - apexLanguage
+        - Beep
