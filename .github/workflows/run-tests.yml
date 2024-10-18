@@ -46,10 +46,35 @@ jobs:
           path: |
             ./reports
             ./coverage
+
+  # The smoke tests should mimic a production setup as closely as possible. To that end, we'll spin up a tarball and
+  # then upload it as an artifact, so the smoke test jobs can pull it down and install it.
+  build-installable-tarball:
+    runs-on: ubuntu-latest
+    steps:
+      # Obviously, we need to get the code first
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.target-branch }}
+      # Make sure we're on the right version of Node
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*' # Always use Node LTS for building the tarball
+      # Install/build dependencies
+      - run: yarn
+      - run: yarn build
+      # Create the tarball
+      - run: npm pack
+      # Upload the tarball as an artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-tarball
+          path: ./salesforce-plugin-code-analyzer-*.tgz
   # For now, the smoke tests are no-ops, so the job doesn't have to do anything exciting.
   # When smoke-tests stop being no-ops, we'll need a build-dependencies step to create a tarball artifact, and so forth.
   # We'll be able to use the v4 workflow as a template.
   smoke-tests:
+    needs: build-installable-tarball
     strategy:
       # By default, if any job in a matrix fails, all other jobs are automatically cancelled. This makes the jobs run
       # to completion instead.
@@ -59,8 +84,47 @@ jobs:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: macos-latest, exe: .sh}, {vm: windows-latest, exe: .cmd}]
     runs-on: ${{ matrix.os.vm }}
     steps:
+      # Check out the code
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.target-branch }}
-      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
+      # Set up Node and Java
+      - uses: actions/setup-node@v4
+        with:
+          ref: ${{ matrix.node.version }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      # Install SF CLI via NPM
+      - run: npm install -g @salesforce/cli
+      # Download and install the Tarball artifact
+      - uses: actions/download-artifact@v4
+        id: download
+        with:
+          name: smoke-test-tarball
+          # Download the tarball to a subdirectory of HOME, to guarantee that it's somewhere the installation command
+          # can see
+          path: ~/downloads/tarball
+      - name: Echo tarball download location
+        run: echo ${{ steps.download.outputs.download-path }}
+      - name: Install Tarball
+        shell: bash
+        run: |
+          # We need to determine the Tarball's name first.
+          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-plugin-code-analyzer-5\\.0\\.0-alpha\\.[0-9]*\\.tgz)
+          # We need to determine the Tarball's location in an installable way.
+          # Get the path to the download folder. Swap out backslashes for forward slashes to ensure Windows compatibility.
+          RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+          # If the path starts with "C:", that needs to be pulled off.
+          ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
+          # Install the tarball, piping in a `y` to simulate agreeing to install an unsigned package. Use the URI of the file's full path.
+          echo y | sf plugins install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
+      - name: Run smoke tests
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
+      - uses: actions/upload-artifact@v4
+        if: ${{always()}}
+        with:
+          name: smoke-test-results-${{ runner.os }}-node-${{ matrix.node.artifact }}
+          path: smoke-test-results
 
