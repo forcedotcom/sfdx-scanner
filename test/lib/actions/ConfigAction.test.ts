@@ -42,13 +42,16 @@ describe('ConfigAction tests', () => {
 				};
 			});
 
-			it('Top-level overview-comment is correct', async () => {
+			it.each([
+				{position: 'start'},
+				{position: 'end'}
+			])('Top-level $position comment is correct', async ({position}) => {
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
-				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', 'top-level.yml.goldfile'));
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', `top-level-${position}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -167,7 +170,10 @@ describe('ConfigAction tests', () => {
 			});
 
 
-			it('Top-level overview-comment is correct', async () => {
+			it.each([
+				{position: 'start'},
+				{position: 'end'}
+			])('Top-level $position comment is correct', async ({position}) => {
 				// ==== SETUP ====
 				// Set the dummy config properties to null; it's fine for this test.
 				stubConfigFactory.setDummyConfigRoot('null');
@@ -178,7 +184,7 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
-				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', 'top-level.yml.goldfile'));
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', `top-level-${position}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
 

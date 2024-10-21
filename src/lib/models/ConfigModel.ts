@@ -114,7 +114,9 @@ abstract class YamlFormatter {
 			this.toYamlRuleOverrides() + '\n' +
 			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions!.engines) + '\n' +
-			this.toYamlEngineOverrides() + '\n';
+			this.toYamlEngineOverrides() + '\n' +
+			'\n' +
+			this.toYamlSectionHeadingComment(getMessage(BundleName.ConfigModel, 'template.common.end-of-config')) + '\n';
 	}
 
 	private toYamlRuleOverrides(): string {

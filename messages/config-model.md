@@ -12,3 +12,6 @@ Empty object used because rule selection returned no rules
 
 # template.yaml.no-rules-selected
 Remove this empty object {} when you are ready to specify your first rule override
+
+# template.common.end-of-config
+END OF CODE ANALYZER CONFIGURATION
