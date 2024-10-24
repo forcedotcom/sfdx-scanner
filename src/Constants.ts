@@ -4,7 +4,7 @@ import path = require('path');
 // Keep this in sync with <repoRoot>/pmd7/build.gradle.kts > pmd7Version
 export const PMD7_VERSION = '7.6.0';
 
-export const PMD_APPEXCHANGE_RULES_VERSION = '0.15';
+export const PMD_APPEXCHANGE_RULES_VERSION = '0.16';
 
 // Keep this in sync with <repoRoot>/sfge/build.gradle.kts > version
 export const SFGE_VERSION = '1.0.1-pilot';
