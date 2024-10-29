@@ -2,6 +2,7 @@ import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {ConfigAction, ConfigDependencies} from '../../lib/actions/ConfigAction';
 import {ConfigFileWriter} from '../../lib/writers/ConfigWriter';
 import {ConfigStyledYamlViewer} from '../../lib/viewers/ConfigViewer';
+import {ConfigActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
@@ -70,10 +71,11 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressEventListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
 			modelGenerator: modelGeneratorFunction,
+			actionSummaryViewer: new ConfigActionSummaryViewer(uxDisplay),
 			viewer: new ConfigStyledYamlViewer(uxDisplay)
 		};
 		if (outputFile) {
-			dependencies.writer = ConfigFileWriter.fromFile(outputFile);
+			dependencies.writer = ConfigFileWriter.fromFile(outputFile, uxDisplay);
 		}
 		return dependencies;
 	}

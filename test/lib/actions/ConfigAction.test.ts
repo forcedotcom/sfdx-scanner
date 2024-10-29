@@ -9,15 +9,18 @@ import {CodeAnalyzerConfigFactory} from "../../../src/lib/factories/CodeAnalyzer
 import {EnginePluginsFactory} from '../../../src/lib/factories/EnginePluginsFactory';
 import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/actions/ConfigAction';
 import {AnnotatedConfigModel} from '../../../src/lib/models/ConfigModel';
-import {ConfigStyledYamlViewer} from '../../../lib/lib/viewers/ConfigViewer';
+import {ConfigStyledYamlViewer} from '../../../src/lib/viewers/ConfigViewer';
+import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 
-const PATH_TO_EXAMPLE_WORKSPACE = path.join(__dirname, '..', '..', 'fixtures', 'example-workspaces', 'ConfigAction.test.ts');
+const PATH_TO_FIXTURES = path.join(__dirname, '..', '..', 'fixtures');
+
+const PATH_TO_EXAMPLE_WORKSPACE = path.join(PATH_TO_FIXTURES, 'example-workspaces', 'ConfigAction.test.ts');
 
 describe('ConfigAction tests', () => {
-	const PATH_TO_COMPARISON_DIR = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'ConfigAction.test.ts');
+	const PATH_TO_COMPARISON_DIR = path.join(PATH_TO_FIXTURES, 'comparison-files', 'lib', 'actions', 'ConfigAction.test.ts');
 
 	let spyDisplay: SpyDisplay;
 	let dependencies: ConfigDependencies;
@@ -26,7 +29,7 @@ describe('ConfigAction tests', () => {
 
 		describe('When there IS NOT an existing config...', () => {
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				spyDisplay = new SpyDisplay();
 				dependencies = {
 					logEventListeners: [],
@@ -34,17 +37,21 @@ describe('ConfigAction tests', () => {
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
 					modelGenerator: AnnotatedConfigModel.fromSelection,
+					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
 			});
 
-			it('Top-level overview-comment is correct', async () => {
+			it.each([
+				{position: 'start'},
+				{position: 'end'}
+			])('Top-level $position comment is correct', async ({position}) => {
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
-				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', 'top-level.yml.goldfile'));
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', `top-level-${position}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -72,9 +79,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -147,7 +155,7 @@ describe('ConfigAction tests', () => {
 
 			let stubConfigFactory: AlternativeStubCodeAnalyzerConfigFactory;
 
-			beforeEach(async () => {
+			beforeEach(() => {
 				stubConfigFactory = new AlternativeStubCodeAnalyzerConfigFactory();
 				spyDisplay = new SpyDisplay();
 				dependencies = {
@@ -156,12 +164,16 @@ describe('ConfigAction tests', () => {
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
 					modelGenerator: AnnotatedConfigModel.fromSelection,
+					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
 			});
 
 
-			it('Top-level overview-comment is correct', async () => {
+			it.each([
+				{position: 'start'},
+				{position: 'end'}
+			])('Top-level $position comment is correct', async ({position}) => {
 				// ==== SETUP ====
 				// Set the dummy config properties to null; it's fine for this test.
 				stubConfigFactory.setDummyConfigRoot('null');
@@ -172,7 +184,7 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
-				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', 'top-level.yml.goldfile'));
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'header-comments', `top-level-${position}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -209,9 +221,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -228,9 +241,10 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', CodeAnalyzerConfig.withDefaults().getConfigRoot())
-					.replaceAll('__DUMMY_LOG_FOLDER__', CodeAnalyzerConfig.withDefaults().getLogFolder());
+					.replaceAll('__DUMMY_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replaceAll('__DUMMY_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -249,9 +263,12 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
+				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-non-defaults', `${prop}.yml.goldfile`)))
-					.replaceAll('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
-					.replaceAll('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory);
+					.replace('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
+					.replace('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory)
+					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
+					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()))
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -356,11 +373,24 @@ describe('ConfigAction tests', () => {
 				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `${ruleName}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
+
+			it('If config is provided with relative path to config_root, then it remains relative in config output even though core makes it absolute for engines', async () => {
+				// ==== SETUP ====
+				stubConfigFactory.setDummyConfigRoot(PATH_TO_EXAMPLE_WORKSPACE);
+				stubConfigFactory.setDummyLogFolder('null');
+
+				// ==== TESTED BEHAVIOR ====
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['Stub2Rule1']);
+
+				// ==== ASSERTIONS ====
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `StubEngine2_forConfigWithRelativePathScenario.yml.goldfile`));
+				expect(output).toContain(goldFileContents);
+			});
 		});
 	});
 
 	describe('File Creation', () => {
-		beforeEach(async () => {
+		beforeEach(() => {
 			spyDisplay = new SpyDisplay();
 			dependencies = {
 				logEventListeners: [],
@@ -368,6 +398,7 @@ describe('ConfigAction tests', () => {
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
 				modelGenerator: AnnotatedConfigModel.fromSelection,
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
 		});
@@ -385,17 +416,86 @@ describe('ConfigAction tests', () => {
 			expect(spyWriter.getCallHistory()).toHaveLength(1);
 		});
 	});
+
+	describe('Summary generation', () => {
+		beforeEach(() => {
+			spyDisplay = new SpyDisplay();
+			dependencies = {
+				logEventListeners: [],
+				progressEventListeners: [],
+				viewer: new ConfigStyledYamlViewer(spyDisplay),
+				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
+				modelGenerator: AnnotatedConfigModel.fromSelection,
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
+				pluginsFactory: new StubEnginePluginFactory()
+			}
+		});
+
+		it('When an Outfile is created, it is mentioned by the Summarizer', async () => {
+			// ==== SETUP ====
+			// Assign a Writer to the dependencies.
+			dependencies.writer = new SpyConfigWriter(true);
+
+			// ==== TESTED BEHAVIOR ====
+			// Invoke the action, specifying an outfile.
+			const action = ConfigAction.createAction(dependencies);
+			const input: ConfigInput = {
+				'rule-selector': ['all'],
+				'output-file': 'out-config.yml'
+			};
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+
+			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'outfile-created.txt.goldfile'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
+
+		it.each([
+			{case: 'an Outfile is specified but not written', writer: new SpyConfigWriter(false), outfile: 'out-config.yml'},
+			{case: 'an Outfile is not specified at all', writer: undefined, outfile: undefined}
+		])('When $case, the Summarizer mentions no outfile', async ({writer, outfile}) => {
+			// ==== SETUP ====
+			// Add the specified Writer (or lack-of-Writer) to the dependencies.
+			dependencies.writer = writer;
+
+			// ==== TESTED BEHAVIOR ====
+			// Invoke the action, specifying an outfile (or lack of one).
+			const action = ConfigAction.createAction(dependencies);
+			const input: ConfigInput = {
+				'rule-selector': ['all'],
+				'output-file': outfile
+			};
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+
+			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'no-outfile-created.txt.goldfile'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
+	})
 	// ====== HELPER FUNCTIONS ======
 
 	async function readGoldFile(goldFilePath: string): Promise<string> {
 		return fsp.readFile(goldFilePath, {encoding: 'utf-8'});
 	}
 
-	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[]): Promise<string> {
+	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string): Promise<string> {
 		// ==== SETUP ====
 		const action = ConfigAction.createAction(dependencies);
 		const input: ConfigInput = {
-			'rule-selector': ruleSelectors
+			'rule-selector': ruleSelectors,
+			'config-file': configFile
 		};
 
 		// ==== TESTED BEHAVIOR ====
@@ -403,7 +503,6 @@ describe('ConfigAction tests', () => {
 
 		// ==== OUTPUT PROCESSING ====
 		const displayEvents = spyDisplay.getDisplayEvents();
-		expect(displayEvents).toHaveLength(1);
 		expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 		return ansis.strip(displayEvents[0].data);
 	}
@@ -430,11 +529,13 @@ class AlternativeStubCodeAnalyzerConfigFactory implements CodeAnalyzerConfigFact
 	}
 
 	public create(): CodeAnalyzerConfig {
-		const rawConfigFileContents = fs.readFileSync(path.join(PATH_TO_EXAMPLE_WORKSPACE, 'optional-input-config.yml'), {encoding: 'utf-8'});
+		const rawConfigFileContents = fs.readFileSync(path.join(PATH_TO_EXAMPLE_WORKSPACE, 'optional-input-config.yml'), 'utf-8');
 		const validatedConfigFileContents = rawConfigFileContents
 			.replaceAll('__DUMMY_CONFIG_ROOT__', this.dummyConfigRoot)
-			.replaceAll('__DUMMY_LOG_FOLDER__', this.dummyLogFolder);
-		return CodeAnalyzerConfig.fromYamlString(validatedConfigFileContents, process.cwd());
+			.replaceAll('__DUMMY_LOG_FOLDER__', this.dummyLogFolder)
+			.replaceAll('__DUMMY_STUBENGINE2_SUBFIELD__', this.dummyConfigRoot && this.dummyConfigRoot !== 'null' ?
+				path.join(this.dummyConfigRoot, 'optional-input-config.yml') : 'dummy');
+		return CodeAnalyzerConfig.fromYamlString(validatedConfigFileContents,  process.cwd());
 	}
 }
 
@@ -461,8 +562,13 @@ class StubEnginePlugin extends EngineApi.EnginePluginV1 {
 				'Property5': 'This is the description for Property5',
 				'Property6': 'This is the description for Property6'
 			}
+		},
+		StubEngine2: {
+			overview: 'Some overview for StubEngine2',
+			fieldDescriptions: {
+				'top_field': 'Some description for top_field'
+			}
 		}
-		// StubEngine2 has no overview and no documented properties.
 		// StubEngine3 also has no overview or documented properties.
 	}
 

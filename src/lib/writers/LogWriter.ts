@@ -4,18 +4,25 @@ import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 
 export interface LogWriter {
 	writeToLog(message: string): void;
+	getLogDestination(): string;
 	closeLog(): void;
 }
 
 export class LogFileWriter implements LogWriter {
 	private readonly writeStream: NodeJS.WritableStream;
+	private readonly destination: string;
 
-	private constructor(writeStream: NodeJS.WritableStream) {
+	private constructor(writeStream: NodeJS.WritableStream, destination: string) {
 		this.writeStream = writeStream;
+		this.destination = destination;
 	}
 
 	public writeToLog(message: string): void {
 		this.writeStream.write(message);
+	}
+
+	public getLogDestination(): string {
+		return this.destination;
 	}
 
 	public closeLog(): void {
@@ -29,6 +36,6 @@ export class LogFileWriter implements LogWriter {
 		const logFile = path.join(logFolder, `sfca-${Date.now()}.log`);
 		// 'w' flag causes the file to be created if it doesn't already exist.
 		const fh = await fs.open(logFile, 'w');
-		return new LogFileWriter(fh.createWriteStream({}));
+		return new LogFileWriter(fh.createWriteStream({}), logFile);
 	}
 }

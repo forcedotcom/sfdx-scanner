@@ -80,7 +80,7 @@ export class RunAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
 		this.dependencies.resultsViewer.view(results);
-		this.dependencies.runSummaryViewer.view(results, config, input['output-file']);
+		this.dependencies.runSummaryViewer.view(results, logWriter.getLogDestination(), input['output-file']);
 
 		const thresholdValue = input['severity-threshold'];
 		if (thresholdValue) {

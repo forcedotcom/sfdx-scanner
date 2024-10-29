@@ -7,6 +7,7 @@ import {ConfigViewer} from '../viewers/ConfigViewer';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
+import {ConfigActionSummaryViewer} from '../viewers/ActionSummaryViewer';
 import {ConfigModel, ConfigModelGeneratorFunction, ConfigContext} from '../models/ConfigModel';
 
 export type ConfigDependencies = {
@@ -16,11 +17,13 @@ export type ConfigDependencies = {
 	logEventListeners: LogEventListener[];
 	progressEventListeners: ProgressEventListener[];
 	writer?: ConfigWriter;
+	actionSummaryViewer: ConfigActionSummaryViewer;
 	viewer: ConfigViewer;
 };
 
 export type ConfigInput = {
 	'config-file'?: string;
+	'output-file'?: string;
 	'rule-selector': string[];
 	workspace?: string[];
 };
@@ -38,7 +41,8 @@ export class ConfigAction {
 		const defaultConfig: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults();
 
 		// We always add a Logger Listener to the appropriate listeners list, because we should always be logging.
-		const logEventLogger: LogEventLogger = new LogEventLogger(await LogFileWriter.fromConfig(userConfig));
+		const logFileWriter: LogFileWriter = await LogFileWriter.fromConfig(userConfig);
+		const logEventLogger: LogEventLogger = new LogEventLogger(logFileWriter);
 		this.dependencies.logEventListeners.push(logEventLogger);
 
 		// The User's config produces one Core.
@@ -118,7 +122,10 @@ export class ConfigAction {
 		const configModel: ConfigModel = this.dependencies.modelGenerator(relevantEngines, userConfigContext, defaultConfigContext);
 
 		this.dependencies.viewer.view(configModel);
-		this.dependencies.writer?.write(configModel);
+		const fileWritten: boolean = this.dependencies.writer
+			? await this.dependencies.writer.write(configModel)
+			: false;
+		this.dependencies.actionSummaryViewer.view(logFileWriter.getLogDestination(), fileWritten ? input['output-file'] : undefined);
 		return Promise.resolve();
 	}
 

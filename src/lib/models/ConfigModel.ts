@@ -1,4 +1,4 @@
-import * as yaml from 'js-yaml';
+import {dump as yamlDump} from 'js-yaml';
 import {
 	CodeAnalyzer,
 	CodeAnalyzerConfig,
@@ -9,6 +9,7 @@ import {
 } from '@salesforce/code-analyzer-core';
 import {indent, makeGrey} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
+import path from "node:path";
 
 export enum OutputFormat {
 	RAW_YAML = "RAW_YAML",
@@ -41,9 +42,9 @@ export class AnnotatedConfigModel implements ConfigModel {
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return toYaml(this.relevantEngines, this.userContext, this.defaultContext, true);
+			return new StyledYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
 		} else if (format === OutputFormat.RAW_YAML) {
-			return toYaml(this.relevantEngines, this.userContext, this.defaultContext, false);
+			return new PlainYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
 		} else {
 			throw new Error(`Unsupported`)
 		}
@@ -54,153 +55,192 @@ export class AnnotatedConfigModel implements ConfigModel {
 	}
 }
 
-function toYaml(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
-	let result: string = '';
+abstract class YamlFormatter {
+	private readonly relevantEngines: Set<string>;
+	private readonly userContext: ConfigContext;
+	private readonly defaultContext: ConfigContext;
 
-	// First, add the header.
-	const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
-	result += `${toYamlComment(getYamlSectionWrapper(), styled)}\n`
-	result += `${toYamlComment(topLevelDescription.overview!, styled)}\n`;
-	result += `${toYamlComment(getYamlSectionWrapper(), styled)}\n`
-	result += '\n';
-
-	// Next add `config_root`
-	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.config_root, styled)}\n`;
-	result += `config_root: ${toYamlWithDerivedValueComment(userContext.config.getConfigRoot(), process.cwd(), styled)}\n`;
-	result += '\n';
-
-	// Then `log_folder'
-	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.log_folder, styled)}\n`;
-	result += `log_folder: ${toYamlWithDerivedValueComment(userContext.config.getLogFolder(), defaultContext.config.getLogFolder(), styled)}\n`;
-	result += '\n';
-
-	// Then the `rules` section
-	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.rules, styled)}\n`;
-	result += `${toYamlRules(userContext, defaultContext, styled)}\n`;
-	result += '\n';
-
-	// Then the `engines` section
-	result += `${toYamlComment(topLevelDescription.fieldDescriptions!.engines, styled)}\n`;
-	result += `${toYamlEngines(relevantEngines, userContext, defaultContext, styled)}`;
-
-	return result;
-}
-
-function getYamlSectionWrapper(): string {
-	return '='.repeat(70);
-}
-
-function toYamlComment(comment: string, styled: boolean, indentLength: number = 0): string {
-	// At the start of the string, and at the start of every line...
-	return comment.replace(/^.*/gm, s => {
-		// ...Inject a `# ` at the start to make it a comment...
-		let commented = `# ${s}`;
-		// ...Apply styling if requested...
-		commented = styled ? makeGrey(commented) : commented;
-		// ...And indent to the requested amount
-		return indent(commented, indentLength);
-	});
-}
-
-function toYamlWithDerivedValueComment(userValue: string, defaultValue: string, styled: boolean): string {
-	if (userValue == null || userValue === defaultValue) {
-		const comment = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [defaultValue]);
-		return `null ${toYamlComment(comment, styled)}`;
-	} else {
-		return `${userValue}`;
+	protected constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+		this.relevantEngines = relevantEngines;
+		this.userContext = userContext;
+		this.defaultContext = defaultContext;
 	}
-}
 
-function toYamlRules(userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
-	if (userContext.rules.getCount() === 0) {
-		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
-		return `rules: {} ${toYamlComment(comment, styled)}`;
+	protected abstract toYamlComment(commentText: string): string
+
+	private toYamlSectionHeadingComment(commentText: string): string {
+		const horizontalLine: string = '='.repeat(70);
+		return this.toYamlComment(`${horizontalLine}\n${commentText}\n${horizontalLine}`);
 	}
-	let results: string = 'rules:\n';
-	for (const engineName of userContext.rules.getEngineNames()) {
-		results += `\n${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`;
-		results += `${toYamlComment(getMessage(BundleName.ConfigModel, 'template.rule-overrides-section', [engineName.toUpperCase()]), styled, 2)}\n`;
-		results += `${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`;
-		results += indent(`${engineName}:`, 2) + '\n';
-		for (const userRule of userContext.rules.getRulesFor(engineName)) {
-			const defaultRule = getDefaultRule(defaultContext, engineName, userRule.getName());
-			results += indent(toYamlRule(userRule, defaultRule, styled), 4);
-		}
+
+	private toYamlUncheckedField(fieldName: string, fieldValue: unknown): string {
+		return yamlDump({[fieldName]: fieldValue}).trim();
 	}
-	return results;
-}
 
-function getDefaultRule(defaultContext: ConfigContext, engineName: string, ruleName: string): Rule|null {
-	try {
-		return defaultContext.rules.getRule(engineName, ruleName);
-	} catch (e) {
-		// istanbul ignore next
-		return null;
+	private toYamlUncheckedFieldWithInlineComment(fieldName: string, fieldValue: unknown, commentText: string): string {
+		const yamlCode: string = this.toYamlUncheckedField(fieldName, fieldValue);
+		const comment: string = this.toYamlComment(commentText);
+		return yamlCode.replace(/(\r?\n|$)/, ` ${comment}$1`);
 	}
-}
 
-function toYamlRule(userRule: Rule, defaultRule: Rule|null, styled: boolean): string {
-	const ruleName: string = userRule.getName();
-	const userSeverity: SeverityLevel = userRule.getSeverityLevel();
-	const userTags: string[] = userRule.getTags();
-
-	let severityYaml = yaml.dump({severity: userSeverity});
-	let tagsYaml = yaml.dump({tags: userTags});
-
-	if (defaultRule != null) {
-		const defaultSeverity: SeverityLevel = defaultRule.getSeverityLevel();
-		const defaultTagsJson: string = JSON.stringify(defaultRule.getTags());
-
-		if (userSeverity !== defaultSeverity) {
-			const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultSeverity]);
-			severityYaml = severityYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
+	private toYamlField(fieldName: string, userValue: unknown, defaultValue: unknown): string {
+		if (looksLikeAPathValue(userValue) && userValue === defaultValue) {
+			// We special handle a path value when it is equal to the default value, making it equal null because
+			// chances are it is a derived file or folder value based on the specific environment that we do not want to
+			// actually want to hard code since checking in the config to CI/CD system may create a different value
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [JSON.stringify(userValue)]);
+			return this.toYamlUncheckedFieldWithInlineComment(fieldName, null, commentText);
+		} else if (JSON.stringify(userValue) === JSON.stringify(defaultValue)) {
+			return this.toYamlUncheckedField(fieldName, userValue);
 		}
 
-		if (JSON.stringify(userTags) !== defaultTagsJson) {
-			const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultTagsJson]);
-			// The YAML spec requires a trailing newline, so we know that there's at least one newline somewhere in the
-			// string. If we inject a comment before the first newline we encounter, then it will look clean.
-			tagsYaml = tagsYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
+		userValue = replaceAbsolutePathsWithRelativePathsWherePossible(userValue, this.userContext.config.getConfigRoot() + path.sep);
+
+		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
+		return this.toYamlUncheckedFieldWithInlineComment(fieldName, userValue, commentText);
+	}
+
+	toYaml(): string {
+		const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
+		return this.toYamlSectionHeadingComment(topLevelDescription.overview!) + '\n' +
+			'\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions!.config_root) + '\n' +
+			this.toYamlField('config_root', this.userContext.config.getConfigRoot(), this.defaultContext.config.getConfigRoot()) + '\n' +
+			'\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions!.log_folder) + '\n' +
+			this.toYamlField('log_folder', this.userContext.config.getLogFolder(), this.defaultContext.config.getLogFolder()) + '\n' +
+			'\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions!.rules) + '\n' +
+			this.toYamlRuleOverrides() + '\n' +
+			'\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions!.engines) + '\n' +
+			this.toYamlEngineOverrides() + '\n' +
+			'\n' +
+			this.toYamlSectionHeadingComment(getMessage(BundleName.ConfigModel, 'template.common.end-of-config')) + '\n';
+	}
+
+	private toYamlRuleOverrides(): string {
+		if (this.userContext.rules.getCount() === 0) {
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
+			return `rules: {} ${this.toYamlComment(commentText)}`;
+		}
+
+		let yamlCode: string = 'rules:\n';
+		for (const engineName of this.userContext.rules.getEngineNames()) {
+			yamlCode += '\n';
+			yamlCode += indent(this.toYamlRuleOverridesForEngine(engineName), 2) + '\n';
+		}
+		return yamlCode.trimEnd();
+	}
+
+	private toYamlRuleOverridesForEngine(engineName: string): string {
+		const engineConfigHeader: string = getMessage(BundleName.ConfigModel, 'template.rule-overrides-section',
+			[engineName.toUpperCase()]);
+		let yamlCode: string = this.toYamlSectionHeadingComment(engineConfigHeader) + '\n';
+		yamlCode += `${engineName}:\n`;
+		for (const userRule of this.userContext.rules.getRulesFor(engineName)) {
+			const defaultRule: Rule|null = this.getDefaultRuleFor(engineName, userRule.getName());
+			yamlCode += indent(this.toYamlRuleOverridesForRule(userRule, defaultRule), 2) + '\n';
+		}
+		return yamlCode.trimEnd();
+	}
+
+	private getDefaultRuleFor(engineName: string, ruleName: string): Rule|null {
+		try {
+			return this.defaultContext.rules.getRule(engineName, ruleName);
+		} catch (e) {
+			// istanbul ignore next
+			return null;
 		}
 	}
-	return `"${ruleName}":\n${indent(severityYaml, 2)}${indent(tagsYaml, 2)}`;
-}
 
-function toYamlEngines(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext, styled: boolean): string {
-	if (relevantEngines.size === 0) {
-		const comment = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
-		return `engines: {} ${toYamlComment(comment, styled)}`;
+	private toYamlRuleOverridesForRule(userRule: Rule, defaultRule: Rule|null): string {
+		const userSeverity: SeverityLevel = userRule.getSeverityLevel();
+		const userTags: string[] = userRule.getTags();
+		return `"${userRule.getName()}":\n` +
+			indent(this.toYamlField('severity', userSeverity, defaultRule !== null ? defaultRule.getSeverityLevel() : userSeverity), 2) + '\n' +
+			indent(this.toYamlField('tags', userTags, defaultRule !== null ? defaultRule.getTags() : userTags), 2);
 	}
 
-	let results: string = 'engines:\n'
+	private toYamlEngineOverrides(): string {
+		if (this.relevantEngines.size === 0) {
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
+			return `engines: {} ${this.toYamlComment(commentText)}`;
+		}
 
-	for (const engineName of relevantEngines.keys()) {
-		const engineConfigDescriptor = userContext.core.getEngineConfigDescription(engineName);
-		const userEngineConfig = userContext.core.getEngineConfig(engineName);
-		const defaultEngineConfig = defaultContext.core.getEngineConfig(engineName);
+		let yamlCode: string = 'engines:\n'
+		for (const engineName of this.relevantEngines.keys()) {
+			yamlCode += indent(this.toYamlEngineOverridesForEngine(engineName), 2) + '\n';
+		}
+		return yamlCode.trimEnd();
+	}
 
-		results += `\n${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`
-		// Engines are guaranteed to have an overview, even if it's just generic text.
-		results += `${toYamlComment(engineConfigDescriptor.overview!, styled, 2)}\n`;
-		results += `${toYamlComment(getYamlSectionWrapper(), styled, 2)}\n`
+	private toYamlEngineOverridesForEngine(engineName: string): string {
+		const engineConfigDescriptor = this.userContext.core.getEngineConfigDescription(engineName);
+		const userEngineConfig = this.userContext.core.getEngineConfig(engineName);
+		const defaultEngineConfig = this.defaultContext.core.getEngineConfig(engineName);
 
-		results += indent(`${engineName}:`, 2) + '\n';
+		let yamlCode: string = '\n' +
+			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview!) + '\n' +
+			`${engineName}:\n`;
 		// By fiat, the field description will always include, at minimum, an entry for "disable_engine", so we can
 		// assume that the object is not undefined.
 		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
 			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
-			const defaultFieldValue = defaultEngineConfig[configField] ?? null;
-			const userFieldValue = userEngineConfig[configField] ?? defaultFieldValue;
+			const defaultValue = defaultEngineConfig[configField] ?? null;
+			const userValue = userEngineConfig[configField] ?? defaultValue;
 			// Add a leading newline to visually break up the property from the previous one.
-			results += '\n' + toYamlComment(fieldDescription, styled, 4) + '\n';
-			let fieldYaml = indent(`${yaml.dump({[configField]: userFieldValue})}`, 4);
-			if(JSON.stringify(userFieldValue) !== JSON.stringify(defaultFieldValue)) {
-				const comment = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultFieldValue)]);
-				fieldYaml = fieldYaml.replace('\n', ` ${toYamlComment(comment, styled)}\n`);
-			}
-			results += fieldYaml;
+			yamlCode += '\n' +
+				indent(this.toYamlComment(fieldDescription), 2) + '\n' +
+				indent(this.toYamlField(configField, userValue, defaultValue), 2) + '\n';
 		}
+		return yamlCode.trimEnd();
 	}
-	return results;
 }
 
+class PlainYamlFormatter extends YamlFormatter {
+	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+		super(relevantEngines, userContext, defaultContext);
+	}
+
+	protected toYamlComment(commentText: string): string {
+		return commentText.replace(/^.*/gm, s => `# ${s}`);
+	}
+}
+
+class StyledYamlFormatter extends YamlFormatter {
+	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+		super(relevantEngines, userContext, defaultContext);
+	}
+
+	protected toYamlComment(commentText: string): string {
+		return commentText.replace(/^.*/gm, s => makeGrey(`# ${s}`));
+	}
+}
+
+function looksLikeAPathValue(value: unknown) {
+	return typeof(value) === 'string' && !value.includes('\n') && value.includes(path.sep);
+}
+
+function replaceAbsolutePathsWithRelativePathsWherePossible(value: unknown, parentFolder: string): unknown {
+	if (typeof value === 'string') {
+		// Check if the string starts with the parent folder
+		if (value.startsWith(parentFolder)) {
+			// Strip the parent folder from the start of the string
+			return value.substring(parentFolder.length);
+		}
+		return value; // Return unchanged if it doesn't start with the parent folder
+	} else if (Array.isArray(value)) {
+		// If value is an array, recursively process each element
+		return value.map(item => replaceAbsolutePathsWithRelativePathsWherePossible(item, parentFolder));
+	} else if (typeof value === 'object' && value !== null) {
+		// If value is an object, recursively process each key-value pair
+		const updatedObject: object = {};
+		for (const key in value) {
+			updatedObject[key] = replaceAbsolutePathsWithRelativePathsWherePossible(value[key], parentFolder);
+		}
+		return updatedObject;
+	}
+	// Return the value unchanged if it's a number, boolean, or null
+	return value;
+}

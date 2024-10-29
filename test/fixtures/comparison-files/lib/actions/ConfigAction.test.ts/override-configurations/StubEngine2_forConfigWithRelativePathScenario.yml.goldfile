@@ -1,0 +1,12 @@
+  # ======================================================================
+  # Some overview for StubEngine2
+  # ======================================================================
+  StubEngine2:
+
+    # Whether to turn off the 'StubEngine2' engine so that it is not included when running Code Analyzer commands.
+    disable_engine: false
+
+    # Some description for top_field
+    top_field: # Modified from: null
+      sub_field:
+        - optional-input-config.yml

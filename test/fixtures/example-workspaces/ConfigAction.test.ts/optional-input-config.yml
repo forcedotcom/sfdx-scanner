@@ -12,6 +12,10 @@ engines:
       SubProperty2: false
     Property5: ['bada-bing', 'bada-boom']
     # Property6 is not set, so it should default to null
+  StubEngine2:
+    top_field:
+      sub_field:
+        - __DUMMY_STUBENGINE2_SUBFIELD__
   StubEngine3:
     disable_engine: true
 rules:
