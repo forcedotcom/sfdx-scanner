@@ -34,10 +34,8 @@ export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
 
 		if (outfile) {
 			this.displayOutfile(outfile);
-		} else {
-			this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'config-action.no-outfiles'));
+			this.displayLineSeparator();
 		}
-		this.displayLineSeparator();
 
 		this.displayLogFileInfo(logFile);
 	}

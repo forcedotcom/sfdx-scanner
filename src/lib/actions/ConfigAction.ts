@@ -121,10 +121,13 @@ export class ConfigAction {
 		};
 		const configModel: ConfigModel = this.dependencies.modelGenerator(relevantEngines, userConfigContext, defaultConfigContext);
 
-		this.dependencies.viewer.view(configModel);
 		const fileWritten: boolean = this.dependencies.writer
 			? await this.dependencies.writer.write(configModel)
 			: false;
+		if (!fileWritten) {
+			this.dependencies.viewer.view(configModel);
+		}
+
 		this.dependencies.actionSummaryViewer.view(logFileWriter.getLogDestination(), fileWritten ? input['output-file'] : undefined);
 		return Promise.resolve();
 	}

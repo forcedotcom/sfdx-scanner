@@ -13,6 +13,7 @@ import {ConfigStyledYamlViewer} from '../../../src/lib/viewers/ConfigViewer';
 import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
+import {SpyConfigViewer} from '../../stubs/SpyConfigViewer';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 
 const PATH_TO_FIXTURES = path.join(__dirname, '..', '..', 'fixtures');
@@ -403,17 +404,38 @@ describe('ConfigAction tests', () => {
 			};
 		});
 
-		it('If a ConfigWriter is provided, it is used along with the ConfigViewer', async () => {
+		it('If a file is created, then the ConfigViewer is unused', async () => {
 			// ==== SETUP ====
 			// We need to add a Writer to the dependencies.
 			const spyWriter = new SpyConfigWriter();
 			dependencies.writer = spyWriter;
+			// Replace the viewer with a Spy.
+			const spyViewer = new SpyConfigViewer();
+			dependencies.viewer = spyViewer;
 
 			// ==== TESTED BEHAVIOR ====
 			await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 			// ==== ASSERTIONS ====
 			expect(spyWriter.getCallHistory()).toHaveLength(1);
+			expect(spyViewer.getCallHistory()).toHaveLength(0);
+		});
+
+		it('If a file is specified by not created, then the ConfigViewer is used', async () => {
+			// ==== SETUP ====
+			// We need to add a Writer to the dependencies.
+			const spyWriter = new SpyConfigWriter(false);
+			dependencies.writer = spyWriter;
+			// Replace the viewer with a Spy.
+			const spyViewer = new SpyConfigViewer();
+			dependencies.viewer = spyViewer;
+
+			// ==== TESTED BEHAVIOR ====
+			await runActionAndGetDisplayedConfig(dependencies, ['all']);
+
+			// ==== ASSERTIONS ====
+			expect(spyWriter.getCallHistory()).toHaveLength(1);
+			expect(spyViewer.getCallHistory()).toHaveLength(1);
 		});
 	});
 
