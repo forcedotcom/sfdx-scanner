@@ -3,6 +3,7 @@ import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {RuleDetailDisplayer, RuleTableDisplayer} from '../../lib/viewers/RuleViewer';
+import {RulesActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
@@ -67,6 +68,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
+			actionSummaryViewer: new RulesActionSummaryViewer(uxDisplay),
 			viewer: view === View.TABLE ? new RuleTableDisplayer(uxDisplay) : new RuleDetailDisplayer(uxDisplay)
 		};
 	}

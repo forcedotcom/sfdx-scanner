@@ -5,7 +5,7 @@ Selecting rules
 Eligible engines: %s; Completion: %d%; Elapsed time: %ds
 
 # selection-spinner.finished-status
-done. Selected rules from %s.
+done.
 
 # execution-spinner.action
 Executing rules

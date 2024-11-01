@@ -138,8 +138,7 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 	}
 
 	protected createFinishedSpinnerStatus(): string {
-		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.finished-status',
-			[[...this.engineNames.keys()].join(', ')]);
+		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.finished-status');
 	}
 }
 
