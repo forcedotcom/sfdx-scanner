@@ -6,12 +6,14 @@ import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {RuleViewer} from '../viewers/RuleViewer';
+import {RulesActionSummaryViewer} from '../viewers/ActionSummaryViewer';
 
 export type RulesDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
 	progressListeners: ProgressEventListener[];
+	actionSummaryViewer: RulesActionSummaryViewer,
 	viewer: RuleViewer;
 }
 
@@ -58,6 +60,7 @@ export class RulesAction {
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
 		this.dependencies.viewer.view(rules);
+		this.dependencies.actionSummaryViewer.view(ruleSelection, logWriter.getLogDestination());
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {

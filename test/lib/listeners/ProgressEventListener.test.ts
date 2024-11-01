@@ -87,7 +87,7 @@ describe('ProgressEventListener implementations', () => {
 			expect(percentagesInOrder).toEqual([0, 25, 50, 100]);
 			const endEvent = displayEvents[displayEvents.length - 1];
 			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
-			expect(endEvent.data).toContain(`done. Selected rules from stubEngine1, stubEngine2.`);
+			expect(endEvent.data).toEqual(`done.`);
 		});
 
 		it('Properly aggregates percentages across multiple Cores', async () => {
@@ -123,7 +123,7 @@ describe('ProgressEventListener implementations', () => {
 			expect(percentagesInOrder).toEqual([0, 12, 25, 50, 62, 75, 100]);
 			const endEvent = displayEvents[displayEvents.length - 1];
 			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
-			expect(endEvent.data).toContain('done. Selected rules from stubEngine1, stubEngine2.');
+			expect(endEvent.data).toEqual('done.');
 		});
 
 		it('Properly interleaves progress updates with ticking', async () => {
@@ -159,7 +159,7 @@ describe('ProgressEventListener implementations', () => {
 			expect(percentagesInOrder).toEqual([0, 20, 40, 50, 60, 80, 100]);
 			const endEvent = displayEvents[displayEvents.length - 1];
 			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
-			expect(endEvent.data).toContain('done. Selected rules from timeableEngine1, timeableEngine2.');
+			expect(endEvent.data).toEqual('done.');
 		});
 	});
 
