@@ -10,7 +10,7 @@ const PATH_TO_COMPARISON_FILES = path.resolve(__dirname, '..', '..', '..', 'test
 
 describe('RuleViewer implementations', () => {
 	describe('RuleDetailDisplayer', () => {
-		it('When given no rules, outputs summary and nothing else', () => {
+		it('When given no rules, outputs a line separator and nothing else', () => {
 			const display = new SpyDisplay();
 			const viewer = new RuleDetailDisplayer(display);
 
@@ -20,7 +20,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: 'Found 0 rules.'
+				data: ''
 			}]);
 		});
 
@@ -34,7 +34,7 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const actualDisplayEvents = display.getDisplayEvents();
-			expect(actualDisplayEvents).toHaveLength(2);
+			expect(actualDisplayEvents).toHaveLength(3);
 			for (const displayEvent of actualDisplayEvents) {
 				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
 			}
@@ -57,7 +57,7 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const actualDisplayEvents = display.getDisplayEvents();
-			expect(actualDisplayEvents).toHaveLength(2);
+			expect(actualDisplayEvents).toHaveLength(3);
 			for (const displayEvent of actualDisplayEvents) {
 				expect(displayEvent.type).toEqual(DisplayEventType.LOG);
 			}
@@ -80,7 +80,7 @@ describe('RuleViewer implementations', () => {
 			expect(displayEvents).toHaveLength(1);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: 'Found 0 rules.'
+				data: ''
 			}]);
 		});
 
@@ -94,10 +94,10 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
+			expect(displayEvents).toHaveLength(3);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: 'Found 1 rule(s):'
+				data: ''
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
@@ -110,6 +110,9 @@ describe('RuleViewer implementations', () => {
 						tag: rule.getFormattedTags()
 					}]
 				})
+			}, {
+				type: DisplayEventType.LOG,
+				data: ''
 			}])
 		});
 
@@ -125,10 +128,10 @@ describe('RuleViewer implementations', () => {
 			]);
 
 			const displayEvents = display.getDisplayEvents();
-			expect(displayEvents).toHaveLength(2);
+			expect(displayEvents).toHaveLength(3);
 			expect(displayEvents).toEqual([{
 				type: DisplayEventType.LOG,
-				data: 'Found 2 rule(s):'
+				data: ''
 			}, {
 				type: DisplayEventType.TABLE,
 				data: JSON.stringify({
@@ -147,6 +150,9 @@ describe('RuleViewer implementations', () => {
 						tag: rule2.getFormattedTags()
 					}]
 				})
+			}, {
+				type: DisplayEventType.LOG,
+				data: ''
 			}]);
 		});
 	});
