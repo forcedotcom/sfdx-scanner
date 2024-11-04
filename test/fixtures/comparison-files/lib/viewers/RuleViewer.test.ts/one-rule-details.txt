@@ -1,4 +1,4 @@
-Found 1 rule(s):
+
 === 1. StubRule1
     severity:    2 (High)
     engine:      FakeEngine1

@@ -17,12 +17,15 @@ abstract class AbstractRuleDisplayer implements RuleViewer {
 	}
 
 	public view(rules: Rule[]): void {
-		if (rules.length === 0) {
-			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-no-rules'));
-		} else {
-			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-rules', [rules.length]));
+		this.displayLineSeparator();
+		if (rules.length > 0) {
 			this._view(rules);
+			this.displayLineSeparator();
 		}
+	}
+
+	protected displayLineSeparator(): void {
+		this.display.displayLog("");
 	}
 
 	protected abstract _view(rules: Rule[]): void;
