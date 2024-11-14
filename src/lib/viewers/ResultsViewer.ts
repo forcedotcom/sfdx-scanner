@@ -58,7 +58,6 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	private styleViolation(violation: Violation, idx: number): string {
 		const rule = violation.getRule();
 		const sev = rule.getSeverityLevel();
-		const primaryLocation = violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
 
 		const header = getMessage(
 			BundleName.ResultsViewer,
@@ -80,7 +79,7 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
 				engine: rule.getEngineName(),
 				message: violation.getMessage(),
-				location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
+				location: stringifyLocations(violation.getCodeLocations())[0],
 				resources: violation.getResourceUrls().join(',')
 			};
 			const keys = ['severity', 'engine', 'message', 'location', 'resources'];
@@ -89,13 +88,14 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	}
 }
 
-function stringifyLocations(codeLocations: CodeLocation[], primaryIndex: number): string[] {
+function stringifyLocations(codeLocations: CodeLocation[], primaryIndex?: number): string[] {
 	const locationStrings: string[] = [];
 
 	codeLocations.forEach((loc, idx) => {
 		const commentPortion: string = loc.getComment() ? ` ${loc.getComment()}` : '';
-		const rawLocationString: string = `${loc.getFile()}:${loc.getStartLine()}:${loc.getStartColumn()}${commentPortion}`;
-		locationStrings.push(idx === primaryIndex ? `**${rawLocationString}**` : rawLocationString);
+		const locationString: string = `${loc.getFile()}:${loc.getStartLine()}:${loc.getStartColumn()}${commentPortion}`;
+		const mainPortion: string = `${primaryIndex != null && primaryIndex === idx ? '(main) ' : ''}`;
+		locationStrings.push(`${mainPortion}${locationString}`);
 	});
 
 	return locationStrings;

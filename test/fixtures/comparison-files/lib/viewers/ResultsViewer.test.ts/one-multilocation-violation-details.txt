@@ -5,6 +5,6 @@ Found 1 violation(s) across 1 file(s):
     message:   This is a message
     locations:
         __PATH_TO_FILE_A__:20:1
-        **__PATH_TO_FILE_Z__:2:1 This is a comment at Location 2**
+        (main) __PATH_TO_FILE_Z__:2:1 This is a comment at Location 2
         __PATH_TO_FILE_A__:1:1 This is a comment at Location 3
     resources: https://example.com/stub1RuleA
