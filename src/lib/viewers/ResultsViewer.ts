@@ -94,7 +94,7 @@ function stringifyLocations(codeLocations: CodeLocation[], primaryIndex?: number
 	codeLocations.forEach((loc, idx) => {
 		const commentPortion: string = loc.getComment() ? ` ${loc.getComment()}` : '';
 		const locationString: string = `${loc.getFile()}:${loc.getStartLine()}:${loc.getStartColumn()}${commentPortion}`;
-		const mainPortion: string = `${primaryIndex != null && primaryIndex === idx ? '(main) ' : ''}`;
+		const mainPortion: string = primaryIndex != null && primaryIndex === idx ? '(main) ' : '';
 		locationStrings.push(`${mainPortion}${locationString}`);
 	});
 
