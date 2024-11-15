@@ -1,26 +1,31 @@
 import path from 'node:path';
+import * as fsp from 'node:fs/promises';
 import {SfError} from '@salesforce/core';
+import ansis from 'ansis';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {SpyResultsViewer} from '../../stubs/SpyResultsViewer';
-import {SpyRunSummaryViewer} from '../../stubs/SpyRunSummaryViewer';
 import {SpyResultsWriter} from '../../stubs/SpyResultsWriter';
+import {SpyDisplay, DisplayEventType} from '../../stubs/SpyDisplay';
 import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
 import {ConfigurableStubEnginePlugin1, StubEngine1, TargetDependentEngine1} from '../../stubs/StubEnginePlugins';
 import {RunAction, RunInput, RunDependencies} from '../../../src/lib/actions/RunAction';
+import {RunActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 import {
 	StubEnginePluginsFactory_withPreconfiguredStubEngines,
 	StubEnginePluginsFactory_withThrowingStubPlugin
 } from '../../stubs/StubEnginePluginsFactories';
 
 const PATH_TO_FILE_A = path.resolve('test', 'sample-code', 'fileA.cls');
+const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'RunAction.test.ts');
 
 describe('RunAction tests', () => {
+	let spyDisplay: SpyDisplay;
 	let engine1: StubEngine1;
 	let stubEnginePlugin: ConfigurableStubEnginePlugin1;
 	let pluginsFactory: StubEnginePluginsFactory_withPreconfiguredStubEngines;
 	let writer: SpyResultsWriter;
 	let resultsViewer: SpyResultsViewer;
-	let runSummaryViewer: SpyRunSummaryViewer;
+	let actionSummaryViewer: RunActionSummaryViewer;
 	let dependencies: RunDependencies;
 	let action: RunAction;
 
@@ -33,9 +38,10 @@ describe('RunAction tests', () => {
 		pluginsFactory.addPreconfiguredEnginePlugin(stubEnginePlugin);
 
 		// Set up the writer and viewers.
+		spyDisplay = new SpyDisplay();
 		writer = new SpyResultsWriter();
 		resultsViewer = new SpyResultsViewer();
-		runSummaryViewer = new SpyRunSummaryViewer();
+		actionSummaryViewer = new RunActionSummaryViewer(spyDisplay);
 
 		// Initialize our dependency object.
 		dependencies = {
@@ -45,7 +51,7 @@ describe('RunAction tests', () => {
 			progressListeners: [],
 			writer,
 			resultsViewer,
-			runSummaryViewer
+			actionSummaryViewer
 		};
 		// Create the action.
 		action = RunAction.createAction(dependencies);
@@ -94,8 +100,6 @@ describe('RunAction tests', () => {
 		expect(writer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 		expect(resultsViewer.getCallHistory()[0].getViolationCount()).toEqual(1);
 		expect(resultsViewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
-		expect(runSummaryViewer.getCallHistory()[0].results.getViolationCount()).toEqual(1);
-		expect(runSummaryViewer.getCallHistory()[0].results.getViolations()[0].getMessage()).toEqual('Fake message');
 	});
 
 	it('Engines with target-dependent rules run the right rules', async () => {
@@ -217,7 +221,7 @@ describe('RunAction tests', () => {
 			progressListeners: [],
 			writer,
 			resultsViewer,
-			runSummaryViewer
+			actionSummaryViewer
 		};
 		// Instantiate our action, intentionally using a different instance than the one set up in
 		// the before-each.
@@ -233,6 +237,116 @@ describe('RunAction tests', () => {
 
 		// ==== ASSERTIONS ====
 		await expect(executionPromise).rejects.toThrow('SomeErrorFromGetAvailableEngineNames');
+	});
+
+	describe('Summary generation', () => {
+		it.each([
+			{quantifier: 'no', expectation: 'Summarizer reflects this fact', goldfile: 'no-violations.txt.goldfile', resultsToReturn: []},
+			{quantifier: 'some', expectation: 'Summarizer breaks them down by severity', goldfile: 'some-violations.txt.goldfile',
+				resultsToReturn: [{
+					ruleName: 'stub1RuleA',
+					message: 'Fake message',
+					codeLocations: [{
+						file: PATH_TO_FILE_A,
+						startLine: 5,
+						startColumn: 1
+					}],
+					primaryLocationIndex: 0
+				}, {
+					ruleName: 'stub1RuleB',
+					message: 'Fake message',
+					codeLocations: [{
+						file: PATH_TO_FILE_A,
+						startLine: 5,
+						startColumn: 1
+					}],
+					primaryLocationIndex: 0
+				}]
+			}
+		])('When $quantifier violations are found, $expectation', async ({resultsToReturn, goldfile}) => {
+			// ==== SETUP ====
+			const expectedRules = ['stub1RuleA', 'stub1RuleB', 'stub1RuleC', 'stub1RuleD', 'stub1RuleE']
+			// Create the input.
+			const input: RunInput = {
+				// Use the selector provided by the test
+				'rule-selector': ['all'],
+				// Use the current directory, for convenience.
+				'workspace': ['.'],
+				// Outfile is just an empty list
+				'output-file': []
+			};
+			// Configure the engine to return a violation for the first expected rule.
+			engine1.resultsToReturn = {
+				violations: resultsToReturn
+			};
+
+			// ==== TESTED BEHAVIOR ====
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			// Verify that the expected rules were executed on the right files.
+			const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
+			expect(actualExecutedRules).toEqual(expectedRules);
+			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
+			expect(actualTargetFiles).toEqual([path.resolve('.')]);
+			// Verify that the summary output matches the expectation.
+			const goldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', goldfile), 'utf-8');
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
+
+		it('When Outfiles are provided, they are mentioned', async () => {
+			// ==== SETUP ====
+			const expectedRules = ['stub1RuleA', 'stub1RuleB', 'stub1RuleC', 'stub1RuleD', 'stub1RuleE']
+			const outfilePath1 = path.join('the', 'specifics', 'of', 'this', 'path', 'do', 'not', 'matter.csv');
+			const outfilePath2 = path.join('neither', 'do', 'the', 'specifics', 'of', 'this', 'one.json');
+			// Create the input.
+			const input: RunInput = {
+				// Use the selector provided by the test
+				'rule-selector': ['all'],
+				// Use the current directory, for convenience.
+				'workspace': ['.'],
+				// Outfiles are provided
+				'output-file': [outfilePath1, outfilePath2]
+			};
+			// Configure the engine to return a violation for the first expected rule.
+			engine1.resultsToReturn = {
+				violations: [{
+					ruleName: 'stub1RuleA',
+					message: 'Fake message',
+					codeLocations: [{
+						file: PATH_TO_FILE_A,
+						startLine: 5,
+						startColumn: 1
+					}],
+					primaryLocationIndex: 0
+				}]
+			};
+
+			// ==== TESTED BEHAVIOR ====
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			// Verify that the expected rules were executed on the right files.
+			const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
+			expect(actualExecutedRules).toEqual(expectedRules);
+			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
+			expect(actualTargetFiles).toEqual([path.resolve('.')]);
+			// Verify that the summary output matches the expectation.
+			const goldfileContents: string = (await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'some-outfiles.txt.goldfile'), 'utf-8'))
+				.replace(`{{PATH_TO_FILE1}}`, outfilePath1)
+				.replace(`{{PATH_TO_FILE2}}`, outfilePath2);
+			const displayEvents = spyDisplay.getDisplayEvents();
+			const displayedLogEvents = ansis.strip(displayEvents
+				.filter(e => e.type === DisplayEventType.LOG)
+				.map(e => e.data)
+				.join('\n'));
+			expect(displayedLogEvents).toContain(goldfileContents);
+		});
 	});
 });
 

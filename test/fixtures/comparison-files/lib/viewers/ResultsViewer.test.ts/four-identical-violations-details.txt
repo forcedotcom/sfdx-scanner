@@ -1,4 +1,4 @@
-Found 4 violation(s) across 1 file(s):
+
 === 1. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1

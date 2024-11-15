@@ -21,3 +21,19 @@ Found %d rule(s) from %d engine(s):
 # rules-action.rules-item
 
 %d %s rule(s) found.
+
+# run-action.found-no-violations
+
+Found 0 violations.
+
+# run-action.violations-total
+
+Found %d violation(s) across %d file(s):
+
+# run-action.violations-item
+
+%d %s severity violation(s) found.
+
+# run-action.outfiles-total
+
+Results written to:

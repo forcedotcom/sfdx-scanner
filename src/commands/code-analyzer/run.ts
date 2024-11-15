@@ -6,7 +6,7 @@ import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerCon
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
 import {ResultsDetailDisplayer, ResultsTableDisplayer} from '../../lib/viewers/ResultsViewer';
-import {RunSummaryDisplayer} from '../../lib/viewers/RunSummaryViewer';
+import {RunActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
@@ -108,7 +108,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			resultsViewer: view === View.TABLE
 				? new ResultsTableDisplayer(uxDisplay)
 				: new ResultsDetailDisplayer(uxDisplay),
-			runSummaryViewer: new RunSummaryDisplayer(uxDisplay)
+			actionSummaryViewer: new RunActionSummaryViewer(uxDisplay)
 		};
 	}
 }

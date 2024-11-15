@@ -20,21 +20,14 @@ abstract class AbstractResultsDisplayer implements ResultsViewer {
 		if (results.getViolationCount() === 0) {
 			return;
 		} else {
+			this.displayLineSeparator();
 			this._view(results);
-			this.display.displayLog('\n');
+			this.displayLineSeparator();
 		}
 	}
 
-	protected countUniqueFiles(violations: Violation[]): number {
-		const fileSet: Set<string> = new Set();
-		violations.forEach(v => {
-			const primaryLocation = v.getCodeLocations()[v.getPrimaryLocationIndex()];
-			const file = primaryLocation.getFile();
-			if (file) {
-				fileSet.add(file);
-			}
-		});
-		return fileSet.size;
+	protected displayLineSeparator(): void {
+		this.display.displayLog('');
 	}
 
 	protected abstract _view(results: RunResults): void;
@@ -44,8 +37,6 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
 
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.detail.found-results', [
-			violations.length, this.countUniqueFiles(violations)]));
 		this.displayDetails(violations);
 	}
 
@@ -147,8 +138,7 @@ export class ResultsTableDisplayer extends AbstractResultsDisplayer {
 				}
 			});
 
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [
-			violations.length, this.countUniqueFiles(violations), parentFolder]));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [parentFolder]));
 		this.display.displayTable(resultRows, TABLE_COLUMNS);
 	}
 }
@@ -164,22 +154,22 @@ function sortViolations(violations: Violation[]): Violation[] {
 		// Next, compare file names.
 		const v1PrimaryLocation = v1.getCodeLocations()[v1.getPrimaryLocationIndex()];
 		const v2PrimaryLocation = v2.getCodeLocations()[v2.getPrimaryLocationIndex()];
-		const v1File = v1PrimaryLocation.getFile() || '';
-		const v2File = v2PrimaryLocation.getFile() || '';
+		const v1File = v1PrimaryLocation.getFile() || /* istanbul ignore next */ '';
+		const v2File = v2PrimaryLocation.getFile() || /* istanbul ignore next */ '';
 		if (v1File !== v2File) {
 			return v1File.localeCompare(v2File);
 		}
 
 		// Next, compare start lines.
-		const v1StartLine = v1PrimaryLocation.getStartLine() || 0;
-		const v2StartLine = v2PrimaryLocation.getStartLine() || 0;
+		const v1StartLine = v1PrimaryLocation.getStartLine() || /* istanbul ignore next */ 0;
+		const v2StartLine = v2PrimaryLocation.getStartLine() || /* istanbul ignore next */ 0;
 		if (v1StartLine !== v2StartLine) {
 			return v1StartLine - v2StartLine;
 		}
 
 		// Next, compare start columns.
-		const v1StartColumn = v1PrimaryLocation.getStartColumn() || 0;
-		const v2StartColumn = v2PrimaryLocation.getStartColumn() || 0;
+		const v1StartColumn = v1PrimaryLocation.getStartColumn() || /* istanbul ignore next */ 0;
+		const v2StartColumn = v2PrimaryLocation.getStartColumn() || /* istanbul ignore next */ 0;
 		return v1StartColumn - v2StartColumn;
 	});
 }
@@ -196,6 +186,7 @@ function getPrimaryLocation(violation: Violation): CodeLocation {
 export function findLongestCommonParentFolderOf(filePaths: string[]): string {
 	const roots: string[] = filePaths.map(filePath => path.parse(filePath).root);
 	const commonRoot: string = (new Set(roots)).size === 1 ? roots[0] : '';
+	// istanbul ignore next - Hard to test outside of Windows
 	if (!commonRoot) {
 		return '';
 	}
