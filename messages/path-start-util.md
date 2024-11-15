@@ -1,6 +1,6 @@
 # error.glob-method-conflict
 
-Path start point %s is invalid: When specifying a method with the #methodName syntax, glob patterns cannot be used.
+Path start point %s is invalid: You can't use glob patterns when specifying a method with the #methodName syntax.
 
 # error.negative-globs-unsupported
 
