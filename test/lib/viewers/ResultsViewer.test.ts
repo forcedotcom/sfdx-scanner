@@ -132,6 +132,53 @@ describe('ResultsViewer implementations', () => {
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
 			expect(actualEventText).toContain(expectedViolationDetails);
 		});
+
+		it('Multi-location violations are correctly displayed', async () => {
+			// ==== TEST SETUP ====
+			// Populate the engine with:
+			const violations: Violation[] = [
+				// A violation.
+				createViolation(rule1.name, PATH_TO_FILE_A, 20, 1),
+			];
+
+			// Add some additional locations to the violation.
+			violations[0].codeLocations.push({
+				file: PATH_TO_FILE_Z,
+				startLine: 2,
+				startColumn: 1,
+				comment: 'This is a comment at Location 2'
+			}, {
+				file: PATH_TO_FILE_A,
+				startLine: 1,
+				startColumn: 1,
+				comment: 'This is a comment at Location 3'
+			});
+			// Declare the second location to be the primary.
+			violations[0].primaryLocationIndex = 1;
+			engine1.resultsToReturn = {violations};
+
+			// "Run" the plugin.
+			const workspace = await codeAnalyzerCore.createWorkspace(['package.json']);
+			const rules = await codeAnalyzerCore.selectRules(['all'], {workspace});
+			const results = await codeAnalyzerCore.run(rules, {workspace});
+
+			// ==== TESTED METHOD ====
+			// Pass the result object into the viewer.
+			viewer.view(results);
+
+			// ==== ASSERTIONS ====
+			// Compare the text in the events with the text in our comparison file.
+			const actualDisplayEvents: DisplayEvent[] = spyDisplay.getDisplayEvents();
+			for (const event of actualDisplayEvents) {
+				expect(event.type).toEqual(DisplayEventType.LOG);
+			}
+			// Rip off all of ansis's styling, so we're just comparing plain text.
+			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
+			const expectedViolationDetails = (await readComparisonFile('one-multilocation-violation-details.txt'))
+				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
+				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
+			expect(actualEventText).toContain(expectedViolationDetails);
+		})
 	});
 
 	describe('ResultsTableDisplayer', () => {

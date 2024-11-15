@@ -58,23 +58,47 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	private styleViolation(violation: Violation, idx: number): string {
 		const rule = violation.getRule();
 		const sev = rule.getSeverityLevel();
-		const primaryLocation = violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
 
 		const header = getMessage(
 			BundleName.ResultsViewer,
 			'summary.detail.violation-header',
 			[idx + 1, rule.getName()]
 		);
-		const body = {
-			severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
-			engine: rule.getEngineName(),
-			message: violation.getMessage(),
-			location: `${primaryLocation.getFile()}:${primaryLocation.getStartLine()}:${primaryLocation.getStartColumn()}`,
-			resources: violation.getResourceUrls().join(',')
-		};
-		const keys = ['severity', 'engine', 'message', 'location', 'resources'];
-		return toStyledHeaderAndBody(header, body, keys);
+		if (violation.getCodeLocations().length > 1) {
+			const body = {
+				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
+				engine: rule.getEngineName(),
+				message: violation.getMessage(),
+				locations: stringifyLocations(violation.getCodeLocations(), violation.getPrimaryLocationIndex()),
+				resources: violation.getResourceUrls().join(',')
+			};
+			const keys = ['severity', 'engine', 'message', 'locations', 'resources'];
+			return toStyledHeaderAndBody(header, body, keys);
+		} else {
+			const body = {
+				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
+				engine: rule.getEngineName(),
+				message: violation.getMessage(),
+				location: stringifyLocations(violation.getCodeLocations())[0],
+				resources: violation.getResourceUrls().join(',')
+			};
+			const keys = ['severity', 'engine', 'message', 'location', 'resources'];
+			return toStyledHeaderAndBody(header, body, keys);
+		}
 	}
+}
+
+function stringifyLocations(codeLocations: CodeLocation[], primaryIndex?: number): string[] {
+	const locationStrings: string[] = [];
+
+	codeLocations.forEach((loc, idx) => {
+		const commentPortion: string = loc.getComment() ? ` ${loc.getComment()}` : '';
+		const locationString: string = `${loc.getFile()}:${loc.getStartLine()}:${loc.getStartColumn()}${commentPortion}`;
+		const mainPortion: string = primaryIndex != null && primaryIndex === idx ? '(main) ' : '';
+		locationStrings.push(`${mainPortion}${locationString}`);
+	});
+
+	return locationStrings;
 }
 
 type ResultRow = {

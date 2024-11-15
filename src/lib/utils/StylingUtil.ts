@@ -4,7 +4,7 @@ import ansis from 'ansis';
  * For now, the styling methods only accept objects if all of their keys correspond to string values. This puts the
  * burden of formatting non-string properties on the caller.
  */
-type Styleable = null | undefined | {[key: string]: string};
+type Styleable = null | undefined | {[key: string]: string|string[]};
 
 export function toStyledHeaderAndBody(header: string, body: Styleable, keys?: string[]): string {
 	const styledHeader: string = toStyledHeader(header);
@@ -27,11 +27,16 @@ export function toStyledPropertyList(body: Styleable, selectedKeys?: string[]): 
 	const keysToPrint = selectedKeys || [...Object.keys(body)];
 	const longestKeyLength = Math.max(...keysToPrint.map(k => k.length));
 
-	const styleProperty = (key: string, value: string): string => {
+	const styleProperty = (key: string, value: string|string[]): string => {
 		const keyPortion = `${ansis.blue(key)}:`;
 		const keyValueGap = ' '.repeat(longestKeyLength - key.length + 1);
-		const valuePortion = value.replace('\n', `\n${' '.repeat(longestKeyLength + 2)}`);
-		return `${keyPortion}${keyValueGap}${valuePortion}`;
+		if (typeof value === 'string') {
+			const valuePortion = value.replace('\n', `\n${' '.repeat(longestKeyLength + 2)}`);
+			return `${keyPortion}${keyValueGap}${valuePortion}`;
+		} else {
+			const valuePortion: string = value.map(v => `${indent(v, 4)}`).join('\n');
+			return `${keyPortion}\n${valuePortion}`;
+		}
 	}
 
 	const output = keysToPrint.map(key => styleProperty(key, body[key] || ''));
