@@ -8,6 +8,8 @@ You can scan your codebase with the recommended rules. Or use flags to filter th
 
 If you want to preview the list of rules before you actually run them, use the `code-analyzer rules` command, which also has the "--rules-selector", "--workspace", and "--config-file" flags that together define the list of rules to be run.
 
+We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at http://sfdc.co/CodeAnalyzerFeedback.
+
 # command.examples
 
 - Analyze code using the default behavior: analyze the files in the current folder (default workspace) using the Recommended rules; display the output in the terminal with the concise table view; and automatically apply rule or engine overrides if a "code-analyzer.yml" or "code-analyzer.yaml" file exists in the current folder:
