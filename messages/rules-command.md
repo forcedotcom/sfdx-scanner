@@ -8,6 +8,8 @@ You can also view details about the rules, such as the engine it's associated wi
 
 Use this command to determine the exact set of rules to analyze your code. The `code-analyzer run` command has similar flags as this command, so once you've determined the flag values for this command that list the rules you want to run, you specify the same values to the `code-analyzer run` command.
 
+We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at http://sfdc.co/CodeAnalyzerFeedback.
+
 # command.examples
 
 - List rules using the default behavior: include rules from all engines that have a "Recommended" tag; display the rules using concise table format; and automatically apply rule or engine overrides if a "code-analyzer.yml" or "code-analyzer.yaml" file exists in the current folder:
