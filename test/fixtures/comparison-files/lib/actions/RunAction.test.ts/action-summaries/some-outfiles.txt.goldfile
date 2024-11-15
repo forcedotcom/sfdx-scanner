@@ -1,0 +1,11 @@
+
+=== Summary
+
+Found 1 violation(s) across 1 file(s):
+    1 Low severity violation(s) found.
+
+Results written to:
+    {{PATH_TO_FILE1}}
+    {{PATH_TO_FILE2}}
+
+Additional log information written to:

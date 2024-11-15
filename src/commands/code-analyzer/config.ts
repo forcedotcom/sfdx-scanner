@@ -62,7 +62,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		const modelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => {
+		const modelGeneratorFunction = /* istanbul ignore next - Model tested separately */ (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => {
 			return AnnotatedConfigModel.fromSelection(relevantEngines, userContext, defaultContext);
 		};
 		const dependencies: ConfigDependencies = {

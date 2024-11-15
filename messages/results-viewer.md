@@ -1,10 +1,10 @@
-# summary.detail.found-results
-
-Found %d violation(s) across %d file(s):
-
 # summary.detail.violation-header
 
 %d. %s
+
+# summary.table.results-relative-to
+
+Violation file paths relative to '%s'.
 
 # summary.table.found-results
 

@@ -247,7 +247,7 @@ describe('ProgressEventListener implementations', () => {
 			const startEvent = displayEvents[0];
 			expect(startEvent).toHaveProperty('type', DisplayEventType.SPINNER_START);
 			// The start event should always start with at least 1 known engine, to prevent "0 of 0 engines" scenarios.
-			expect(startEvent.data).toContain("1 of 1 engines");
+			expect(startEvent.data).toContain("0 of 1 engines");
 			const percentagesInOrder = getDedupedCompletionPercentages(displayEvents.slice(1, displayEvents.length - 1));
 			expect(percentagesInOrder).toEqual([0, 50, 100]);
 			const endEvent = displayEvents[displayEvents.length - 1];

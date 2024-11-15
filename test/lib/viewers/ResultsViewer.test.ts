@@ -223,11 +223,13 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(3);
+			expect(displayEvents).toHaveLength(4);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
-			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 1, PATH_TO_SAMPLE_CODE]));
-			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
-			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+			expect(displayEvents[0].data).toEqual('');
+			expect(displayEvents[1].type).toEqual(DisplayEventType.LOG);
+			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[2].type).toEqual(DisplayEventType.TABLE);
+			expect(displayEvents[2].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
 		});
 
 		// The reasoning behind this sorting order is so that the Table view can function as a "show me all the violations
@@ -255,11 +257,13 @@ describe('ResultsViewer implementations', () => {
 
 			// ==== ASSERTIONS ====
 			const displayEvents = spyDisplay.getDisplayEvents();
-			expect(displayEvents).toHaveLength(3);
+			expect(displayEvents).toHaveLength(4);
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
-			expect(displayEvents[0].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.found-results', [4, 2, PATH_TO_SAMPLE_CODE]));
-			expect(displayEvents[1].type).toEqual(DisplayEventType.TABLE);
-			expect(displayEvents[1].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
+			expect(displayEvents[0].data).toEqual('');
+			expect(displayEvents[1].type).toEqual(DisplayEventType.LOG);
+			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[2].type).toEqual(DisplayEventType.TABLE);
+			expect(displayEvents[2].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
 		});
 	});
 });
