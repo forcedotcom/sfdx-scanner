@@ -23,8 +23,6 @@ describe('ResultsWriter implementations', () => {
 			{ext: '.html', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
 			{ext: '.htm', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
 			{ext: '.json', expectedOutput: `Results formatted as ${OutputFormat.JSON}`},
-			//{ext: '.junit', expectedOutput: `Results formatted as ${OutputFormat.JUNIT}`},
-			//{ext: '.junit.xml', expectedOutput: `Results formatted as ${OutputFormat.JUNIT}`},
 			//{ext: '.sarif', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
 			//{ext: '.sarif.json', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
 			{ext: '.xml', expectedOutput: `Results formatted as ${OutputFormat.XML}`}
@@ -48,8 +46,6 @@ describe('ResultsWriter implementations', () => {
 		 * in the case array for the valid format tests.
 		 */
 		it.each([
-			{ext: '.junit'},
-			{ext: '.junit.xml'},
 			{ext: '.sarif'},
 			{ext: '.sarif.json'}
 		])('Throws TODO error for not-yet-supported format: *$ext', ({ext}) => {
