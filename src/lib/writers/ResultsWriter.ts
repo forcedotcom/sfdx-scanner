@@ -39,9 +39,6 @@ export class ResultsFileWriter implements ResultsWriter {
 		// Check for `.json` AFTER checking for `.sarif.json`!
 		} else if (ext === '.json') {
 			this.format = OutputFormat.JSON;
-		} else if (ext === '.junit' || file.toLowerCase().endsWith('.junit.xml')) {
-			throw new Error('TODO: Support JUNIT-type output');
-		// Check for `.xml` AFTER checking for `.junit.xml`!
 		} else if (ext === '.xml') {
 			this.format = OutputFormat.XML;
 		} else {

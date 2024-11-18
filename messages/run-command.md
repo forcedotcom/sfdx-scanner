@@ -133,7 +133,6 @@ If you don't specify this flag, the command outputs the results in the terminal.
 - .csv
 - .html or .htm
 - .json
-- .junit or .junit.xml
 - .sarif or .sarif.json
 - .xml
 
