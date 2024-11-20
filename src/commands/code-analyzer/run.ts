@@ -82,7 +82,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RunCommand)).flags;
-		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View, parsedFlags['output-file']);
+		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View|undefined, parsedFlags['output-file']);
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
@@ -96,7 +96,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		await action.execute(runInput);
 	}
 
-	protected createDependencies(view: View, outputFiles: string[] = []): RunDependencies {
+	protected createDependencies(view: View|undefined, outputFiles: string[] = []): RunDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const resultsViewer: ResultsViewer = createResultsViewer(view, outputFiles, uxDisplay);
 		return {
@@ -136,7 +136,7 @@ function convertThresholdToEnum(threshold: string): SeverityLevel {
 	}
 }
 
-function createResultsViewer(view: View, outputFiles: string[], uxDisplay: UxDisplay): ResultsViewer {
+function createResultsViewer(view: View|undefined, outputFiles: string[], uxDisplay: UxDisplay): ResultsViewer {
 	switch (view) {
 		case View.DETAIL:
 			return new ResultsDetailDisplayer(uxDisplay);
