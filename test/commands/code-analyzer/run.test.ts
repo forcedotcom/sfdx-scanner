@@ -11,6 +11,8 @@ describe('`code-analyzer run` tests', () => {
 	let createActionSpy: jest.SpyInstance;
 	let receivedActionInput: RunInput;
 	let receivedActionDependencies: RunDependencies;
+	let fromFilesSpy: jest.SpyInstance;
+	let receivedFiles: string[];
 	beforeEach(() => {
 		stubSfCommandUx($$.SANDBOX);
 		executeSpy = jest.spyOn(RunAction.prototype, 'execute').mockImplementation((input) => {
@@ -22,6 +24,11 @@ describe('`code-analyzer run` tests', () => {
 			receivedActionDependencies = dependencies;
 			return originalCreateAction(dependencies);
 		});
+		const originalFromFiles = CompositeResultsWriter.fromFiles;
+		fromFilesSpy = jest.spyOn(CompositeResultsWriter, 'fromFiles').mockImplementation(files => {
+			receivedFiles = files;
+			return originalFromFiles(files);
+		})
 	});
 
 	afterEach(() => {
@@ -231,17 +238,6 @@ describe('`code-analyzer run` tests', () => {
 	});
 
 	describe('--output-file', () => {
-		let fromFilesSpy: jest.SpyInstance;
-		let receivedFiles: string[];
-
-		beforeEach(() => {
-			const originalFromFiles = CompositeResultsWriter.fromFiles;
-			fromFilesSpy = jest.spyOn(CompositeResultsWriter, 'fromFiles').mockImplementation(files => {
-				receivedFiles = files;
-				return originalFromFiles(files);
-			})
-		});
-
 		it('Can be supplied once with a single value', async () => {
 			const inputValue = './somefile.json';
 			await RunCommand.run(['--output-file', inputValue]);
@@ -312,12 +308,6 @@ describe('`code-analyzer run` tests', () => {
 			expect(executeSpy).not.toHaveBeenCalled();
 		});
 
-		it('Defaults to value of "table"', async () => {
-			await RunCommand.run([]);
-			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsTableDisplayer');
-		});
-
 		it('Can be supplied only once', async () => {
 			const inputValue1 = 'detail';
 			const inputValue2 = 'table';
@@ -332,6 +322,39 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['-v', inputValue]);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsDetailDisplayer');
+		});
+	});
+
+	describe('Flag interactions', () => {
+		describe('--output-file and --view', () => {
+			it('When --output-file and --view are both present, both are used', async () => {
+				const outfileInput = 'beep.json';
+				const viewInput = 'detail';
+				await RunCommand.run(['--output-file', outfileInput, '--view', viewInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsDetailDisplayer');
+			});
+
+			it('When --output-file is present and --view is not, --view is a no-op', async () => {
+				const outfileInput= 'beep.json';
+				await RunCommand.run(['--output-file', outfileInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsNoOpDisplayer');
+			});
+
+			it('When --output-file and --view are both absent, --view defaults to "table"', async () => {
+				await RunCommand.run([]);
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([]);
+				expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsTableDisplayer');
+			});
 		});
 	});
 });
