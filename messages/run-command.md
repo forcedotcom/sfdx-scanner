@@ -122,6 +122,8 @@ Format to display the command results in the terminal.
 
 The format `table` is concise and shows minimal output, the format `detail` shows all available information.
 
+If you specify neither --view nor --output-file, then the default table view is shown. If you specify --output-file but not --view, only summary information is shown.
+
 # flags.output-file.summary
 
 Output file that contains the analysis results. The file format depends on the extension you specify, such as .csv, .html, .xml, and so on. 

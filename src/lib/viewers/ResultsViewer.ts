@@ -9,6 +9,13 @@ export interface ResultsViewer {
 	view(results: RunResults): void;
 }
 
+export class ResultsNoOpDisplayer implements ResultsViewer {
+	public view(_results: RunResults): void {
+		// istanbul ignore next - No need to cover deliberate no-op
+		return;
+	}
+}
+
 abstract class AbstractResultsDisplayer implements ResultsViewer {
 	protected display: Display;
 

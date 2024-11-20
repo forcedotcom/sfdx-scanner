@@ -5,7 +5,7 @@ import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {CompositeResultsWriter} from '../../lib/writers/ResultsWriter';
-import {ResultsDetailDisplayer, ResultsTableDisplayer} from '../../lib/viewers/ResultsViewer';
+import {ResultsDetailDisplayer, ResultsNoOpDisplayer, ResultsTableDisplayer, ResultsViewer} from '../../lib/viewers/ResultsViewer';
 import {RunActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
@@ -59,7 +59,6 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
 			description: getMessage(BundleName.RunCommand, 'flags.view.description'),
 			char: 'v',
-			default: View.TABLE,
 			options: Object.values(View)
 		}),
 		'output-file': Flags.string({
@@ -99,15 +98,14 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 
 	protected createDependencies(view: View, outputFiles: string[] = []): RunDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
+		const resultsViewer: ResultsViewer = createResultsViewer(view, outputFiles, uxDisplay);
 		return {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
-			resultsViewer: view === View.TABLE
-				? new ResultsTableDisplayer(uxDisplay)
-				: new ResultsDetailDisplayer(uxDisplay),
+			resultsViewer,
 			actionSummaryViewer: new RunActionSummaryViewer(uxDisplay)
 		};
 	}
@@ -138,3 +136,15 @@ function convertThresholdToEnum(threshold: string): SeverityLevel {
 	}
 }
 
+function createResultsViewer(view: View, outputFiles: string[], uxDisplay: UxDisplay): ResultsViewer {
+	switch (view) {
+		case View.DETAIL:
+			return new ResultsDetailDisplayer(uxDisplay);
+		case View.TABLE:
+			return new ResultsTableDisplayer(uxDisplay);
+		default:
+			return outputFiles.length === 0
+				? new ResultsTableDisplayer(uxDisplay)
+				: new ResultsNoOpDisplayer();
+	}
+}
