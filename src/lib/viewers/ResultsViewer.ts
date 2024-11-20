@@ -62,41 +62,47 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 			'summary.detail.violation-header',
 			[idx + 1, rule.getName()]
 		);
-		if (violation.getCodeLocations().length > 1) {
-			const body = {
-				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
-				engine: rule.getEngineName(),
-				message: violation.getMessage(),
-				locations: stringifyLocations(violation.getCodeLocations(), violation.getPrimaryLocationIndex()),
-				resources: violation.getResourceUrls().join(',')
-			};
-			const keys = ['severity', 'engine', 'message', 'locations', 'resources'];
-			return toStyledHeaderAndBody(header, body, keys);
-		} else {
-			const body = {
-				severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
-				engine: rule.getEngineName(),
-				message: violation.getMessage(),
-				location: stringifyLocations(violation.getCodeLocations())[0],
-				resources: violation.getResourceUrls().join(',')
-			};
-			const keys = ['severity', 'engine', 'message', 'location', 'resources'];
-			return toStyledHeaderAndBody(header, body, keys);
+		const body = {
+			severity: `${sev.valueOf()} (${SeverityLevel[sev]})`,
+			engine: rule.getEngineName(),
+			message: violation.getMessage()
 		}
+		const keys: string[] = ['severity', 'engine', 'message'];
+		if (violation.getCodeLocations().length == 1) {
+			body['location'] = stringifyLocation(violation.getCodeLocations()[0], false);
+			keys.push('location');
+		} else if (violation.getCodeLocations().length > 1) {
+			body['locations'] = stringifyLocations(violation.getCodeLocations(), violation.getPrimaryLocationIndex());
+			keys.push('locations');
+		}
+		if (violation.getResourceUrls().length == 1) {
+			body['resource'] = violation.getResourceUrls()[0];
+			keys.push('resource');
+		} else if (violation.getResourceUrls().length > 1) {
+			body['resources'] = violation.getResourceUrls();
+			keys.push('resources');
+		}
+		return toStyledHeaderAndBody(header, body, keys);
 	}
 }
 
-function stringifyLocations(codeLocations: CodeLocation[], primaryIndex?: number): string[] {
-	const locationStrings: string[] = [];
+function stringifyLocations(codeLocations: CodeLocation[], primaryIndex: number): string[] {
+	return codeLocations.map((loc, idx) =>
+		stringifyLocation(loc, codeLocations.length > 1 && primaryIndex === idx));
+}
 
-	codeLocations.forEach((loc, idx) => {
-		const commentPortion: string = loc.getComment() ? ` ${loc.getComment()}` : '';
-		const locationString: string = `${loc.getFile()}:${loc.getStartLine()}:${loc.getStartColumn()}${commentPortion}`;
-		const mainPortion: string = primaryIndex != null && primaryIndex === idx ? '(main) ' : '';
-		locationStrings.push(`${mainPortion}${locationString}`);
-	});
-
-	return locationStrings;
+function stringifyLocation(loc: CodeLocation, displayMain: boolean): string {
+	const mainPortion: string = displayMain ? '(main) ' : '';
+	const commentPortion: string = loc.getComment() ? ` "${loc.getComment()}"` : '';
+	let rangePortion: string = '';
+	if (loc.getStartLine()) {
+		rangePortion += ` (${loc.getStartLine()}:${loc.getStartColumn() || 1}`;
+		if (loc.getEndLine()) {
+			rangePortion += `-${loc.getEndLine()}:${loc.getEndColumn() || 1}`;
+		}
+		rangePortion += ')';
+	}
+	return `${mainPortion}${loc.getFile()}${rangePortion}${commentPortion}`;
 }
 
 type ResultRow = {

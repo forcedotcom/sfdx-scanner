@@ -69,7 +69,7 @@ describe('ResultsViewer implementations', () => {
 			// ==== TEST SETUP ====
 			// This test doesn't care about sorting, so just assign our engine several copies of the same violation.
 			const violations: Violation[] = repeatViolation(
-				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1),
+				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1, ['https://violation_specific.url']),
 				4);
 			engine1.resultsToReturn = {violations};
 			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
@@ -146,11 +146,13 @@ describe('ResultsViewer implementations', () => {
 				file: PATH_TO_FILE_Z,
 				startLine: 2,
 				startColumn: 1,
-				comment: 'This is a comment at Location 2'
+				endColumn: 7,
+				comment: 'This is a comment at Location 2',
 			}, {
 				file: PATH_TO_FILE_A,
 				startLine: 1,
 				startColumn: 1,
+				endLine: 3,
 				comment: 'This is a comment at Location 3'
 			});
 			// Declare the second location to be the primary.
@@ -177,7 +179,7 @@ describe('ResultsViewer implementations', () => {
 			const expectedViolationDetails = (await readComparisonFile('one-multilocation-violation-details.txt'))
 				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
 				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
-			expect(actualEventText).toContain(expectedViolationDetails);
+			expect(actualEventText).toEqual(expectedViolationDetails);
 		})
 	});
 
@@ -301,7 +303,7 @@ describe('Tests for the findLongestCommonParentFolderOf helper function', () => 
 	}
 });
 
-function createViolation(ruleName: string, file: string, startLine: number, startColumn: number): Violation {
+function createViolation(ruleName: string, file: string, startLine: number, startColumn: number, resourceUrls: string[] = []): Violation {
 	return {
 		ruleName,
 		message: 'This is a message',
@@ -310,7 +312,8 @@ function createViolation(ruleName: string, file: string, startLine: number, star
 			startLine,
 			startColumn
 		}],
-		primaryLocationIndex: 0
+		primaryLocationIndex: 0,
+		resourceUrls: resourceUrls
 	};
 }
 

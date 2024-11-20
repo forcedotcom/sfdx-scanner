@@ -3,26 +3,34 @@
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  __PATH_TO_SOME_FILE__ (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 2. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  __PATH_TO_SOME_FILE__ (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 3. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  __PATH_TO_SOME_FILE__ (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 4. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  __PATH_TO_SOME_FILE__ (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
