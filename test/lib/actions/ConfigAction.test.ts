@@ -655,56 +655,48 @@ class StubEngine1 extends EngineApi.Engine {
 		return Promise.resolve([{
 			name: 'Stub1Rule1',
 			severityLevel: EngineApi.SeverityLevel.Info,
-			type: EngineApi.RuleType.Standard,
 			tags: ["Recommended", "CodeStyle"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule2',
 			severityLevel: EngineApi.SeverityLevel.Moderate,
-			type: EngineApi.RuleType.Standard,
 			tags: ["CodeStyle"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule3',
 			severityLevel: EngineApi.SeverityLevel.Low,
-			type: EngineApi.RuleType.Standard,
 			tags: ["BestPractices"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule4',
 			severityLevel: EngineApi.SeverityLevel.High,
-			type: EngineApi.RuleType.Standard,
 			tags: ["CodeStyle"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule5',
 			severityLevel: EngineApi.SeverityLevel.High,
-			type: EngineApi.RuleType.Standard,
 			tags: ["Recommended", "CodeStyle"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule6',
 			severityLevel: EngineApi.SeverityLevel.Low,
-			type: EngineApi.RuleType.Standard,
 			tags: ["Recommended"],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule7',
 			severityLevel: EngineApi.SeverityLevel.Moderate,
-			type: EngineApi.RuleType.Standard,
 			tags: [],
 			description: 'Generic description',
 			resourceUrls: []
 		}, {
 			name: 'Stub1Rule8',
 			severityLevel: EngineApi.SeverityLevel.Moderate,
-			type: EngineApi.RuleType.Standard,
 			tags: ['Recommended'],
 			description: 'Generic description',
 			resourceUrls: []
@@ -731,7 +723,6 @@ class StubEngine2 extends EngineApi.Engine {
 		return Promise.resolve([{
 			name: 'Stub2Rule1',
 			severityLevel: EngineApi.SeverityLevel.Moderate,
-			type: EngineApi.RuleType.Standard,
 			tags: ['Security'],
 			description: 'Generic description',
 			resourceUrls: []
@@ -758,7 +749,6 @@ class StubEngine3 extends EngineApi.Engine {
 		return Promise.resolve([{
 			name: 'Stub3Rule1',
 			severityLevel: EngineApi.SeverityLevel.Moderate,
-			type: EngineApi.RuleType.Standard,
 			tags: ['CodeStyle'],
 			description: 'Generic description',
 			resourceUrls: []
