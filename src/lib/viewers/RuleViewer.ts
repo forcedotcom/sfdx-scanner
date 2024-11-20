@@ -1,5 +1,5 @@
 import {Ux} from '@salesforce/sf-plugins-core';
-import {Rule, RuleType, SeverityLevel} from '@salesforce/code-analyzer-core';
+import {Rule, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {toStyledHeaderAndBody} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
@@ -41,12 +41,11 @@ export class RuleDetailDisplayer extends AbstractRuleDisplayer {
 			const body = {
 				engine: rule.getEngineName(),
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
-				type: RuleType[rule.getType()],
 				tags: rule.getTags().join(', '),
 				resources: rule.getResourceUrls().join(', '),
 				description: rule.getDescription()
 			};
-			const keys = ['severity', 'engine', 'type', 'tags', 'resources', 'description'];
+			const keys = ['severity', 'engine', 'tags', 'resources', 'description'];
 			styledRules.push(toStyledHeaderAndBody(header, body, keys));
 		}
 		this.display.displayLog(styledRules.join('\n\n'));

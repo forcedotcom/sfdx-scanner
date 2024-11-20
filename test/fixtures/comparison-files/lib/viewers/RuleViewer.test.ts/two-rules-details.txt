@@ -2,7 +2,6 @@
 === 1. StubRule1
     severity:    2 (High)
     engine:      FakeEngine1
-    type:        Standard
     tags:        Recommended, Security
     resources:   www.google.com
     description: This is the description for a stub rule. Blah blah blah.
@@ -10,7 +9,6 @@
 === 2. StubRule2
     severity:    4 (Low)
     engine:      FakeEngine1
-    type:        Flow
     tags:        CodeStyle, Performance
     resources:   www.bing.com, www.salesforce.com
     description: This is the description for a second stub rule. Blah blah blah.

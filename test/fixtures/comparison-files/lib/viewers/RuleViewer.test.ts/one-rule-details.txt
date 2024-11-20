@@ -2,7 +2,6 @@
 === 1. StubRule1
     severity:    2 (High)
     engine:      FakeEngine1
-    type:        Standard
     tags:        Recommended, Security
     resources:   www.google.com
     description: This is the description for a stub rule. Blah blah blah.

@@ -93,7 +93,6 @@ export class StubEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended", "CodeStyle"],
 				description: "Some description for stub1RuleA",
 				resourceUrls: ["https://example.com/stub1RuleA"]
@@ -101,7 +100,6 @@ export class StubEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleB",
 				severityLevel: EngineApi.SeverityLevel.High,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended", "Security"],
 				description: "Some description for stub1RuleB",
 				resourceUrls: ["https://example.com/stub1RuleB"]
@@ -109,7 +107,6 @@ export class StubEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleC",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended", "Performance", "Custom"],
 				description: "Some description for stub1RuleC",
 				resourceUrls: ["https://example.com/stub1RuleC"]
@@ -117,7 +114,6 @@ export class StubEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleD",
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.Standard,
 				tags: ["CodeStyle"],
 				description: "Some description for stub1RuleD",
 				resourceUrls: ["https://example.com/stub1RuleD"]
@@ -125,7 +121,6 @@ export class StubEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleE",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Performance"],
 				description: "Some description for stub1RuleE",
 				resourceUrls: ["https://example.com/stub1RuleE", "https://example.com/stub1RuleE_2"]
@@ -178,7 +173,6 @@ export class StubEngine2 extends EngineApi.Engine {
 			{
 				name: "stub2RuleA",
 				severityLevel: EngineApi.SeverityLevel.Moderate,
-				type: EngineApi.RuleType.DataFlow,
 				tags: ["Recommended", "Security"],
 				description: "Some description for stub2RuleA",
 				resourceUrls: ["https://example.com/stub2RuleA"]
@@ -186,7 +180,6 @@ export class StubEngine2 extends EngineApi.Engine {
 			{
 				name: "stub2RuleB",
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.DataFlow,
 				tags: ["Performance", "Custom"],
 				description: "Some description for stub2RuleB",
 				resourceUrls: ["https://example.com/stub2RuleB"]
@@ -194,7 +187,6 @@ export class StubEngine2 extends EngineApi.Engine {
 			{
 				name: "stub2RuleC",
 				severityLevel: EngineApi.SeverityLevel.High,
-				type: EngineApi.RuleType.DataFlow,
 				tags: ["Recommended", "BestPractice"],
 				description: "Some description for stub2RuleC",
 				resourceUrls: [] // Purposely putting in nothing here
@@ -267,7 +259,7 @@ abstract class BaseTimeableEngine extends EngineApi.Engine {
 	private selectionWaitTime: number;
 	private executionWaitTime: number;
 
-	constructor(config: EngineApi.ConfigObject) {
+	constructor(_config: EngineApi.ConfigObject) {
 		super();
 		this.selectionWaitTime = 0;
 		this.executionWaitTime = 0;
@@ -306,7 +298,6 @@ abstract class BaseTimeableEngine extends EngineApi.Engine {
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended", "CodeStyle"],
 				description: "Some description for stub1RuleA",
 				resourceUrls: ["https://example.com/stub1RuleA"]
@@ -314,7 +305,7 @@ abstract class BaseTimeableEngine extends EngineApi.Engine {
 		];
 	}
 
-	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+	async runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		await new Promise(res => setTimeout(res, this.executionWaitTime));
 		this.emitEvent<EngineApi.RunRulesProgressEvent>({
 			type: EngineApi.EventType.RunRulesProgressEvent,
@@ -367,7 +358,7 @@ export class TimeableEngine2 extends BaseTimeableEngine {
 export class EventConfigurableEngine1 extends EngineApi.Engine {
 	private events: {logLevel: LogLevel, message: string}[] = [];
 
-	constructor(config: EngineApi.ConfigObject) {
+	constructor(_config: EngineApi.ConfigObject) {
 		super();
 	}
 
@@ -384,7 +375,6 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 			{
 				name: "stub1RuleA",
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended", "CodeStyle"],
 				description: "Some description for stub1RuleA",
 				resourceUrls: ["https://example.com/stub1RuleA"]
@@ -392,7 +382,7 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 		]);
 	}
 
-	async runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+	async runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
 		for (const {logLevel, message} of this.events) {
 			this.emitEvent<EngineApi.LogEvent>({
 				type: EngineApi.EventType.LogEvent,
@@ -447,7 +437,6 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 			return {
 				name: `ruleFor${fileOrFolder}`,
 				severityLevel: EngineApi.SeverityLevel.Low,
-				type: EngineApi.RuleType.Standard,
 				tags: ["Recommended"],
 				description: `Rule synthesized for target "${fileOrFolder}`,
 				resourceUrls: [`https://example.com/${fileOrFolder}`]
