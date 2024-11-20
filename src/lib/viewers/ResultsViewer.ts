@@ -43,17 +43,18 @@ abstract class AbstractResultsDisplayer implements ResultsViewer {
 export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults): void {
 		const violations = sortViolations(results.getViolations());
-
-		this.displayDetails(violations);
+		const runDir: string = results.getRunDirectory();
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.shared.results-relative-to', [runDir]) + "\n");
+		this.displayDetails(violations, runDir);
 	}
 
-	private displayDetails(violations: Violation[]): void {
+	private displayDetails(violations: Violation[], runDir: string): void {
 		const styledViolations: string[] = violations
-			.map((violation, idx) => this.styleViolation(violation, idx));
+			.map((violation, idx) => this.styleViolation(violation, idx, runDir));
 		this.display.displayLog(styledViolations.join('\n\n'));
 	}
 
-	private styleViolation(violation: Violation, idx: number): string {
+	private styleViolation(violation: Violation, idx: number, runDir: string): string {
 		const rule = violation.getRule();
 		const sev = rule.getSeverityLevel();
 
@@ -69,10 +70,10 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 		}
 		const keys: string[] = ['severity', 'engine', 'message'];
 		if (violation.getCodeLocations().length == 1) {
-			body['location'] = stringifyLocation(violation.getCodeLocations()[0], false);
+			body['location'] = stringifyLocation(violation.getCodeLocations()[0], false, runDir);
 			keys.push('location');
 		} else if (violation.getCodeLocations().length > 1) {
-			body['locations'] = stringifyLocations(violation.getCodeLocations(), violation.getPrimaryLocationIndex());
+			body['locations'] = stringifyLocations(violation.getCodeLocations(), violation.getPrimaryLocationIndex(), runDir);
 			keys.push('locations');
 		}
 		if (violation.getResourceUrls().length == 1) {
@@ -86,14 +87,17 @@ export class ResultsDetailDisplayer extends AbstractResultsDisplayer {
 	}
 }
 
-function stringifyLocations(codeLocations: CodeLocation[], primaryIndex: number): string[] {
+function stringifyLocations(codeLocations: CodeLocation[], primaryIndex: number, runDir: string): string[] {
 	return codeLocations.map((loc, idx) =>
-		stringifyLocation(loc, codeLocations.length > 1 && primaryIndex === idx));
+		stringifyLocation(loc, codeLocations.length > 1 && primaryIndex === idx, runDir));
 }
 
-function stringifyLocation(loc: CodeLocation, displayMain: boolean): string {
+function stringifyLocation(loc: CodeLocation, displayMain: boolean, runDir: string): string {
 	const mainPortion: string = displayMain ? '(main) ' : '';
-	const commentPortion: string = loc.getComment() ? ` "${loc.getComment()}"` : '';
+	let filePortion: string | undefined = loc.getFile();
+	if (filePortion && filePortion.startsWith(runDir)) {
+		filePortion = filePortion.slice(runDir.length);
+	}
 	let rangePortion: string = '';
 	if (loc.getStartLine()) {
 		rangePortion += ` (${loc.getStartLine()}:${loc.getStartColumn() || 1}`;
@@ -102,7 +106,9 @@ function stringifyLocation(loc: CodeLocation, displayMain: boolean): string {
 		}
 		rangePortion += ')';
 	}
-	return `${mainPortion}${loc.getFile()}${rangePortion}${commentPortion}`;
+	const commentPortion: string = loc.getComment() ? ` "${loc.getComment()}"` : '';
+
+	return `${mainPortion}${filePortion}${rangePortion}${commentPortion}`;
 }
 
 type ResultRow = {
@@ -151,7 +157,7 @@ export class ResultsTableDisplayer extends AbstractResultsDisplayer {
 				}
 			});
 
-		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [parentFolder]));
+		this.display.displayLog(getMessage(BundleName.ResultsViewer, 'summary.shared.results-relative-to', [parentFolder]));
 		this.display.displayTable(resultRows, TABLE_COLUMNS);
 	}
 }

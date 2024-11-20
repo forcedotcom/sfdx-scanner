@@ -1,28 +1,30 @@
 
+Violation file paths relative to '{{RUNDIR}}'.
+
 === 1. stub1RuleB
     severity: 2 (High)
     engine:   stubEngine1
     message:  This is a message
-    location: __PATH_TO_FILE_Z__ (20:1)
+    location: test{{PATHSEP}}sample-code{{PATHSEP}}fileZ.cls (20:1)
     resource: https://example.com/stub1RuleB
 
 === 2. stub1RuleA
     severity: 4 (Low)
     engine:   stubEngine1
     message:  This is a message
-    location: __PATH_TO_FILE_A__ (1:1)
+    location: test{{PATHSEP}}sample-code{{PATHSEP}}fileA.cls (1:1)
     resource: https://example.com/stub1RuleA
 
 === 3. stub1RuleA
     severity: 4 (Low)
     engine:   stubEngine1
     message:  This is a message
-    location: __PATH_TO_FILE_A__ (20:1)
+    location: test{{PATHSEP}}sample-code{{PATHSEP}}fileA.cls (20:1)
     resource: https://example.com/stub1RuleA
 
 === 4. stub1RuleA
     severity: 4 (Low)
     engine:   stubEngine1
     message:  This is a message
-    location: __PATH_TO_FILE_Z__ (1:1)
+    location: test{{PATHSEP}}sample-code{{PATHSEP}}fileZ.cls (1:1)
     resource: https://example.com/stub1RuleA
