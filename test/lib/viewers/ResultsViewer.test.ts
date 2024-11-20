@@ -69,7 +69,7 @@ describe('ResultsViewer implementations', () => {
 			// ==== TEST SETUP ====
 			// This test doesn't care about sorting, so just assign our engine several copies of the same violation.
 			const violations: Violation[] = repeatViolation(
-				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1),
+				createViolation(rule1.name, PATH_TO_SOME_FILE, 1, 1, ['https://violation_specific.url']),
 				4);
 			engine1.resultsToReturn = {violations};
 			const workspace = await codeAnalyzerCore.createWorkspace([PATH_TO_SOME_FILE]);
@@ -90,8 +90,9 @@ describe('ResultsViewer implementations', () => {
 			// Rip off all of ansis's styling, so we're just comparing plain text.
 			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 			const expectedViolationDetails = (await readComparisonFile('four-identical-violations-details.txt'))
-				.replace(/__PATH_TO_SOME_FILE__/g, PATH_TO_SOME_FILE);
-			expect(actualEventText).toContain(expectedViolationDetails);
+				.replaceAll("{{PATHSEP}}", path.sep)
+				.replace("{{RUNDIR}}", results.getRunDirectory());
+			expect(actualEventText).toEqual(expectedViolationDetails);
 		});
 
 		// The reasoning behind this sorting order is so that the Detail view can function as a "show me the N most
@@ -128,9 +129,9 @@ describe('ResultsViewer implementations', () => {
 			// Rip off all of ansis's styling, so we're just comparing plain text.
 			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 			const expectedViolationDetails = (await readComparisonFile('four-unique-violations-details.txt'))
-				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
-				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
-			expect(actualEventText).toContain(expectedViolationDetails);
+				.replaceAll("{{PATHSEP}}", path.sep)
+				.replace("{{RUNDIR}}", results.getRunDirectory());
+			expect(actualEventText).toEqual(expectedViolationDetails);
 		});
 
 		it('Multi-location violations are correctly displayed', async () => {
@@ -146,11 +147,13 @@ describe('ResultsViewer implementations', () => {
 				file: PATH_TO_FILE_Z,
 				startLine: 2,
 				startColumn: 1,
-				comment: 'This is a comment at Location 2'
+				endColumn: 7,
+				comment: 'This is a comment at Location 2',
 			}, {
 				file: PATH_TO_FILE_A,
 				startLine: 1,
 				startColumn: 1,
+				endLine: 3,
 				comment: 'This is a comment at Location 3'
 			});
 			// Declare the second location to be the primary.
@@ -175,9 +178,9 @@ describe('ResultsViewer implementations', () => {
 			// Rip off all of ansis's styling, so we're just comparing plain text.
 			const actualEventText = ansis.strip(actualDisplayEvents.map(e => e.data).join('\n'));
 			const expectedViolationDetails = (await readComparisonFile('one-multilocation-violation-details.txt'))
-				.replace(/__PATH_TO_FILE_A__/g, PATH_TO_FILE_A)
-				.replace(/__PATH_TO_FILE_Z__/g, PATH_TO_FILE_Z);
-			expect(actualEventText).toContain(expectedViolationDetails);
+				.replaceAll("{{PATHSEP}}", path.sep)
+				.replace("{{RUNDIR}}", results.getRunDirectory());
+			expect(actualEventText).toEqual(expectedViolationDetails);
 		})
 	});
 
@@ -227,7 +230,7 @@ describe('ResultsViewer implementations', () => {
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 			expect(displayEvents[0].data).toEqual('');
 			expect(displayEvents[1].type).toEqual(DisplayEventType.LOG);
-			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.shared.results-relative-to', [PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[2].type).toEqual(DisplayEventType.TABLE);
 			expect(displayEvents[2].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":2,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"someFile.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
 		});
@@ -261,7 +264,7 @@ describe('ResultsViewer implementations', () => {
 			expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
 			expect(displayEvents[0].data).toEqual('');
 			expect(displayEvents[1].type).toEqual(DisplayEventType.LOG);
-			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.table.results-relative-to', [PATH_TO_SAMPLE_CODE]));
+			expect(displayEvents[1].data).toEqual(getMessage(BundleName.ResultsViewer, 'summary.shared.results-relative-to', [PATH_TO_SAMPLE_CODE]));
 			expect(displayEvents[2].type).toEqual(DisplayEventType.TABLE);
 			expect(displayEvents[2].data).toEqual(`{"columns":["#","Severity","Rule","Location","Message"],"rows":[{"num":1,"location":"fileZ.cls:20:1","rule":"stubEngine1:stub1RuleB","severity":"2 (High)","message":"This is a message"},{"num":2,"location":"fileA.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":3,"location":"fileA.cls:20:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"},{"num":4,"location":"fileZ.cls:1:1","rule":"stubEngine1:stub1RuleA","severity":"4 (Low)","message":"This is a message"}]}`);
 		});
@@ -301,7 +304,7 @@ describe('Tests for the findLongestCommonParentFolderOf helper function', () => 
 	}
 });
 
-function createViolation(ruleName: string, file: string, startLine: number, startColumn: number): Violation {
+function createViolation(ruleName: string, file: string, startLine: number, startColumn: number, resourceUrls: string[] = []): Violation {
 	return {
 		ruleName,
 		message: 'This is a message',
@@ -310,7 +313,8 @@ function createViolation(ruleName: string, file: string, startLine: number, star
 			startLine,
 			startColumn
 		}],
-		primaryLocationIndex: 0
+		primaryLocationIndex: 0,
+		resourceUrls: resourceUrls
 	};
 }
 

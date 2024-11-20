@@ -2,7 +2,7 @@
 
 %d. %s
 
-# summary.table.results-relative-to
+# summary.shared.results-relative-to
 
 Violation file paths relative to '%s'.
 
