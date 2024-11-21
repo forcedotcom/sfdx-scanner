@@ -96,6 +96,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       # Install SF CLI via NPM
       - run: npm install -g @salesforce/cli
       # Download and install the Tarball artifact
