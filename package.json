@@ -9,6 +9,7 @@
 		"@salesforce/code-analyzer-core": "0.17.0",
 		"@salesforce/code-analyzer-engine-api": "0.14.0",
 		"@salesforce/code-analyzer-eslint-engine": "0.14.0",
+		"@salesforce/code-analyzer-flowtest-engine": "0.14.0",
 		"@salesforce/code-analyzer-pmd-engine": "0.14.0",
 		"@salesforce/code-analyzer-regex-engine": "0.14.0",
 		"@salesforce/code-analyzer-retirejs-engine": "0.14.0",

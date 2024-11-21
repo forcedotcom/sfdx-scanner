@@ -1739,6 +1739,18 @@
     eslint-plugin-import "^2.29.1"
     eslint-plugin-jest "^28.6.0"
 
+"@salesforce/code-analyzer-flowtest-engine@0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-flowtest-engine/-/code-analyzer-flowtest-engine-0.14.0.tgz#2e7fd02c4f71d0a0a4dd96460a16f261f2ae0434"
+  integrity sha512-SKcwtdB7h7GagowUsfZYoQYM5HSoTyQI5SNsGnwXxaJ7VCLBbxG8Ag1811cvqMAbk1DUb/44nHNBeb5XqUN3nA==
+  dependencies:
+    "@salesforce/code-analyzer-engine-api" "0.14.0"
+    "@types/node" "^20.0.0"
+    "@types/semver" "^7.5.8"
+    "@types/tmp" "^0.2.6"
+    semver "^7.6.3"
+    tmp "^0.2.3"
+
 "@salesforce/code-analyzer-pmd-engine@0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.14.0.tgz#580a4b038a9f6468689e35a0e8e2867e71b5d75c"
