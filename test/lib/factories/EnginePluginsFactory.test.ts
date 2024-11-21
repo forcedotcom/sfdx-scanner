@@ -6,10 +6,11 @@ describe('EnginePluginsFactoryImpl', () => {
 		const pluginsFactory = new EnginePluginsFactoryImpl();
 		const enginePlugins = pluginsFactory.create();
 
-		expect(enginePlugins).toHaveLength(4);
+		expect(enginePlugins).toHaveLength(5);
 		expect(enginePlugins[0].getAvailableEngineNames()).toEqual(['eslint']);
 		expect(enginePlugins[1].getAvailableEngineNames()).toEqual(['pmd', 'cpd']);
 		expect(enginePlugins[2].getAvailableEngineNames()).toEqual(['retire-js']);
 		expect(enginePlugins[3].getAvailableEngineNames()).toEqual(['regex']);
+		expect(enginePlugins[4].getAvailableEngineNames()).toEqual(['flowtest']);
 	});
 });
