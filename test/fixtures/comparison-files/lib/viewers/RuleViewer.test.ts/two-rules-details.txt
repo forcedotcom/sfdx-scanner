@@ -3,12 +3,14 @@
     severity:    2 (High)
     engine:      FakeEngine1
     tags:        Recommended, Security
-    resources:   www.google.com
+    resource:    www.google.com
     description: This is the description for a stub rule. Blah blah blah.
 
 === 2. StubRule2
     severity:    4 (Low)
     engine:      FakeEngine1
     tags:        CodeStyle, Performance
-    resources:   www.bing.com, www.salesforce.com
+    resources:
+        www.bing.com
+        www.salesforce.com
     description: This is the description for a second stub rule. Blah blah blah.
