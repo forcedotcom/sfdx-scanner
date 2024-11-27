@@ -38,14 +38,31 @@ export class RuleDetailDisplayer extends AbstractRuleDisplayer {
 			const rule = rules[i];
 			const header = getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]);
 			const severity = rule.getSeverityLevel();
+
 			const body = {
-				engine: rule.getEngineName(),
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
-				tags: rule.getTags().join(', '),
-				resources: rule.getResourceUrls().join(', '),
-				description: rule.getDescription()
+				engine: rule.getEngineName(),
 			};
-			const keys = ['severity', 'engine', 'tags', 'resources', 'description'];
+			const keys: string[] = ['severity', 'engine'];
+
+			if (rule.getTags().length > 0) {
+				body['tags'] = rule.getTags().join(', ');
+				keys.push('tags');
+			}
+
+			if (rule.getResourceUrls().length == 1) {
+				body['resource'] = rule.getResourceUrls()[0];
+				keys.push('resource');
+			} else if (rule.getResourceUrls().length > 1) {
+				body['resources'] = rule.getResourceUrls();
+				keys.push('resources');
+			}
+
+			if (rule.getDescription().length > 0) {
+				body['description'] = rule.getDescription();
+				keys.push('description');
+			}
+
 			styledRules.push(toStyledHeaderAndBody(header, body, keys));
 		}
 		this.display.displayLog(styledRules.join('\n\n'));

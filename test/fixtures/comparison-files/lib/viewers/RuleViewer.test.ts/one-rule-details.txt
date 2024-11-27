@@ -3,5 +3,5 @@
     severity:    2 (High)
     engine:      FakeEngine1
     tags:        Recommended, Security
-    resources:   www.google.com
+    resource:    www.google.com
     description: This is the description for a stub rule. Blah blah blah.
