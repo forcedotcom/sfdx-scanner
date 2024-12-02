@@ -10,7 +10,7 @@ repositories {
 }
 
 // Keep this in sync with src/Constants.ts > PMD7_VERSION
-var pmd7Version = "7.7.0"
+var pmd7Version = "7.8.0"
 
 val pmdDist7Dir = "$buildDir/../../dist/pmd7"
 
