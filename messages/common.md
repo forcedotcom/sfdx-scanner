@@ -2,6 +2,6 @@
 
 Emit additional command output to stdout.
 
-# surveyRequestMessage
+# deprecationMessage
 
-We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at http://sfdc.co/CodeAnalyzerFeedback
+We will end support for v4.x of Code Analyzer in the upcoming months. We recommend users migrate to v5.x, which is currently in Beta and will be in GA soon. More information: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/version-5.html
