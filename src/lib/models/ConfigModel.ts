@@ -86,20 +86,23 @@ abstract class YamlFormatter {
 		return yamlCode.replace(/(\r?\n|$)/, ` ${comment}$1`);
 	}
 
-	private toYamlFieldUsingFieldDescription(fieldName: string, resolvedValue: unknown, fieldDescription: ConfigFieldDescription): string {
+	private toYamlFieldWithFieldDescription(fieldName: string, resolvedValue: unknown, fieldDescription: ConfigFieldDescription): string {
 		const resolvedValueJson: string = JSON.stringify(resolvedValue);
 		const defaultValueJson: string = JSON.stringify(fieldDescription.defaultValue);
 
+		let yamlField: string;
 		if (!fieldDescription.wasSuppliedByUser && resolvedValueJson !== defaultValueJson) {
 			// Whenever the user did not supply the value themselves but the resolved value is different from the
 			// default value, this means the value was not a "fixed" value but a value "calculated" at runtime.
 			// Since "calculated" values often depend on the specific environment, we do not want to actually hard code
 			// this value into the config since checking in the config to CI/CD system may create a different value.
 			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [resolvedValueJson]);
-			return this.toYamlUncheckedFieldWithInlineComment(fieldName, fieldDescription.defaultValue, commentText);
+			yamlField = this.toYamlUncheckedFieldWithInlineComment(fieldName, fieldDescription.defaultValue, commentText);
+		} else {
+			yamlField = this.toYamlField(fieldName, resolvedValue, fieldDescription.defaultValue);
 		}
 
-		return this.toYamlField(fieldName, resolvedValue, fieldDescription.defaultValue);
+		return this.toYamlComment(fieldDescription.descriptionText) + "\n" + yamlField
 	}
 
 	private toYamlField(fieldName: string, resolvedValue: unknown, defaultValue: unknown): string {
@@ -119,12 +122,10 @@ abstract class YamlFormatter {
 		const topLevelDescription: ConfigDescription = this.config.getConfigDescription();
 		return this.toYamlSectionHeadingComment(topLevelDescription.overview) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions.config_root.descriptionText) + '\n' +
-			this.toYamlFieldUsingFieldDescription('config_root', this.config.getConfigRoot(),
+			this.toYamlFieldWithFieldDescription('config_root', this.config.getConfigRoot(),
 				topLevelDescription.fieldDescriptions.config_root) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions.log_folder.descriptionText) + '\n' +
-			this.toYamlFieldUsingFieldDescription('log_folder', this.config.getLogFolder(),
+			this.toYamlFieldWithFieldDescription('log_folder', this.config.getLogFolder(),
 				topLevelDescription.fieldDescriptions.log_folder) + '\n' +
 			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions.rules.descriptionText) + '\n' +
@@ -206,8 +207,7 @@ abstract class YamlFormatter {
 			const resolvedValue = userEngineConfig[configField] ?? fieldDescription.defaultValue;
 			// Add a leading newline to visually break up the property from the previous one.
 			yamlCode += '\n' +
-				indent(this.toYamlComment(fieldDescription.descriptionText), 2) + '\n' +
-				indent(this.toYamlFieldUsingFieldDescription(configField, resolvedValue, fieldDescription), 2) + '\n';
+				indent(this.toYamlFieldWithFieldDescription(configField, resolvedValue, fieldDescription), 2) + '\n';
 		}
 		return yamlCode.trimEnd();
 	}
