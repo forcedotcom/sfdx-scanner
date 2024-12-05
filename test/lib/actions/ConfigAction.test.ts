@@ -37,7 +37,7 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-					modelGenerator: AnnotatedConfigModel.fromSelection,
+					modelGenerator: AnnotatedConfigModel,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -164,7 +164,7 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
-					modelGenerator: AnnotatedConfigModel.fromSelection,
+					modelGenerator: AnnotatedConfigModel,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -397,7 +397,7 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel.fromSelection,
+				modelGenerator: AnnotatedConfigModel,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
@@ -446,7 +446,7 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel.fromSelection,
+				modelGenerator: AnnotatedConfigModel,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			}

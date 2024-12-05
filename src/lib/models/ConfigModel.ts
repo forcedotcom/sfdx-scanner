@@ -21,50 +21,48 @@ export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
-export type ConfigContext = {
-	config: CodeAnalyzerConfig;
-	core: CodeAnalyzer;
-	rules: RuleSelection;
-}
-
-export type ConfigModelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => ConfigModel;
+export type ConfigModelConstructor = new (config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) => ConfigModel;
 
 export class AnnotatedConfigModel implements ConfigModel {
-	private readonly relevantEngines: Set<string>;
-	private readonly userContext: ConfigContext;
-	private readonly defaultContext: ConfigContext;
+	private readonly config: CodeAnalyzerConfig; // TODO: It would be nice if we updated the CodeAnalyzer (in our core module) to just return its CodeAnalyzerConfig with a getter so we didn't need to pass it around
+	private readonly codeAnalyzer: CodeAnalyzer;
+	private readonly userRules: RuleSelection;
+	private readonly allDefaultRules: RuleSelection;
+	private readonly  relevantEngines: Set<string>;
 
-	private constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		this.config = config;
+		this.codeAnalyzer = codeAnalyzer;
+		this.userRules = userRules;
+		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
-		this.userContext = userContext;
-		this.defaultContext = defaultContext;
 	}
 
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return new StyledYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
+			return new StyledYamlFormatter(this.config, this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else if (format === OutputFormat.RAW_YAML) {
-			return new PlainYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
+			return new PlainYamlFormatter(this.config, this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else {
 			throw new Error(`Unsupported`)
 		}
 	}
-
-	public static fromSelection(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext): AnnotatedConfigModel {
-		return new AnnotatedConfigModel(relevantEngines, userContext, defaultContext);
-	}
 }
 
 abstract class YamlFormatter {
+	private readonly config: CodeAnalyzerConfig;
+	private readonly codeAnalyzer: CodeAnalyzer;
+	private readonly userRules: RuleSelection;
+	private readonly allDefaultRules: RuleSelection;
 	private readonly relevantEngines: Set<string>;
-	private readonly userContext: ConfigContext;
-	private readonly defaultContext: ConfigContext;
 
-	protected constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+	protected constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		this.config = config;
+		this.codeAnalyzer = codeAnalyzer;
+		this.userRules = userRules;
+		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
-		this.userContext = userContext;
-		this.defaultContext = defaultContext;
 	}
 
 	protected abstract toYamlComment(commentText: string): string
@@ -109,20 +107,20 @@ abstract class YamlFormatter {
 		}
 
 		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultValueJson]);
-		resolvedValue = replaceAbsolutePathsWithRelativePathsWherePossible(resolvedValue, this.userContext.config.getConfigRoot() + path.sep);
+		resolvedValue = replaceAbsolutePathsWithRelativePathsWherePossible(resolvedValue, this.config.getConfigRoot() + path.sep);
 		return this.toYamlUncheckedFieldWithInlineComment(fieldName, resolvedValue, commentText);
 	}
 
 	toYaml(): string {
-		const topLevelDescription: ConfigDescription = this.userContext.config.getConfigDescription();
+		const topLevelDescription: ConfigDescription = this.config.getConfigDescription();
 		return this.toYamlSectionHeadingComment(topLevelDescription.overview) + '\n' +
 			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions.config_root.descriptionText) + '\n' +
-			this.toYamlFieldUsingFieldDescription('config_root', this.userContext.config.getConfigRoot(),
+			this.toYamlFieldUsingFieldDescription('config_root', this.config.getConfigRoot(),
 				topLevelDescription.fieldDescriptions.config_root) + '\n' +
 			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions.log_folder.descriptionText) + '\n' +
-			this.toYamlFieldUsingFieldDescription('log_folder', this.userContext.config.getLogFolder(),
+			this.toYamlFieldUsingFieldDescription('log_folder', this.config.getLogFolder(),
 				topLevelDescription.fieldDescriptions.log_folder) + '\n' +
 			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions.rules.descriptionText) + '\n' +
@@ -135,13 +133,13 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlRuleOverrides(): string {
-		if (this.userContext.rules.getCount() === 0) {
+		if (this.userRules.getCount() === 0) {
 			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 			return `rules: {} ${this.toYamlComment(commentText)}`;
 		}
 
 		let yamlCode: string = 'rules:\n';
-		for (const engineName of this.userContext.rules.getEngineNames()) {
+		for (const engineName of this.userRules.getEngineNames()) {
 			yamlCode += '\n';
 			yamlCode += indent(this.toYamlRuleOverridesForEngine(engineName), 2) + '\n';
 		}
@@ -153,7 +151,7 @@ abstract class YamlFormatter {
 			[engineName.toUpperCase()]);
 		let yamlCode: string = this.toYamlSectionHeadingComment(engineConfigHeader) + '\n';
 		yamlCode += `${engineName}:\n`;
-		for (const userRule of this.userContext.rules.getRulesFor(engineName)) {
+		for (const userRule of this.userRules.getRulesFor(engineName)) {
 			const defaultRule: Rule|null = this.getDefaultRuleFor(engineName, userRule.getName());
 			yamlCode += indent(this.toYamlRuleOverridesForRule(userRule, defaultRule), 2) + '\n';
 		}
@@ -162,7 +160,7 @@ abstract class YamlFormatter {
 
 	private getDefaultRuleFor(engineName: string, ruleName: string): Rule|null {
 		try {
-			return this.defaultContext.rules.getRule(engineName, ruleName);
+			return this.allDefaultRules.getRule(engineName, ruleName);
 		} catch (e) {
 			// istanbul ignore next
 			return null;
@@ -191,8 +189,8 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlEngineOverridesForEngine(engineName: string): string {
-		const engineConfigDescriptor: ConfigDescription = this.userContext.core.getEngineConfigDescription(engineName);
-		const userEngineConfig: EngineConfig = this.userContext.core.getEngineConfig(engineName);
+		const engineConfigDescriptor: ConfigDescription = this.codeAnalyzer.getEngineConfigDescription(engineName);
+		const userEngineConfig: EngineConfig = this.codeAnalyzer.getEngineConfig(engineName);
 
 		let yamlCode: string = '\n' +
 			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview) + '\n' +
@@ -212,8 +210,8 @@ abstract class YamlFormatter {
 }
 
 class PlainYamlFormatter extends YamlFormatter {
-	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
-		super(relevantEngines, userContext, defaultContext);
+	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(config, codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {
@@ -222,8 +220,8 @@ class PlainYamlFormatter extends YamlFormatter {
 }
 
 class StyledYamlFormatter extends YamlFormatter {
-	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
-		super(relevantEngines, userContext, defaultContext);
+	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(config, codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {
