@@ -2,7 +2,8 @@ import {dump as yamlDump} from 'js-yaml';
 import {
 	CodeAnalyzer,
 	CodeAnalyzerConfig,
-	ConfigDescription,
+	ConfigDescription, ConfigFieldDescription,
+	EngineConfig,
 	Rule,
 	RuleSelection,
 	SeverityLevel
@@ -83,37 +84,51 @@ abstract class YamlFormatter {
 		return yamlCode.replace(/(\r?\n|$)/, ` ${comment}$1`);
 	}
 
-	private toYamlField(fieldName: string, userValue: unknown, defaultValue: unknown): string {
-		if (looksLikeAPathValue(userValue) && userValue === defaultValue) {
-			// We special handle a path value when it is equal to the default value, making it equal null because
-			// chances are it is a derived file or folder value based on the specific environment that we do not want to
-			// actually want to hard code since checking in the config to CI/CD system may create a different value
-			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [JSON.stringify(userValue)]);
-			return this.toYamlUncheckedFieldWithInlineComment(fieldName, null, commentText);
-		} else if (JSON.stringify(userValue) === JSON.stringify(defaultValue)) {
-			return this.toYamlUncheckedField(fieldName, userValue);
+	private toYamlFieldUsingFieldDescription(fieldName: string, resolvedValue: unknown, fieldDescription: ConfigFieldDescription): string {
+		const resolvedValueJson: string = JSON.stringify(resolvedValue);
+		const defaultValueJson: string = JSON.stringify(fieldDescription.defaultValue);
+
+		if (!fieldDescription.wasSuppliedByUser && resolvedValueJson !== defaultValueJson) {
+			// Whenever the user did not supply the value themselves but the resolved value is different from the
+			// default value, this means the value was not a "fixed" value but a value "calculated" at runtime.
+			// Since "calculated" values often depend on the specific environment, we do not want to actually hard code
+			// this value into the config since checking in the config to CI/CD system may create a different value.
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [resolvedValueJson]);
+			return this.toYamlUncheckedFieldWithInlineComment(fieldName, fieldDescription.defaultValue, commentText);
 		}
 
-		userValue = replaceAbsolutePathsWithRelativePathsWherePossible(userValue, this.userContext.config.getConfigRoot() + path.sep);
+		return this.toYamlField(fieldName, resolvedValue, fieldDescription.defaultValue);
+	}
 
-		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
-		return this.toYamlUncheckedFieldWithInlineComment(fieldName, userValue, commentText);
+	private toYamlField(fieldName: string, resolvedValue: unknown, defaultValue: unknown): string {
+		const resolvedValueJson: string = JSON.stringify(resolvedValue);
+		const defaultValueJson: string = JSON.stringify(defaultValue);
+
+		if (resolvedValueJson === defaultValueJson) {
+			return this.toYamlUncheckedField(fieldName, resolvedValue);
+		}
+
+		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultValueJson]);
+		resolvedValue = replaceAbsolutePathsWithRelativePathsWherePossible(resolvedValue, this.userContext.config.getConfigRoot() + path.sep);
+		return this.toYamlUncheckedFieldWithInlineComment(fieldName, resolvedValue, commentText);
 	}
 
 	toYaml(): string {
-		const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
-		return this.toYamlSectionHeadingComment(topLevelDescription.overview!) + '\n' +
+		const topLevelDescription: ConfigDescription = this.userContext.config.getConfigDescription();
+		return this.toYamlSectionHeadingComment(topLevelDescription.overview) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.config_root) + '\n' +
-			this.toYamlField('config_root', this.userContext.config.getConfigRoot(), this.defaultContext.config.getConfigRoot()) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.config_root.descriptionText) + '\n' +
+			this.toYamlFieldUsingFieldDescription('config_root', this.userContext.config.getConfigRoot(),
+				topLevelDescription.fieldDescriptions.config_root) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.log_folder) + '\n' +
-			this.toYamlField('log_folder', this.userContext.config.getLogFolder(), this.defaultContext.config.getLogFolder()) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.log_folder.descriptionText) + '\n' +
+			this.toYamlFieldUsingFieldDescription('log_folder', this.userContext.config.getLogFolder(),
+				topLevelDescription.fieldDescriptions.log_folder) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.rules) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.rules.descriptionText) + '\n' +
 			this.toYamlRuleOverrides() + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.engines) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.engines.descriptionText) + '\n' +
 			this.toYamlEngineOverrides() + '\n' +
 			'\n' +
 			this.toYamlSectionHeadingComment(getMessage(BundleName.ConfigModel, 'template.common.end-of-config')) + '\n';
@@ -176,23 +191,21 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlEngineOverridesForEngine(engineName: string): string {
-		const engineConfigDescriptor = this.userContext.core.getEngineConfigDescription(engineName);
-		const userEngineConfig = this.userContext.core.getEngineConfig(engineName);
-		const defaultEngineConfig = this.defaultContext.core.getEngineConfig(engineName);
+		const engineConfigDescriptor: ConfigDescription = this.userContext.core.getEngineConfigDescription(engineName);
+		const userEngineConfig: EngineConfig = this.userContext.core.getEngineConfig(engineName);
 
 		let yamlCode: string = '\n' +
-			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview!) + '\n' +
+			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview) + '\n' +
 			`${engineName}:\n`;
 		// By fiat, the field description will always include, at minimum, an entry for "disable_engine", so we can
 		// assume that the object is not undefined.
-		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
-			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
-			const defaultValue = defaultEngineConfig[configField] ?? null;
-			const userValue = userEngineConfig[configField] ?? defaultValue;
+		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions)) {
+			const fieldDescription: ConfigFieldDescription = engineConfigDescriptor.fieldDescriptions[configField];
+			const userValue = userEngineConfig[configField] ?? fieldDescription.defaultValue;
 			// Add a leading newline to visually break up the property from the previous one.
 			yamlCode += '\n' +
-				indent(this.toYamlComment(fieldDescription), 2) + '\n' +
-				indent(this.toYamlField(configField, userValue, defaultValue), 2) + '\n';
+				indent(this.toYamlComment(fieldDescription.descriptionText), 2) + '\n' +
+				indent(this.toYamlFieldUsingFieldDescription(configField, userValue, fieldDescription), 2) + '\n';
 		}
 		return yamlCode.trimEnd();
 	}
@@ -216,10 +229,6 @@ class StyledYamlFormatter extends YamlFormatter {
 	protected toYamlComment(commentText: string): string {
 		return commentText.replace(/^.*/gm, s => makeGrey(`# ${s}`));
 	}
-}
-
-function looksLikeAPathValue(value: unknown) {
-	return typeof(value) === 'string' && !value.includes('\n') && value.includes(path.sep);
 }
 
 function replaceAbsolutePathsWithRelativePathsWherePossible(value: unknown, parentFolder: string): unknown {

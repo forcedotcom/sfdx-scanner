@@ -17,7 +17,6 @@ export enum BundleName {
 	ResultsWriter = 'results-writer',
 	RunAction = 'run-action',
 	RunCommand = 'run-command',
-	RunSummaryViewer = 'run-summary-viewer',
 	Shared = 'shared',
 	WorkspaceUtil = 'workspace-util'
 }
