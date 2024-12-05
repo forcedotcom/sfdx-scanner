@@ -264,8 +264,8 @@ describe('ConfigAction tests', () => {
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-non-defaults', `${prop}.yml.goldfile`)))
 					.replace('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
 					.replace('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory)
-					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', JSON.stringify(null))
-					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', JSON.stringify(null))
+					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', 'null')
+					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', 'null')
 				expect(output).toContain(goldFileContents);
 			});
 
