@@ -2,7 +2,8 @@ import {dump as yamlDump} from 'js-yaml';
 import {
 	CodeAnalyzer,
 	CodeAnalyzerConfig,
-	ConfigDescription, ConfigFieldDescription,
+	ConfigDescription,
+	ConfigFieldDescription,
 	EngineConfig,
 	Rule,
 	RuleSelection,
@@ -21,13 +22,16 @@ export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
-export type ConfigModelConstructor = new (config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) => ConfigModel;
-
 export class AnnotatedConfigModel implements ConfigModel {
 	private readonly config: CodeAnalyzerConfig; // TODO: It would be nice if we updated the CodeAnalyzer (in our core module) to just return its CodeAnalyzerConfig with a getter so we didn't need to pass it around
 	private readonly codeAnalyzer: CodeAnalyzer;
 	private readonly userRules: RuleSelection;
 	private readonly allDefaultRules: RuleSelection;
+
+	// Note that it is important that we calculate the relevant engines list based on (the user rule selection with no
+	// config) plus (user rule selection with user config) since we still want to show the "disable_engine" config value
+	// in the output if a user even if selects an engine that is currently disabled. But we don't want to the engine
+	// configs not associated with the user's rule selection, thus we can't use the engines from allDefaultRules.
 	private readonly  relevantEngines: Set<string>;
 
 	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
@@ -199,11 +203,11 @@ abstract class YamlFormatter {
 		// assume that the object is not undefined.
 		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions)) {
 			const fieldDescription: ConfigFieldDescription = engineConfigDescriptor.fieldDescriptions[configField];
-			const userValue = userEngineConfig[configField] ?? fieldDescription.defaultValue;
+			const resolvedValue = userEngineConfig[configField] ?? fieldDescription.defaultValue;
 			// Add a leading newline to visually break up the property from the previous one.
 			yamlCode += '\n' +
 				indent(this.toYamlComment(fieldDescription.descriptionText), 2) + '\n' +
-				indent(this.toYamlFieldUsingFieldDescription(configField, userValue, fieldDescription), 2) + '\n';
+				indent(this.toYamlFieldUsingFieldDescription(configField, resolvedValue, fieldDescription), 2) + '\n';
 		}
 		return yamlCode.trimEnd();
 	}

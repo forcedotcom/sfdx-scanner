@@ -8,7 +8,6 @@ import * as EngineApi from "@salesforce/code-analyzer-engine-api";
 import {CodeAnalyzerConfigFactory} from "../../../src/lib/factories/CodeAnalyzerConfigFactory";
 import {EnginePluginsFactory} from '../../../src/lib/factories/EnginePluginsFactory';
 import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/actions/ConfigAction';
-import {AnnotatedConfigModel} from '../../../src/lib/models/ConfigModel';
 import {ConfigStyledYamlViewer} from '../../../src/lib/viewers/ConfigViewer';
 import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 
@@ -37,7 +36,6 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-					modelGenerator: AnnotatedConfigModel,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -164,7 +162,6 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
-					modelGenerator: AnnotatedConfigModel,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -397,7 +394,6 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
@@ -446,7 +442,6 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			}

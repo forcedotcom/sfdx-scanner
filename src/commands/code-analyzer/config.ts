@@ -8,7 +8,6 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import {AnnotatedConfigModel} from '../../lib/models/ConfigModel';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class ConfigCommand extends SfCommand<void> implements Displayable {
@@ -67,7 +66,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressEventListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
-			modelGenerator: AnnotatedConfigModel,
 			actionSummaryViewer: new ConfigActionSummaryViewer(uxDisplay),
 			viewer: new ConfigStyledYamlViewer(uxDisplay)
 		};
