@@ -116,7 +116,13 @@ class JreSetupManager extends AsyncCreatable {
 	}
 
 	private async verifyJavaVersion(javaHome: string): Promise<void> {
-		const versionCommandOut = await this.fetchJavaVersion(javaHome);
+		let versionCommandOut: string;
+		try {
+			versionCommandOut = await this.fetchJavaVersion(javaHome);
+		} catch (e) {
+			const msg: string = e instanceof Error ? e.message : e as string;
+			throw new SfError(msg, 'CouldNotFindJavaVersion');
+		}
 
 		// We are using "java -version" below which has output that typically looks like:
 		// * (from MacOS): "openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n"

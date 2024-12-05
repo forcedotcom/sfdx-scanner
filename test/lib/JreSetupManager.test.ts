@@ -203,6 +203,30 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			statStub.restore();
 		});
 
+		it('should fail when valid path is found, but Java version cannot be returned', async () => {
+			// More stubbing
+			Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
+			// FileHandler claims the path is valid.
+			Sinon.stub(FileHandler.prototype, 'stats').resolves();
+			// Error indicates that version could not be retrieved.
+			Sinon.stub(childProcess, 'execFile').yields(error, emptyStdout, 'irrelevant');
+
+			// Execute and verify
+			let threw = false;
+			let name: string = '';
+			let message: string = '';
+			try {
+				await verifyJreSetup();
+			} catch (err) {
+				threw = true;
+				name = err.name;
+				message = err instanceof Error ? err.message : err as string;
+			}
+			expect(threw).equals(true);
+			expect(message).contains('Could not fetch Java version from path');
+			expect(name).equals('CouldNotFindJavaVersion');
+		});
+
 		it('should fail when valid path is found, but Java version is not acceptable', async () => {
 			// More stubbing
 			const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
