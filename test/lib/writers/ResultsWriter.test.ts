@@ -23,8 +23,8 @@ describe('ResultsWriter implementations', () => {
 			{ext: '.html', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
 			{ext: '.htm', expectedOutput: `Results formatted as ${OutputFormat.HTML}`},
 			{ext: '.json', expectedOutput: `Results formatted as ${OutputFormat.JSON}`},
-			//{ext: '.sarif', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
-			//{ext: '.sarif.json', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
+			{ext: '.sarif', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
+			{ext: '.sarif.json', expectedOutput: `Results formatted as ${OutputFormat.SARIF}`},
 			{ext: '.xml', expectedOutput: `Results formatted as ${OutputFormat.XML}`}
 		])('Accepts and outputs valid file format: *$ext', ({ext, expectedOutput}) => {
 			const validFile = `beep${ext}`;
@@ -38,20 +38,6 @@ describe('ResultsWriter implementations', () => {
 				file: validFile,
 				contents: expectedOutput
 			}]);
-		});
-
-		/**
-		 * All of these extensions are ones we intend to support long-term, but don't yet. When we add support for one of
-		 * these extensions, we should remove it from the cases array here and uncomment the corresponding line
-		 * in the case array for the valid format tests.
-		 */
-		it.each([
-			{ext: '.sarif'},
-			{ext: '.sarif.json'}
-		])('Throws TODO error for not-yet-supported format: *$ext', ({ext}) => {
-			const notYetSupportedFile = `beep${ext}`;
-			// Expect the error message to include an indication that the functionality will be implemented eventually.
-			expect(() => new ResultsFileWriter(notYetSupportedFile)).toThrow('TODO');
 		});
 
 		it('Writes file even when results are empty', () => {
