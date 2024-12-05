@@ -71,6 +71,10 @@ export class StubEngine1 extends EngineApi.Engine {
 		return "stubEngine1";
 	}
 
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.0");
+	}
+
 	describeRules(): Promise<EngineApi.RuleDescription[]> {
 		this.emitEvent<EngineApi.DescribeRulesProgressEvent>({
 			type: EngineApi.EventType.DescribeRulesProgressEvent,
@@ -168,6 +172,10 @@ export class StubEngine2 extends EngineApi.Engine {
 		return "stubEngine2";
 	}
 
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.2.3");
+	}
+
 	describeRules(): Promise<EngineApi.RuleDescription[]> {
 		return Promise.resolve([
 			{
@@ -263,6 +271,10 @@ abstract class BaseTimeableEngine extends EngineApi.Engine {
 		super();
 		this.selectionWaitTime = 0;
 		this.executionWaitTime = 0;
+	}
+
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.1");
 	}
 
 	setRuleSelectionWaitTime(waitTime: number): void {
@@ -366,6 +378,10 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 		return "eventConfigurableEngine1";
 	}
 
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.5");
+	}
+
 	addEvents(...events: {logLevel: LogLevel, message: string}[]): void {
 		this.events = [...this.events, ...events];
 	}
@@ -426,6 +442,10 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 
 	getName(): string {
 		return 'targetDependentEngine1';
+	}
+
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.3.0");
 	}
 
 	describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {

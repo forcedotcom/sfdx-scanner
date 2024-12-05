@@ -8,7 +8,6 @@ import * as EngineApi from "@salesforce/code-analyzer-engine-api";
 import {CodeAnalyzerConfigFactory} from "../../../src/lib/factories/CodeAnalyzerConfigFactory";
 import {EnginePluginsFactory} from '../../../src/lib/factories/EnginePluginsFactory';
 import {ConfigAction, ConfigDependencies, ConfigInput} from '../../../src/lib/actions/ConfigAction';
-import {AnnotatedConfigModel} from '../../../src/lib/models/ConfigModel';
 import {ConfigStyledYamlViewer} from '../../../src/lib/viewers/ConfigViewer';
 import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
 
@@ -37,7 +36,6 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-					modelGenerator: AnnotatedConfigModel.fromSelection,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -164,7 +162,6 @@ describe('ConfigAction tests', () => {
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
-					modelGenerator: AnnotatedConfigModel.fromSelection,
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -252,7 +249,7 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{prop: 'config_root'},
 				{prop: 'log_folder'}
-			])(`When derivable property $prop input is non-null and non-default, it is rendered as-is with no comment`, async ({prop}) => {
+			])(`When derivable property $prop input is non-null and non-default, it is rendered as-is`, async ({prop}) => {
 				// ==== SETUP ====
 				// Make the config root and log folder both be the folder above this one.
 				const parentOfCurrentDirectory = path.resolve(__dirname, '..');
@@ -264,12 +261,11 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
 
 				// ==== ASSERTIONS ====
-				const defaultConfig = CodeAnalyzerConfig.withDefaults();
 				const goldFileContents = (await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'derivables-as-non-defaults', `${prop}.yml.goldfile`)))
 					.replace('__DUMMY_CONFIG_ROOT__', parentOfCurrentDirectory)
 					.replace('__DUMMY_LOG_FOLDER__', parentOfCurrentDirectory)
-					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', JSON.stringify(defaultConfig.getConfigRoot()))
-					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', JSON.stringify(defaultConfig.getLogFolder()))
+					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', 'null')
+					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', 'null')
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -398,7 +394,6 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel.fromSelection,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
@@ -447,7 +442,6 @@ describe('ConfigAction tests', () => {
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
 				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
-				modelGenerator: AnnotatedConfigModel.fromSelection,
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			}
@@ -573,22 +567,52 @@ class StubEnginePlugin extends EngineApi.EnginePluginV1 {
 
 	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
 
+	/*
+	    descriptionText: string;
+    valueType: string;
+    defaultValue: ConfigValue;
+	 */
+
 	private readonly descriptionsByEngine: {[key: string]: EngineApi.ConfigDescription} = {
 		StubEngine1: {
 			overview: 'This is a generic overview for StubEngine1\nIt has multiple lines of text\nWhee!',
 			fieldDescriptions: {
-				'Property1': 'This is the description for Property1',
+				'Property1': {
+					descriptionText: 'This is the description for Property1',
+					valueType: 'string',
+					defaultValue: 'default1'
+				},
 				// Property2 is undocumented
-				'Property3': 'This is the description for Property3',
-				'Property4': 'This is the description for Property4',
-				'Property5': 'This is the description for Property5',
-				'Property6': 'This is the description for Property6'
+				'Property3': {
+					descriptionText: 'This is the description for Property3',
+					valueType: 'string',
+					defaultValue: 'default3'
+				},
+				'Property4': {
+					descriptionText: 'This is the description for Property4',
+					valueType: 'object',
+					defaultValue: {SubProperty1: 10, SubProperty2: true}
+				},
+				'Property5': {
+					descriptionText: 'This is the description for Property5',
+					valueType: 'array',
+					defaultValue: ['arr1', 'arr2']
+				},
+				'Property6': {
+					descriptionText: 'This is the description for Property6',
+					valueType: 'string',
+					defaultValue: null
+				},
 			}
 		},
 		StubEngine2: {
 			overview: 'Some overview for StubEngine2',
 			fieldDescriptions: {
-				'top_field': 'Some description for top_field'
+				'top_field': {
+					descriptionText: 'Some description for top_field',
+					valueType: 'object',
+					defaultValue: {}
+				}
 			}
 		}
 		// StubEngine3 also has no overview or documented properties.
@@ -649,6 +673,10 @@ class StubEngine1 extends EngineApi.Engine {
 
 	public getName(): string {
 		return 'StubEngine1';
+	}
+
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.0");
 	}
 
 	public describeRules(): Promise<EngineApi.RuleDescription[]> {
@@ -719,6 +747,10 @@ class StubEngine2 extends EngineApi.Engine {
 		return 'StubEngine2';
 	}
 
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.2");
+	}
+
 	public describeRules(): Promise<EngineApi.RuleDescription[]> {
 		return Promise.resolve([{
 			name: 'Stub2Rule1',
@@ -743,6 +775,10 @@ class StubEngine3 extends EngineApi.Engine {
 
 	public getName(): string {
 		return 'StubEngine3';
+	}
+
+	getEngineVersion(): Promise<string> {
+		return Promise.resolve("1.0.3");
 	}
 
 	public describeRules(): Promise<EngineApi.RuleDescription[]> {

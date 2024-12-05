@@ -8,12 +8,11 @@ import {createWorkspace} from '../utils/WorkspaceUtil';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {ConfigActionSummaryViewer} from '../viewers/ActionSummaryViewer';
-import {ConfigModel, ConfigModelGeneratorFunction, ConfigContext} from '../models/ConfigModel';
+import {AnnotatedConfigModel, ConfigModel} from '../models/ConfigModel';
 
 export type ConfigDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
-	modelGenerator: ConfigModelGeneratorFunction;
 	logEventListeners: LogEventListener[];
 	progressEventListeners: ProgressEventListener[];
 	writer?: ConfigWriter;
@@ -109,17 +108,7 @@ export class ConfigAction {
 		// We need the Set of all Engines that returned rules for the user's selection on both the Default and User Cores.
 		const relevantEngines: Set<string> = new Set([...userRules.getEngineNames(), ...selectedDefaultRules.getEngineNames()]);
 
-		const userConfigContext: ConfigContext = {
-			config: userConfig,
-			core: userCore,
-			rules: userRules
-		};
-		const defaultConfigContext: ConfigContext = {
-			config: defaultConfig,
-			core: defaultCoreForAllRules,
-			rules: allDefaultRules
-		};
-		const configModel: ConfigModel = this.dependencies.modelGenerator(relevantEngines, userConfigContext, defaultConfigContext);
+		const configModel: ConfigModel = new AnnotatedConfigModel(userConfig, userCore, userRules, allDefaultRules, relevantEngines);
 
 		const fileWritten: boolean = this.dependencies.writer
 			? await this.dependencies.writer.write(configModel)
