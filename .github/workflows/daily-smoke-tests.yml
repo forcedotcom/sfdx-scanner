@@ -12,3 +12,17 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
+  v4-smoke-test:
+    runs-on: macos-latest
+    steps:
+      - name: Invoke v4 smoke tests
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'daily-smoke-tests.yml',
+              ref: 'dev-4'
+            });
