@@ -15,10 +15,10 @@ jobs:
   verify-candidate-tag:
     runs-on: ubuntu-latest
     steps:
-      # Check out the main branch, and get its head commit as output for later.
+      # Check out the main-4 branch, and get its head commit as output for later.
       - uses: actions/checkout@v4
         with:
-          ref: 'main'
+          ref: 'main-4'
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-branch-commit
       # Checkout the tag we want to release, and get its head commit as output for later.
@@ -31,9 +31,9 @@ jobs:
       - name: Fail non-matching commits
         if: ${{ steps.get-branch-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
         run: |
-          echo "Tag commit must match latest commit in main. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
+          echo "Tag commit must match latest commit in main-4. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
-      # Verify that the `package.json`'s version property is 4.Y.Z, as we want to restrict the `dev` and `release`
+      # Verify that the `package.json`'s version property is 4.Y.Z, as we want to restrict the `dev-4` and `release`
       # branches to publishing v4.x.
       - name: Verify major version
         run: |
@@ -103,7 +103,7 @@ jobs:
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest
-  # Step 5: Create a Pull Request for merging `main` into `dev`
+  # Step 5: Create a Pull Request for merging `main-4` into `dev-4`
   create-main2dev-pull-request:
     needs: promote-to-latest
     runs-on: macos-latest
@@ -113,31 +113,31 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      # Check out `main`
+      # Check out `main-4`
       - uses: actions/checkout@v4
         with:
-          ref: 'main'
-      # Create a new branch based on `main`, so that merge conflicts can be manually resolved if need be.
+          ref: 'main-4'
+      # Create a new branch based on `main-4`, so that merge conflicts can be manually resolved if need be.
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           git checkout -b m2d/v$NEW_VERSION
           git push --set-upstream origin m2d/v$NEW_VERSION
-      # Create a Pull Request from the new branch into `dev`.
+      # Create a Pull Request from the new branch into `dev-4`.
       - run: |
           NEW_VERSION=$(jq -r ".version" package.json)
           # For whatever reason, the version of 'echo' on GHAs doesn't process backspace by default.
           # The non-POSIX-standard -e flag causes it to do that.
           echo -e "This branch and PR were automatically created following the successful release of v$NEW_VERSION.\n\
-          It must be MERGED into dev, NOT SQUASHED OR REBASED. Squashing or rebasing this branch onto dev can cause potentially irreconcilable merge conflicts later.\n\
-          As an additional safeguard and reminder, the title of this PR MUST include the word 'merging' in the description portion of the PR title, e.g., 'Main2Dev @W-XXXXXXX@ Merging main to dev after vX.Y.Z'.\n\
-          If there are conflicts between dev and this branch, you should do the following locally:\n\
-          - $ git checkout dev\n\
+          It must be MERGED into dev-4, NOT SQUASHED OR REBASED. Squashing or rebasing this branch onto dev-4 can cause potentially irreconcilable merge conflicts later.\n\
+          As an additional safeguard and reminder, the title of this PR MUST include the word 'merging' in the description portion of the PR title, e.g., 'Main2Dev @W-XXXXXXX@ Merging main-4 to dev-4 after vX.Y.Z'.\n\
+          If there are conflicts between dev-4 and this branch, you should do the following locally:\n\
+          - $ git checkout dev-4\n\
           - $ git pull\n\
           - $ git fetch --all\n\
           - $ git checkout m2d/v$NEW_VERSION\n\
-          - $ git pull origin dev --no-rebase # You MUST include this flag, or someone's day will be ruined.\n\
+          - $ git pull origin dev-4 --no-rebase # You MUST include this flag, or someone's day will be ruined.\n\
           - Resolve the merge conflicts manually. When in doubt, ask the code's author for help.\n\
           - $ git commit\n\
           - $ git push" > body.txt
           # Create the pull request.
-          gh pr create -B dev -H m2d/v$NEW_VERSION --title "Filler title. Read description and rename." -F body.txt
+          gh pr create -B dev-4 -H m2d/v$NEW_VERSION --title "Filler title. Read description and rename." -F body.txt

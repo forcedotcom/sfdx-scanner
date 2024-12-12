@@ -8,13 +8,13 @@ const PR_TYPE_PORTION = "RELEASE"
 
 /**
  * This RegExp matches the title format for Release Branch pull requests,
- * i.e., a PR aimed at the {@code release} or {@code main} branches.
+ * i.e., a PR aimed at the {@code release} or {@code main-4} branches.
  */
 const RELEASE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${SEPARATOR}${WORK_ITEM_PORTION}${SEPARATOR}[^\\s]+.*`, "i");
 
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * aimed at the {@code release} or {@code main} branches.
+ * aimed at the {@code release} or {@code main-4} branches.
  * @param title
  */
 export function verifyReleasePrTitle(title: string): boolean {
