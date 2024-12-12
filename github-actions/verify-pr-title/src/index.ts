@@ -24,20 +24,20 @@ function run(): void {
 		const baseBranch = base.ref;
 		const head = pullRequest.head as {ref: string};
 		const headBranch = head.ref;
-		if (headBranch.startsWith("m2d/") && baseBranch === "dev") {
-			// "m2d/" is the prefix of the auto-generated branches we use to merge `main` into `dev` post-release.
-			// Pull Requests merging these branches into `dev` have their own title convention separate from
-			// the convention for other aimed-at-`dev` PRs.
+		if (headBranch.startsWith("m2d/") && baseBranch === "dev-4") {
+			// "m2d/" is the prefix of the auto-generated branches we use to merge `main-4` into `dev-4` post-release.
+			// Pull Requests merging these branches into `dev-4` have their own title convention separate from
+			// the convention for other aimed-at-`dev-4` PRs.
 			if (verifyMain2DevPrTitle(title)) {
-				console.log(`PR title '${title}' accepted for dev branch.`);
+				console.log(`PR title '${title}' accepted for dev-4 branch.`);
 			} else {
 				core.setFailed(
 					`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Merging after vX.Y.Z"`
 				);
 				return;
 			}
-		} else if (baseBranch === "release" || baseBranch === "main") {
-			// There's a title convention for merging PRs into `release`/`main`.
+		} else if (baseBranch === "release" || baseBranch === "main-4") {
+			// There's a title convention for merging PRs into `release`/`main-4`.
 			if (verifyReleasePrTitle(title)) {
 				console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
 			} else {
@@ -46,8 +46,8 @@ function run(): void {
 				);
 				return;
 			}
-		} else if (baseBranch == "dev" || /^release-\d+\.\d+\.\d+$/.test(baseBranch)) {
-			// There's a title convention for merging feature branch PRs into `dev` or `release-X.Y.Z`
+		} else if (baseBranch == "dev-4" || /^release-\d+\.\d+\.\d+$/.test(baseBranch)) {
+			// There's a title convention for merging feature branch PRs into `dev-4` or `release-X.Y.Z`
 			// branches.
 			if (verifyFeaturePrTitle(title)) {
 				console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
