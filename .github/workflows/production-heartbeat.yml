@@ -20,6 +20,6 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'heartbeat-v4.yml',
+              workflow_id: 'production-heartbeat.yml',
               ref: 'dev-4'
             });
