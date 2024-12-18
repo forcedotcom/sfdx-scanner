@@ -1,6 +1,22 @@
 public with sharing class AuraEnabledFls {
 
 	@AuraEnabled
+	public Integer someSimpleProp {
+		get;
+		set;
+	}
+
+	@AuraEnabled
+	public Integer someComplicatedProp {
+		get {
+			return someComplicatedProp;
+		}
+		set {
+			someComplicatedProp = value;
+		}
+	}
+
+	@AuraEnabled
 	public static Account flsHelperGivenIncorrectObjectType() {
 		// Note that the helper object is being created on the 'Contact' object type.
 		FlsHelperClass helper = new FlsHelperClass('Contact');

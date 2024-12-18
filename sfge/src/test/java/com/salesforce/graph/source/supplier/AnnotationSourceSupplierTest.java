@@ -21,6 +21,21 @@ public class AnnotationSourceSupplierTest extends BaseSourceSupplierTest {
       + "        return true;\n"
       + "    }\n"
       + "    \n"
+      + "    @%s\n"
+      + "    public boolean simpleProp {\n"
+      + "        get;\n"
+      + "        set;\n"
+      + "    }\n"
+      + "    \n"
+      + "    @%s\n"
+      + "    public integer complicatedProp {\n"
+      + "        get { return complicatedProp; }\n"
+      + "        set { complicatedProp = value; }\n"
+      + "    }\n"
+      + "    \n"
+      + "    @%s\n"
+      + "    public void bodilessMethod() {}\n"
+      + "    \n"
         // Add a method without an annotation.
       + "    public boolean nonAnnotatedMethod() {\n"
       + "        return true;\n"
@@ -36,7 +51,7 @@ public class AnnotationSourceSupplierTest extends BaseSourceSupplierTest {
     @ParameterizedTest(name = "{displayName}: Annotation @{0}")
     public void supplierLoadsAnnotatedMethods(
             String annotation, AbstractAnnotationSourceSupplier supplier) {
-        String sourceCode = String.format(TEMPLATE, annotation);
+        String sourceCode = String.format(TEMPLATE, annotation, annotation, annotation, annotation);
         testSupplier_positive(
                 new String[] {sourceCode},
                 supplier,

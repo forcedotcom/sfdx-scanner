@@ -2,7 +2,9 @@ package com.salesforce.graph.ops;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
+import apex.jorje.semantic.compiler.CodeUnit;
 import com.salesforce.apex.jorje.*;
+import apex.jorje.lsp.impl.services.StandardCompilerService;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
@@ -126,6 +128,12 @@ public final class GraphUtil {
         for (String sourceFolder : sourceFolders) {
             comps.addAll(buildFolderComps(sourceFolder));
         }
+        List<String> sourceCodes = new ArrayList<>();
+        for (String sourceFolder: sourceFolders) {
+            sourceCodes.addAll(getSourceCodes(sourceFolder));
+        }
+
+        List<CodeUnit> compiledSourceCodes = JorjeUtil.compileApexFromProject(sourceCodes);
 
         // Verify TopLevelWrappers have appropriately unique names
         final TreeMap<String, Util.CompilationDescriptor> uniqueClassEnumInterfaceNames =
@@ -171,6 +179,19 @@ public final class GraphUtil {
         progressListener.completedBuildingGraph();
     }
 
+    private static List<String> getSourceCodes(String sourceFolder) throws GraphLoadException {
+        List<String> sourceCodes = new ArrayList<>();
+        Path path = new File(sourceFolder).toPath();
+        SourceCodeCollector collector = new SourceCodeCollector(sourceCodes);
+        try {
+            Files.walkFileTree(path, collector);
+        } catch (IOException ex) {
+            throw new GraphLoadException("Could not read file/directory " + collector.lastVisitedFile, ex);
+        }
+
+        return sourceCodes;
+    }
+
     private static List<Util.CompilationDescriptor> buildFolderComps(String sourceFolder)
             throws GraphLoadException {
         List<Util.CompilationDescriptor> comps = new ArrayList<>();
@@ -190,6 +211,16 @@ public final class GraphUtil {
         }
 
         return comps;
+    }
+
+    private static Optional<String> readSourceCode(Path path) throws IOException {
+        String pathString = path.toString();
+        if (!isGraphablePath(pathString)) {
+            return Optional.empty();
+        } else {
+            String sourceCode = FileHandler.getInstance().readTargetFile(pathString);
+            return Optional.of(sourceCode);
+        }
     }
 
     private static Optional<Util.CompilationDescriptor> loadFile(Path path) throws IOException {
@@ -223,6 +254,31 @@ public final class GraphUtil {
     }
 
     private GraphUtil() {}
+
+    private static final class SourceCodeCollector extends SimpleFileVisitor<Path> {
+        private final List<String> sourceCodes;
+        private Path lastVisitedFile;
+
+        private SourceCodeCollector(List<String> sourceCodes) {
+            this.sourceCodes = sourceCodes;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) {
+            if (EXCLUDED_SUBDIRECTORIES.contains(dir.getName(dir.getNameCount() - 1))) {
+                LOGGER.info("Skipping collecting subtree of path=" + dir);
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+            lastVisitedFile = file;
+            readSourceCode(file).ifPresent(sourceCodes::add);
+            return FileVisitResult.CONTINUE;
+        }
+    }
 
     private static final class SourceFileVisitor extends SimpleFileVisitor<Path> {
         private final List<Util.CompilationDescriptor> comps;

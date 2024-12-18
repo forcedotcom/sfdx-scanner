@@ -35,6 +35,33 @@ public final class JorjeUtil {
         incrementLogLevel();
     }
 
+    public static List<CodeUnit> compileApexFromProject(List<String> sourceCodes) {
+        List<SourceFile> sourceFiles = sourceCodes.stream().map(sourceCode -> SourceFile.builder().setBody(sourceCode).build()).collect(Collectors.toList());
+
+        CompilationInput input = new CompilationInput(
+            sourceFiles,
+            EmptySymbolProvider.get(),
+            new TestAccessEvaluator(),
+            new TestQueryValidators.Noop(),
+            null,
+            NoopCompilerProgressCallback.get()
+        );
+
+        ValidationSettings settings = ValidationSettings.builder()
+            .setValidationBehavior(ValidationSettings.ValidationBehavior.COLLECT_MULTIPLE_ERRORS)
+            .build();
+
+        ApexCompiler compiler = ApexCompiler.builder()
+            .setInput(input)
+            .setValidationSettings(settings)
+            .setHiddenTokenBehavior(ParserEngine.HiddenTokenBehavior.COLLECT_COMMENTS)
+            .build();
+
+        List<CodeUnit> codeUnits = compiler.compile(CompilerStage.ADDITIONAL_VALIDATE);
+
+        return codeUnits;
+    }
+
     public static AstNodeWrapper<?> compileApexFromString(String sourceCode) {
         final SourceFile sourceFile = SourceFile.builder().setBody(sourceCode).build();
 
