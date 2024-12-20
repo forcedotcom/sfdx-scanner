@@ -4,6 +4,7 @@ import apex.jorje.data.Locations;
 import apex.jorje.parser.impl.BaseApexLexer;
 import apex.jorje.parser.impl.HiddenToken;
 import apex.jorje.semantic.ast.AstNode;
+import apex.jorje.semantic.ast.visitor.AstVisitor;
 import apex.jorje.semantic.ast.visitor.NoopScope;
 import apex.jorje.semantic.common.EmptySymbolProvider;
 import apex.jorje.semantic.common.TestAccessEvaluator;
@@ -240,4 +241,7 @@ public final class JorjeUtil {
     }
 
     private JorjeUtil() {}
+
+    static class NodeInspectionVisitor extends AstVisitor<NoopScope> {
+    }
 }

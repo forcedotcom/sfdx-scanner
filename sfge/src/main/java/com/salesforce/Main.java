@@ -68,7 +68,7 @@ public class Main {
         Main m = new Main();
         String[] trueArgs =
                 new String[] {
-                    "execute", "/Users/jjayaprakash/workspace/sfdx-scanner/sfge-input.txt"
+                    "execute", "/Users/jfeingold/code/sfdx-scanner/sfge-input.txt"
                 };
         int status = m.process(trueArgs);
         // int status = m.process(args);

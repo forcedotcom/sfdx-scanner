@@ -124,7 +124,7 @@ public final class GraphUtil {
     public static void loadSourceFolders(GraphTraversalSource g, List<String> sourceFolders)
             throws GraphLoadException {
         List<Util.CompilationDescriptor> comps = new ArrayList<>();
-        sourceFolders.add("/Users/jjayaprakash/workspace/projects/ebikes-lwc/.sfdx/tools/252/StandardApexLibrary/System");
+        sourceFolders.add("/Users/jfeingold/code/sfdx-scanner/.sfdx/tools/250/StandardApexLibrary/System");
 //        for (String sourceFolder : sourceFolders) {
 //            comps.addAll(buildFolderComps(sourceFolder));
 //        }
