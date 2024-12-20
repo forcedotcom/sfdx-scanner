@@ -3,6 +3,10 @@ import {EngineRunResults, RunResults, Violation} from '@salesforce/code-analyzer
 
 
 export class StubEmptyResults implements RunResults {
+    getCoreVersion(): string {
+        throw new Error('Method not implemented.');
+    }
+
 	/**
 	 * Based on the way the tests currently use this stub, this method is never called,
 	 * so it should be fine for it to be unimplemented.
@@ -57,6 +61,10 @@ export class StubEmptyResults implements RunResults {
 }
 
 export class StubNonEmptyResults implements RunResults {
+    getCoreVersion(): string {
+        throw new Error('Method not implemented.');
+    }
+
 	getRunDirectory(): string {
 		throw new Error('Method not implemented.');
 	}

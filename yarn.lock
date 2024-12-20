@@ -1699,10 +1699,10 @@
     strip-ansi "6.0.1"
     ts-retry-promise "^0.8.1"
 
-"@salesforce/code-analyzer-core@0.19.1":
-  version "0.19.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.19.1.tgz#9703d5897adb7d5bb88d2ae714e4eaa85dbcdcbc"
-  integrity sha512-NCciOI0sNjrJljAMDV9O0zSmSTs1huXDJTKiRmss1PmMOcKpWfzqtOSWT0ZyE9W1g0PEfUxUiTsxVxlOoHItXA==
+"@salesforce/code-analyzer-core@0.20.0":
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-core/-/code-analyzer-core-0.20.0.tgz#4f16eca0ca30a1dea1fb045e96ce2a7881f20fe1"
+  integrity sha512-vElirVhPSIZrgbFr+2jq14wxgONiQWLlIssYyCO2urTNPUD2AO09tZZtL7CLHyROtJuYaiQ4FxnkD4QKr48HEQ==
   dependencies:
     "@salesforce/code-analyzer-engine-api" "0.16.1"
     "@types/js-yaml" "^4.0.9"
@@ -1753,10 +1753,10 @@
     semver "^7.6.3"
     tmp "^0.2.3"
 
-"@salesforce/code-analyzer-pmd-engine@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.16.1.tgz#94306b171302e6ce52450036077029e431bcec43"
-  integrity sha512-OYrYfUA/xPL4w3LmYfZyv/U4hAjKs346gYnM3GT4hkOKO1AWDJbdE3ABI7EuM7VSntN6Gtwdh+vHCe/G/oZP0A==
+"@salesforce/code-analyzer-pmd-engine@0.17.0":
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/@salesforce/code-analyzer-pmd-engine/-/code-analyzer-pmd-engine-0.17.0.tgz#7af7f78c201131fa2cf0aca7dc7f73d436f3212c"
+  integrity sha512-28BTWEn2aWVbJKKV/UD5zydhAJz7dH5wJXZzV3NCi+Q9y9JzfiOzNMyEgkdqtvHS5hKfOo46d6gJcSFt9fr7ug==
   dependencies:
     "@salesforce/code-analyzer-engine-api" "0.16.1"
     "@types/node" "^20.0.0"
