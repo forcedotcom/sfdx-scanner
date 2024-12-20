@@ -1,0 +1,8 @@
+{
+	"targets":[{
+		"targetFile":"/Users/jjayaprakash/workspace/projects/ebikes-lwc/force-app/main/default/classes/AuraEnabledFls.cls",
+		"targetMethods":[]
+	}],
+	"projectDirs":["/Users/jjayaprakash/workspace/projects/ebikes-lwc/force-app/main/default"],
+	"rulesToRun":["ApexFlsViolationRule"]
+}

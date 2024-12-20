@@ -21,9 +21,9 @@ public final class Util {
         VertexCacheProvider.get().initialize(config.g);
         for (GraphBuilder graphBuilder :
                 new GraphBuilder[] {
-                    new ApexStandardLibraryVertexBuilder(config.g),
-                    new CustomerApexVertexBuilder(config.g, config.customerCompilations),
-                    new InheritanceInformationBuilder(config.g)
+//                    new ApexStandardLibraryVertexBuilder(config.g),
+                    new CustomerApexVertexBuilder(config.g, config.customerCompilations)
+//                    new InheritanceInformationBuilder(config.g)
                 }) {
             if (config.ignoreBuilders.contains(graphBuilder.getClass())) {
                 if (LOGGER.isWarnEnabled()) {

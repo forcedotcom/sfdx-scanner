@@ -4,7 +4,6 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
 import apex.jorje.semantic.compiler.CodeUnit;
 import com.salesforce.apex.jorje.*;
-import apex.jorje.lsp.impl.services.StandardCompilerService;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
@@ -125,15 +124,17 @@ public final class GraphUtil {
     public static void loadSourceFolders(GraphTraversalSource g, List<String> sourceFolders)
             throws GraphLoadException {
         List<Util.CompilationDescriptor> comps = new ArrayList<>();
-        for (String sourceFolder : sourceFolders) {
-            comps.addAll(buildFolderComps(sourceFolder));
-        }
+        sourceFolders.add("/Users/jjayaprakash/workspace/projects/ebikes-lwc/.sfdx/tools/252/StandardApexLibrary/System");
+//        for (String sourceFolder : sourceFolders) {
+//            comps.addAll(buildFolderComps(sourceFolder));
+//        }
         List<String> sourceCodes = new ArrayList<>();
-        for (String sourceFolder: sourceFolders) {
+        for (String sourceFolder : sourceFolders) {
             sourceCodes.addAll(getSourceCodes(sourceFolder));
         }
 
-        List<CodeUnit> compiledSourceCodes = JorjeUtil.compileApexFromProject(sourceCodes);
+//        List<JorjeNode> compiledSourceCodes = JorjeUtil.compileApexFromProject(sourceCodes);
+        comps = JorjeUtil.compileApexFromProject(sourceCodes);
 
         // Verify TopLevelWrappers have appropriately unique names
         final TreeMap<String, Util.CompilationDescriptor> uniqueClassEnumInterfaceNames =
@@ -186,7 +187,8 @@ public final class GraphUtil {
         try {
             Files.walkFileTree(path, collector);
         } catch (IOException ex) {
-            throw new GraphLoadException("Could not read file/directory " + collector.lastVisitedFile, ex);
+            throw new GraphLoadException(
+                    "Could not read file/directory " + collector.lastVisitedFile, ex);
         }
 
         return sourceCodes;
@@ -273,7 +275,8 @@ public final class GraphUtil {
         }
 
         @Override
-        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException {
+        public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs)
+                throws IOException {
             lastVisitedFile = file;
             readSourceCode(file).ifPresent(sourceCodes::add);
             return FileVisitResult.CONTINUE;

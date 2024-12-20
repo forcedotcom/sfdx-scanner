@@ -18,9 +18,12 @@ import apex.jorje.semantic.compiler.parser.ParserEngine;
 import apex.jorje.semantic.compiler.sfdc.NoopCompilerProgressCallback;
 import apex.jorje.services.exception.CompilationException;
 import apex.jorje.services.exception.ParseException;
+import com.google.common.collect.Lists;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.graph.build.Util;
+
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,31 +38,86 @@ public final class JorjeUtil {
         incrementLogLevel();
     }
 
-    public static List<CodeUnit> compileApexFromProject(List<String> sourceCodes) {
-        List<SourceFile> sourceFiles = sourceCodes.stream().map(sourceCode -> SourceFile.builder().setBody(sourceCode).build()).collect(Collectors.toList());
+    public static List<Util.CompilationDescriptor> compileApexFromProject(List<String> sourceCodes) {
+        List<SourceFile> sourceFiles =
+                sourceCodes.stream()
+                        .map(sourceCode -> SourceFile.builder().setBody(sourceCode).build())
+                        .collect(Collectors.toList());
 
-        CompilationInput input = new CompilationInput(
-            sourceFiles,
-            EmptySymbolProvider.get(),
-            new TestAccessEvaluator(),
-            new TestQueryValidators.Noop(),
-            null,
-            NoopCompilerProgressCallback.get()
-        );
+        CompilationInput input =
+                new CompilationInput(
+                        sourceFiles,
+                        EmptySymbolProvider.get(),
+                        new TestAccessEvaluator(),
+                        new TestQueryValidators.Noop(),
+                        null,
+                        NoopCompilerProgressCallback.get());
 
-        ValidationSettings settings = ValidationSettings.builder()
-            .setValidationBehavior(ValidationSettings.ValidationBehavior.COLLECT_MULTIPLE_ERRORS)
-            .build();
+        ValidationSettings settings =
+                ValidationSettings.builder()
+                        .setValidationBehavior(
+                                ValidationSettings.ValidationBehavior.COLLECT_MULTIPLE_ERRORS)
+                        .build();
 
-        ApexCompiler compiler = ApexCompiler.builder()
-            .setInput(input)
-            .setValidationSettings(settings)
-            .setHiddenTokenBehavior(ParserEngine.HiddenTokenBehavior.COLLECT_COMMENTS)
-            .build();
+        ApexCompiler compiler =
+                ApexCompiler.builder()
+                        .setInput(input)
+                        .setValidationSettings(settings)
+                        .setHiddenTokenBehavior(ParserEngine.HiddenTokenBehavior.COLLECT_COMMENTS)
+                        .build();
 
         List<CodeUnit> codeUnits = compiler.compile(CompilerStage.ADDITIONAL_VALIDATE);
 
-        return codeUnits;
+        final List<Util.CompilationDescriptor> compilations = Lists.newArrayList();
+
+//        return codeUnits;
+        for(CodeUnit codeUnit: codeUnits) {
+            try {
+                final Set<String> exceptionMessages = new HashSet<>();
+                final List<CompilationException> exceptions =
+                    codeUnit.getErrors().get().stream()
+                        // Set.add() returns true if the thing being added wasn't already in the
+                        // set.
+                        .filter(
+                            e ->
+                                e instanceof ParseException
+                                    && exceptionMessages.add(e.getMessage()))
+                        .collect(Collectors.toList());
+//                if (!exceptions.isEmpty()) {
+//                    throw new JorjeCompilationException(
+//                        exceptions.stream()
+//                            .map(
+//                                e ->
+//                                    String.format(
+//                                        UserFacingMessages.CompilationErrors
+//                                            .INVALID_SYNTAX_TEMPLATE,
+//                                        e.getLoc().getLine(),
+//                                        e.getLoc().getColumn(),
+//                                        e.getError()))
+//                            .collect(Collectors.joining("\n")));
+//                }
+
+                // Wrap the top level Jorje node in a AstNodeWrapper and build a new tree of AstNodeWrappers
+                final AstNode node = codeUnit.getNode();
+                final AstNodeWrapper<?> wrapper = AstNodeWrapperFactory.getVertex(node, null);
+                final TreeBuilderVisitor visitor = new TreeBuilderVisitor(wrapper);
+                node.traverse(visitor, NoopScope.get());
+
+                // Walk the tree converting comments to EngineDirectives
+                NavigableMap<Integer, HiddenToken> hiddenTokenMap = codeUnit.getHiddenTokenMap();
+                if (!hiddenTokenMap.isEmpty()) {
+                    CommentVisitor commentVisitor = new CommentVisitor(hiddenTokenMap);
+                    visitComments(wrapper, commentVisitor);
+                }
+
+                // Assign positional information to each onde
+                compilations.add(new Util.CompilationDescriptor("FileName" + Math.random(), wrapper));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return compilations;
     }
 
     public static AstNodeWrapper<?> compileApexFromString(String sourceCode) {

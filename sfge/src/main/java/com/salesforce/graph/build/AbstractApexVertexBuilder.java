@@ -119,8 +119,11 @@ abstract class AbstractApexVertexBuilder {
             // TODO: This may be the cause of W-14113545. It's possible that when a synthetic vertex
             //       is created, it should replace the real vertex in the appropriate index.
             //       We need to do some more investigation around this.
-            childVerticesByIndex.put(child.getChildIndex(), vChild);
-
+            if (child.getBeginColumn() != null) {
+                childVerticesByIndex.put(child.getChildIndex(), vChild);
+            } else {
+                childVerticesByIndex.put(0, vChild);
+            }
             // To save memory in the graph, don't pass the source name into recursive calls.
             buildVertices(child, vChild, null);
         }
