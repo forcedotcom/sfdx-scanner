@@ -23,7 +23,6 @@ export interface ConfigModel {
 }
 
 export class AnnotatedConfigModel implements ConfigModel {
-	private readonly config: CodeAnalyzerConfig; // TODO: It would be nice if we updated the CodeAnalyzer (in our core module) to just return its CodeAnalyzerConfig with a getter so we didn't need to pass it around
 	private readonly codeAnalyzer: CodeAnalyzer;
 	private readonly userRules: RuleSelection;
 	private readonly allDefaultRules: RuleSelection;
@@ -34,8 +33,7 @@ export class AnnotatedConfigModel implements ConfigModel {
 	// configs not associated with the user's rule selection, thus we can't use the engines from allDefaultRules.
 	private readonly  relevantEngines: Set<string>;
 
-	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		this.config = config;
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
 		this.codeAnalyzer = codeAnalyzer;
 		this.userRules = userRules;
 		this.allDefaultRules = allDefaultRules;
@@ -45,9 +43,9 @@ export class AnnotatedConfigModel implements ConfigModel {
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return new StyledYamlFormatter(this.config, this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
+			return new StyledYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else if (format === OutputFormat.RAW_YAML) {
-			return new PlainYamlFormatter(this.config, this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
+			return new PlainYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else {
 			throw new Error(`Unsupported`)
 		}
@@ -61,8 +59,8 @@ abstract class YamlFormatter {
 	private readonly allDefaultRules: RuleSelection;
 	private readonly relevantEngines: Set<string>;
 
-	protected constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		this.config = config;
+	protected constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		this.config = codeAnalyzer.getConfig();
 		this.codeAnalyzer = codeAnalyzer;
 		this.userRules = userRules;
 		this.allDefaultRules = allDefaultRules;
@@ -214,8 +212,8 @@ abstract class YamlFormatter {
 }
 
 class PlainYamlFormatter extends YamlFormatter {
-	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		super(config, codeAnalyzer, userRules, allDefaultRules, relevantEngines);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {
@@ -224,8 +222,8 @@ class PlainYamlFormatter extends YamlFormatter {
 }
 
 class StyledYamlFormatter extends YamlFormatter {
-	constructor(config: CodeAnalyzerConfig, codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		super(config, codeAnalyzer, userRules, allDefaultRules, relevantEngines);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {

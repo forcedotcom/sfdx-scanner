@@ -19,7 +19,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	public static readonly description = getMessage(BundleName.RunCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.RunCommand, 'command.examples');
 
-	// TODO: Update when we go to Beta and when we go GA
+	// TODO: Remove when we go GA
 	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
 	public static readonly flags = {
@@ -78,7 +78,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	};
 
 	public async run(): Promise<void> {
-		// TODO: Update when we go to Beta and when we go GA
+		// TODO: Remove when we go GA
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RunCommand)).flags;

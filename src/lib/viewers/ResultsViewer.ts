@@ -141,11 +141,11 @@ export class ResultsTableDisplayer extends AbstractResultsDisplayer {
 	protected _view(results: RunResults) {
 		const violations: Violation[] = sortViolations(results.getViolations());
 		const parentFolder: string = findLongestCommonParentFolderOf(violations.map(v =>
-			getPrimaryLocation(v).getFile()).filter(f => f !== undefined));
+			v.getPrimaryLocation().getFile()).filter(f => f !== undefined));
 
 		const resultRows: ResultRow[] = violations.map((v, idx) => {
 				const severity = v.getRule().getSeverityLevel();
-				const primaryLocation = getPrimaryLocation(v);
+				const primaryLocation: CodeLocation = v.getPrimaryLocation();
 				const relativeFile: string | null = primaryLocation.getFile() ?
 					path.relative(parentFolder, primaryLocation.getFile()!) : null;
 				return {
@@ -191,11 +191,6 @@ function sortViolations(violations: Violation[]): Violation[] {
 		const v2StartColumn = v2PrimaryLocation.getStartColumn() || /* istanbul ignore next */ 0;
 		return v1StartColumn - v2StartColumn;
 	});
-}
-
-// TODO: We should update core module to have this function directly on the Violation object and then remove this helper
-function getPrimaryLocation(violation: Violation): CodeLocation {
-	return violation.getCodeLocations()[violation.getPrimaryLocationIndex()];
 }
 
 /**

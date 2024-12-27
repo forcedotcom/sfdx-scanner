@@ -108,7 +108,7 @@ export class ConfigAction {
 		// We need the Set of all Engines that returned rules for the user's selection on both the Default and User Cores.
 		const relevantEngines: Set<string> = new Set([...userRules.getEngineNames(), ...selectedDefaultRules.getEngineNames()]);
 
-		const configModel: ConfigModel = new AnnotatedConfigModel(userConfig, userCore, userRules, allDefaultRules, relevantEngines);
+		const configModel: ConfigModel = new AnnotatedConfigModel(userCore, userRules, allDefaultRules, relevantEngines);
 
 		const fileWritten: boolean = this.dependencies.writer
 			? await this.dependencies.writer.write(configModel)

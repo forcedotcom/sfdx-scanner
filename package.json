@@ -6,7 +6,7 @@
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
 		"@oclif/core": "^3.3.2",
-		"@salesforce/code-analyzer-core": "0.20.1",
+		"@salesforce/code-analyzer-core": "0.20.2",
 		"@salesforce/code-analyzer-engine-api": "0.16.1",
 		"@salesforce/code-analyzer-eslint-engine": "0.17.0",
 		"@salesforce/code-analyzer-flowtest-engine": "0.16.2",
