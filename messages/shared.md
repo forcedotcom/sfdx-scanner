@@ -1,6 +1,6 @@
 # label.command-state
 
-Developer Preview
+Beta
 
 # warning.command-state
 
