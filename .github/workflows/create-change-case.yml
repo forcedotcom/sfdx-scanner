@@ -1,0 +1,14 @@
+name: create-change-case
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+
+jobs:
+  ctc-open:
+    uses: salesforcecli/github-workflows/.github/workflows/ctcOpen.yml@main
+    secrets: inherit
+  echo-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ steps.ctc-open.outputs }}"
