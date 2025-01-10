@@ -32,12 +32,6 @@ jobs:
         with:
           node-version: 'lts/*'
 
-      - name: Fail if not one of the permitted users
-        if: ${{ github.actor != 'stephen-carter-at-sf' && github.actor != 'jfeingold35' && github.actor != 'jag-j' }}
-        run: |
-          echo "::error::The user ${{ github.actor }} is not one of the permitted users that may perform this action."
-          exit 1
-
       - name: Fail if not confirmed
         if: ${{ github.event.inputs.confirm != 'true' }}
         run: |
