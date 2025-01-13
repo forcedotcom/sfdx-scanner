@@ -8,7 +8,6 @@ import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import {AnnotatedConfigModel, ConfigContext} from '../../lib/models/ConfigModel';
 import {Displayable, UxDisplay} from '../../lib/Display';
 
 export default class ConfigCommand extends SfCommand<void> implements Displayable {
@@ -18,7 +17,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	public static readonly description = getMessage(BundleName.ConfigCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.ConfigCommand, 'command.examples');
 
-	// TODO: Update when we go to Beta and when we go GA
+	// TODO: Remove when we go GA
 	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
 	public static readonly flags = {
@@ -51,7 +50,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 	};
 
 	public async run(): Promise<void> {
-		// TODO: Update when we go to Beta and when we go GA
+		// TODO: Remove when we go GA
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(ConfigCommand)).flags;
@@ -62,15 +61,11 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 
 	protected createDependencies(outputFile?: string): ConfigDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		const modelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => {
-			return AnnotatedConfigModel.fromSelection(relevantEngines, userContext, defaultContext);
-		};
 		const dependencies: ConfigDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressEventListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
-			modelGenerator: modelGeneratorFunction,
 			actionSummaryViewer: new ConfigActionSummaryViewer(uxDisplay),
 			viewer: new ConfigStyledYamlViewer(uxDisplay)
 		};

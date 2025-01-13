@@ -7,6 +7,6 @@
     disable_engine: false
 
     # Some description for top_field
-    top_field: # Modified from: null
+    top_field: # Modified from: {}
       sub_field:
         - optional-input-config.yml

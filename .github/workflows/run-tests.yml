@@ -96,6 +96,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
       # Install SF CLI via NPM
       - run: npm install -g @salesforce/cli
       # Download and install the Tarball artifact
@@ -112,7 +115,7 @@ jobs:
         shell: bash
         run: |
           # We need to determine the Tarball's name first.
-          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-plugin-code-analyzer-5\\.0\\.0-alpha\\.[0-9]*\\.tgz)
+          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-plugin-code-analyzer-5\\.0\\.0-beta\\.[0-9]*\\.tgz)
           # We need to determine the Tarball's location in an installable way.
           # Get the path to the download folder. Swap out backslashes for forward slashes to ensure Windows compatibility.
           RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`

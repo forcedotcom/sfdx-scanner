@@ -17,7 +17,6 @@ export enum BundleName {
 	ResultsWriter = 'results-writer',
 	RunAction = 'run-action',
 	RunCommand = 'run-command',
-	RunSummaryViewer = 'run-summary-viewer',
 	Shared = 'shared',
 	WorkspaceUtil = 'workspace-util'
 }
@@ -50,6 +49,6 @@ export function getMessage(bundle: BundleName, messageKey: string, tokens?: Toke
 }
 
 export function getMessages(bundle: BundleName, messageKey: string, tokens?: Tokens): string[] {
-	INSTANCE = INSTANCE || new MessageCatalog();
+	INSTANCE = INSTANCE || /* istanbul ignore next */ new MessageCatalog();
 	return INSTANCE.getMessages(bundle, messageKey, tokens);
 }

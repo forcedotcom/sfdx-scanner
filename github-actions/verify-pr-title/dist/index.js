@@ -31258,7 +31258,7 @@ function run() {
                 return;
             }
         }
-        else if (baseBranch == "dev" || /^release-\d+\.\d+\.\d+$/.test(baseBranch)) {
+        else if (baseBranch == "dev" || /^release-\d+\.\d+\.\d+\.*$/.test(baseBranch)) {
             // There's a title convention for merging feature branch PRs into `dev` or `release-X.Y.Z`
             // branches.
             if ((0, verifyFeaturePrTitle_1.verifyFeaturePrTitle)(title)) {

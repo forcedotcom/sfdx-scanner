@@ -13,7 +13,7 @@ import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
 import {createPathStarts} from '../utils/PathStartUtil';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {ResultsViewer} from '../viewers/ResultsViewer';
-import {RunSummaryViewer} from '../viewers/RunSummaryViewer';
+import {RunActionSummaryViewer} from '../viewers/ActionSummaryViewer';
 import {ResultsWriter} from '../writers/ResultsWriter';
 import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
@@ -27,7 +27,7 @@ export type RunDependencies = {
 	progressListeners: ProgressEventListener[];
 	writer: ResultsWriter;
 	resultsViewer: ResultsViewer;
-	runSummaryViewer: RunSummaryViewer;
+	actionSummaryViewer: RunActionSummaryViewer;
 }
 
 export type RunInput = {
@@ -80,7 +80,7 @@ export class RunAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
 		this.dependencies.resultsViewer.view(results);
-		this.dependencies.runSummaryViewer.view(results, logWriter.getLogDestination(), input['output-file']);
+		this.dependencies.actionSummaryViewer.view(results, logWriter.getLogDestination(), input['output-file']);
 
 		const thresholdValue = input['severity-threshold'];
 		if (thresholdValue) {

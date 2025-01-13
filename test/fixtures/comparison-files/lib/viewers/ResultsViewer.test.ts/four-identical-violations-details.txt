@@ -1,28 +1,38 @@
-Found 4 violation(s) across 1 file(s):
+
+Violation file paths relative to '{{RUNDIR}}'.
+
 === 1. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  test{{PATHSEP}}sample-code{{PATHSEP}}someFile.cls (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 2. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  test{{PATHSEP}}sample-code{{PATHSEP}}someFile.cls (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 3. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  test{{PATHSEP}}sample-code{{PATHSEP}}someFile.cls (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url
 
 === 4. stub1RuleA
     severity:  4 (Low)
     engine:    stubEngine1
     message:   This is a message
-    location:  __PATH_TO_SOME_FILE__:1:1
-    resources: https://example.com/stub1RuleA
+    location:  test{{PATHSEP}}sample-code{{PATHSEP}}someFile.cls (1:1)
+    resources:
+        https://example.com/stub1RuleA
+        https://violation_specific.url

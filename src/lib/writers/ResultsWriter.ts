@@ -35,13 +35,10 @@ export class ResultsFileWriter implements ResultsWriter {
 		} else if (['.html', '.htm'].includes(ext)) {
 			this.format = OutputFormat.HTML;
 		} else if (ext === '.sarif' || file.toLowerCase().endsWith('.sarif.json')) {
-			throw new Error('TODO: Support SARIF-type output');
+			this.format = OutputFormat.SARIF;
 		// Check for `.json` AFTER checking for `.sarif.json`!
 		} else if (ext === '.json') {
 			this.format = OutputFormat.JSON;
-		} else if (ext === '.junit' || file.toLowerCase().endsWith('.junit.xml')) {
-			throw new Error('TODO: Support JUNIT-type output');
-		// Check for `.xml` AFTER checking for `.junit.xml`!
 		} else if (ext === '.xml') {
 			this.format = OutputFormat.XML;
 		} else {

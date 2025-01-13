@@ -1,6 +1,7 @@
 import {CodeAnalyzer, EngineLogEvent, EventType, LogEvent, LogLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {LogWriter} from '../writers/LogWriter';
+import {BundleName, getMessage} from "../messages";
 
 export interface LogEventListener {
 	listen(codeAnalyzer: CodeAnalyzer): void;
@@ -58,6 +59,7 @@ export class LogEventLogger implements LogEventListener {
 	}
 
 	public stopListening(): void {
+		this.logWriter.writeToLog('\n' + getMessage(BundleName.Shared, 'log.give-us-feedback'));
 		this.logWriter.closeLog();
 	}
 

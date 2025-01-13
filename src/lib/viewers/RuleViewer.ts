@@ -1,5 +1,5 @@
 import {Ux} from '@salesforce/sf-plugins-core';
-import {Rule, RuleType, SeverityLevel} from '@salesforce/code-analyzer-core';
+import {Rule, SeverityLevel} from '@salesforce/code-analyzer-core';
 import {Display} from '../Display';
 import {toStyledHeaderAndBody} from '../utils/StylingUtil';
 import {BundleName, getMessage} from '../messages';
@@ -17,12 +17,15 @@ abstract class AbstractRuleDisplayer implements RuleViewer {
 	}
 
 	public view(rules: Rule[]): void {
-		if (rules.length === 0) {
-			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-no-rules'));
-		} else {
-			this.display.displayLog(getMessage(BundleName.RuleViewer, 'summary.found-rules', [rules.length]));
+		this.displayLineSeparator();
+		if (rules.length > 0) {
 			this._view(rules);
+			this.displayLineSeparator();
 		}
+	}
+
+	protected displayLineSeparator(): void {
+		this.display.displayLog("");
 	}
 
 	protected abstract _view(rules: Rule[]): void;
@@ -35,15 +38,31 @@ export class RuleDetailDisplayer extends AbstractRuleDisplayer {
 			const rule = rules[i];
 			const header = getMessage(BundleName.RuleViewer, 'summary.detail.header', [i + 1, rule.getName()]);
 			const severity = rule.getSeverityLevel();
+
 			const body = {
-				engine: rule.getEngineName(),
 				severity: `${severity.valueOf()} (${SeverityLevel[severity]})`,
-				type: RuleType[rule.getType()],
-				tags: rule.getTags().join(', '),
-				resources: rule.getResourceUrls().join(', '),
-				description: rule.getDescription()
+				engine: rule.getEngineName(),
 			};
-			const keys = ['severity', 'engine', 'type', 'tags', 'resources', 'description'];
+			const keys: string[] = ['severity', 'engine'];
+
+			if (rule.getTags().length > 0) {
+				body['tags'] = rule.getTags().join(', ');
+				keys.push('tags');
+			}
+
+			if (rule.getResourceUrls().length == 1) {
+				body['resource'] = rule.getResourceUrls()[0];
+				keys.push('resource');
+			} else if (rule.getResourceUrls().length > 1) {
+				body['resources'] = rule.getResourceUrls();
+				keys.push('resources');
+			}
+
+			if (rule.getDescription().length > 0) {
+				body['description'] = rule.getDescription();
+				keys.push('description');
+			}
+
 			styledRules.push(toStyledHeaderAndBody(header, body, keys));
 		}
 		this.display.displayLog(styledRules.join('\n\n'));

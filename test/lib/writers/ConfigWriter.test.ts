@@ -9,7 +9,7 @@ describe('ConfigWriter implementations', () => {
 	describe('ConfigWriterImpl', () => {
 
 		let writeFileSpy: jest.SpyInstance;
-		let writeFileInvocations: {file: fs.PathOrFileDescriptor, contents: String|ArrayBufferView}[];
+		let writeFileInvocations: {file: fs.PathOrFileDescriptor, contents: string|ArrayBufferView}[];
 		beforeEach(() => {
 			writeFileInvocations = [];
 			writeFileSpy = jest.spyOn(fs, 'writeFileSync').mockImplementation((file, contents) => {

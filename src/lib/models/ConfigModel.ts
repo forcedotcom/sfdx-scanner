@@ -3,6 +3,8 @@ import {
 	CodeAnalyzer,
 	CodeAnalyzerConfig,
 	ConfigDescription,
+	ConfigFieldDescription,
+	EngineConfig,
 	Rule,
 	RuleSelection,
 	SeverityLevel
@@ -20,50 +22,49 @@ export interface ConfigModel {
 	toFormattedOutput(format: OutputFormat): string;
 }
 
-export type ConfigContext = {
-	config: CodeAnalyzerConfig;
-	core: CodeAnalyzer;
-	rules: RuleSelection;
-}
-
-export type ConfigModelGeneratorFunction = (relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) => ConfigModel;
-
 export class AnnotatedConfigModel implements ConfigModel {
-	private readonly relevantEngines: Set<string>;
-	private readonly userContext: ConfigContext;
-	private readonly defaultContext: ConfigContext;
+	private readonly codeAnalyzer: CodeAnalyzer;
+	private readonly userRules: RuleSelection;
+	private readonly allDefaultRules: RuleSelection;
 
-	private constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+	// Note that it is important that we calculate the relevant engines list based on (the user rule selection with no
+	// config) plus (user rule selection with user config) since we still want to show the "disable_engine" config value
+	// in the output if a user even if selects an engine that is currently disabled. But we don't want to the engine
+	// configs not associated with the user's rule selection, thus we can't use the engines from allDefaultRules.
+	private readonly  relevantEngines: Set<string>;
+
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		this.codeAnalyzer = codeAnalyzer;
+		this.userRules = userRules;
+		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
-		this.userContext = userContext;
-		this.defaultContext = defaultContext;
 	}
 
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return new StyledYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
+			return new StyledYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else if (format === OutputFormat.RAW_YAML) {
-			return new PlainYamlFormatter(this.relevantEngines, this.userContext, this.defaultContext).toYaml();
+			return new PlainYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
 		} else {
 			throw new Error(`Unsupported`)
 		}
 	}
-
-	public static fromSelection(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext): AnnotatedConfigModel {
-		return new AnnotatedConfigModel(relevantEngines, userContext, defaultContext);
-	}
 }
 
 abstract class YamlFormatter {
+	private readonly config: CodeAnalyzerConfig;
+	private readonly codeAnalyzer: CodeAnalyzer;
+	private readonly userRules: RuleSelection;
+	private readonly allDefaultRules: RuleSelection;
 	private readonly relevantEngines: Set<string>;
-	private readonly userContext: ConfigContext;
-	private readonly defaultContext: ConfigContext;
 
-	protected constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
+	protected constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		this.config = codeAnalyzer.getConfig();
+		this.codeAnalyzer = codeAnalyzer;
+		this.userRules = userRules;
+		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
-		this.userContext = userContext;
-		this.defaultContext = defaultContext;
 	}
 
 	protected abstract toYamlComment(commentText: string): string
@@ -83,50 +84,65 @@ abstract class YamlFormatter {
 		return yamlCode.replace(/(\r?\n|$)/, ` ${comment}$1`);
 	}
 
-	private toYamlField(fieldName: string, userValue: unknown, defaultValue: unknown): string {
-		if (looksLikeAPathValue(userValue) && userValue === defaultValue) {
-			// We special handle a path value when it is equal to the default value, making it equal null because
-			// chances are it is a derived file or folder value based on the specific environment that we do not want to
-			// actually want to hard code since checking in the config to CI/CD system may create a different value
-			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [JSON.stringify(userValue)]);
-			return this.toYamlUncheckedFieldWithInlineComment(fieldName, null, commentText);
-		} else if (JSON.stringify(userValue) === JSON.stringify(defaultValue)) {
-			return this.toYamlUncheckedField(fieldName, userValue);
+	private toYamlFieldWithFieldDescription(fieldName: string, resolvedValue: unknown, fieldDescription: ConfigFieldDescription): string {
+		const resolvedValueJson: string = JSON.stringify(resolvedValue);
+		const defaultValueJson: string = JSON.stringify(fieldDescription.defaultValue);
+
+		let yamlField: string;
+		if (!fieldDescription.wasSuppliedByUser && resolvedValueJson !== defaultValueJson) {
+			// Whenever the user did not supply the value themselves but the resolved value is different from the
+			// default value, this means the value was not a "fixed" value but a value "calculated" at runtime.
+			// Since "calculated" values often depend on the specific environment, we do not want to actually hard code
+			// this value into the config since checking in the config to CI/CD system may create a different value.
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [resolvedValueJson]);
+			yamlField = this.toYamlUncheckedFieldWithInlineComment(fieldName, fieldDescription.defaultValue, commentText);
+		} else {
+			yamlField = this.toYamlField(fieldName, resolvedValue, fieldDescription.defaultValue);
 		}
 
-		userValue = replaceAbsolutePathsWithRelativePathsWherePossible(userValue, this.userContext.config.getConfigRoot() + path.sep);
+		return this.toYamlComment(fieldDescription.descriptionText) + "\n" + yamlField
+	}
 
-		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
-		return this.toYamlUncheckedFieldWithInlineComment(fieldName, userValue, commentText);
+	private toYamlField(fieldName: string, resolvedValue: unknown, defaultValue: unknown): string {
+		const resolvedValueJson: string = JSON.stringify(resolvedValue);
+		const defaultValueJson: string = JSON.stringify(defaultValue);
+
+		if (resolvedValueJson === defaultValueJson) {
+			return this.toYamlUncheckedField(fieldName, resolvedValue);
+		}
+
+		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultValueJson]);
+		resolvedValue = replaceAbsolutePathsWithRelativePathsWherePossible(resolvedValue, this.config.getConfigRoot() + path.sep);
+		return this.toYamlUncheckedFieldWithInlineComment(fieldName, resolvedValue, commentText);
 	}
 
 	toYaml(): string {
-		const topLevelDescription: ConfigDescription = CodeAnalyzerConfig.getConfigDescription();
-		return this.toYamlSectionHeadingComment(topLevelDescription.overview!) + '\n' +
+		const topLevelDescription: ConfigDescription = this.config.getConfigDescription();
+		return this.toYamlSectionHeadingComment(topLevelDescription.overview) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.config_root) + '\n' +
-			this.toYamlField('config_root', this.userContext.config.getConfigRoot(), this.defaultContext.config.getConfigRoot()) + '\n' +
+			this.toYamlFieldWithFieldDescription('config_root', this.config.getConfigRoot(),
+				topLevelDescription.fieldDescriptions.config_root) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.log_folder) + '\n' +
-			this.toYamlField('log_folder', this.userContext.config.getLogFolder(), this.defaultContext.config.getLogFolder()) + '\n' +
+			this.toYamlFieldWithFieldDescription('log_folder', this.config.getLogFolder(),
+				topLevelDescription.fieldDescriptions.log_folder) + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.rules) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.rules.descriptionText) + '\n' +
 			this.toYamlRuleOverrides() + '\n' +
 			'\n' +
-			this.toYamlComment(topLevelDescription.fieldDescriptions!.engines) + '\n' +
+			this.toYamlComment(topLevelDescription.fieldDescriptions.engines.descriptionText) + '\n' +
 			this.toYamlEngineOverrides() + '\n' +
 			'\n' +
 			this.toYamlSectionHeadingComment(getMessage(BundleName.ConfigModel, 'template.common.end-of-config')) + '\n';
 	}
 
 	private toYamlRuleOverrides(): string {
-		if (this.userContext.rules.getCount() === 0) {
+		if (this.userRules.getCount() === 0) {
 			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 			return `rules: {} ${this.toYamlComment(commentText)}`;
 		}
 
 		let yamlCode: string = 'rules:\n';
-		for (const engineName of this.userContext.rules.getEngineNames()) {
+		for (const engineName of this.userRules.getEngineNames()) {
 			yamlCode += '\n';
 			yamlCode += indent(this.toYamlRuleOverridesForEngine(engineName), 2) + '\n';
 		}
@@ -138,7 +154,7 @@ abstract class YamlFormatter {
 			[engineName.toUpperCase()]);
 		let yamlCode: string = this.toYamlSectionHeadingComment(engineConfigHeader) + '\n';
 		yamlCode += `${engineName}:\n`;
-		for (const userRule of this.userContext.rules.getRulesFor(engineName)) {
+		for (const userRule of this.userRules.getRulesFor(engineName)) {
 			const defaultRule: Rule|null = this.getDefaultRuleFor(engineName, userRule.getName());
 			yamlCode += indent(this.toYamlRuleOverridesForRule(userRule, defaultRule), 2) + '\n';
 		}
@@ -147,7 +163,7 @@ abstract class YamlFormatter {
 
 	private getDefaultRuleFor(engineName: string, ruleName: string): Rule|null {
 		try {
-			return this.defaultContext.rules.getRule(engineName, ruleName);
+			return this.allDefaultRules.getRule(engineName, ruleName);
 		} catch (e) {
 			// istanbul ignore next
 			return null;
@@ -176,31 +192,28 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlEngineOverridesForEngine(engineName: string): string {
-		const engineConfigDescriptor = this.userContext.core.getEngineConfigDescription(engineName);
-		const userEngineConfig = this.userContext.core.getEngineConfig(engineName);
-		const defaultEngineConfig = this.defaultContext.core.getEngineConfig(engineName);
+		const engineConfigDescriptor: ConfigDescription = this.codeAnalyzer.getEngineConfigDescription(engineName);
+		const userEngineConfig: EngineConfig = this.codeAnalyzer.getEngineConfig(engineName);
 
 		let yamlCode: string = '\n' +
-			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview!) + '\n' +
+			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview) + '\n' +
 			`${engineName}:\n`;
 		// By fiat, the field description will always include, at minimum, an entry for "disable_engine", so we can
 		// assume that the object is not undefined.
-		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions!)) {
-			const fieldDescription = engineConfigDescriptor.fieldDescriptions![configField];
-			const defaultValue = defaultEngineConfig[configField] ?? null;
-			const userValue = userEngineConfig[configField] ?? defaultValue;
+		for (const configField of Object.keys(engineConfigDescriptor.fieldDescriptions)) {
+			const fieldDescription: ConfigFieldDescription = engineConfigDescriptor.fieldDescriptions[configField];
+			const resolvedValue = userEngineConfig[configField] ?? fieldDescription.defaultValue;
 			// Add a leading newline to visually break up the property from the previous one.
 			yamlCode += '\n' +
-				indent(this.toYamlComment(fieldDescription), 2) + '\n' +
-				indent(this.toYamlField(configField, userValue, defaultValue), 2) + '\n';
+				indent(this.toYamlFieldWithFieldDescription(configField, resolvedValue, fieldDescription), 2) + '\n';
 		}
 		return yamlCode.trimEnd();
 	}
 }
 
 class PlainYamlFormatter extends YamlFormatter {
-	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
-		super(relevantEngines, userContext, defaultContext);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {
@@ -209,17 +222,13 @@ class PlainYamlFormatter extends YamlFormatter {
 }
 
 class StyledYamlFormatter extends YamlFormatter {
-	constructor(relevantEngines: Set<string>, userContext: ConfigContext, defaultContext: ConfigContext) {
-		super(relevantEngines, userContext, defaultContext);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
 	}
 
 	protected toYamlComment(commentText: string): string {
 		return commentText.replace(/^.*/gm, s => makeGrey(`# ${s}`));
 	}
-}
-
-function looksLikeAPathValue(value: unknown) {
-	return typeof(value) === 'string' && !value.includes('\n') && value.includes(path.sep);
 }
 
 function replaceAbsolutePathsWithRelativePathsWherePossible(value: unknown, parentFolder: string): unknown {

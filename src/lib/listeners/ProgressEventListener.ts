@@ -138,8 +138,7 @@ export class RuleSelectionProgressSpinner extends ProgressSpinner implements Pro
 	}
 
 	protected createFinishedSpinnerStatus(): string {
-		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.finished-status',
-			[[...this.engineNames.keys()].join(', ')]);
+		return getMessage(BundleName.ProgressEventListener, 'selection-spinner.finished-status');
 	}
 }
 
@@ -208,7 +207,7 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 			engineLines.push(getMessage(BundleName.ProgressEventListener, 'execution-spinner.engine-status', [name, progress]));
 		}
 		return [
-			getMessage(BundleName.ProgressEventListener, 'execution-spinner.progress-summary', [unfinishedEngines, totalEngines, secondsRunning]),
+			getMessage(BundleName.ProgressEventListener, 'execution-spinner.progress-summary', [totalEngines - unfinishedEngines, totalEngines, secondsRunning]),
 			...engineLines
 		].join('\n');
 	}

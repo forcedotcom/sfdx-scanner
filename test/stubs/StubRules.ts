@@ -1,4 +1,4 @@
-import {Rule, RuleType, SeverityLevel} from '@salesforce/code-analyzer-core';
+import {Rule, SeverityLevel} from '@salesforce/code-analyzer-core';
 
 export class StubRule1 implements Rule {
 	public getName(): string {
@@ -15,10 +15,6 @@ export class StubRule1 implements Rule {
 
 	public getFormattedSeverity(): string {
 		return `2 (High)`;
-	}
-
-	public getType(): RuleType {
-		return RuleType.Standard;
 	}
 
 	public getFormattedType(): string {
@@ -61,10 +57,6 @@ export class StubRule2 implements Rule {
 
 	public getFormattedSeverity(): string {
 		return `4 (Low)`;
-	}
-
-	public getType(): RuleType {
-		return RuleType.Flow;
 	}
 
 	public getFormattedType(): string {
