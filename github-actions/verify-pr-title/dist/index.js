@@ -45,14 +45,14 @@ const PR_TYPE_PORTION = "(NEW|FIX|CHANGE)";
 const SCOPE_PORTION = "\\([^()]+\\)";
 /**
  * This RegExp matches the title format for Feature Branch pull requests,
- * i.e., a PR aimed at {@code dev} or a {@code release-x.y.z} branch, not
- * coming from {@code main}.
+ * i.e., a PR aimed at {@code dev-4} or a {@code release-x.y.z} branch, not
+ * coming from {@code main-4}.
  */
 const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${SCOPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * aimed at {@code dev} or a {@code release-x.y.z} branch, not coming
- * from {@code main}.
+ * aimed at {@code dev-4} or a {@code release-x.y.z} branch, not coming
+ * from {@code main-4}.
  * @param title
  */
 function verifyFeaturePrTitle(title) {
@@ -73,27 +73,27 @@ exports.verifyMain2DevPrTitle = void 0;
 const common_1 = __nccwpck_require__(6979);
 /**
  * This regex portion matches the accepted Type options for a pull request
- * merging {@code main} (or an {@code m2d/*} branch) back into {@dev}.
+ * merging {@code main-4} (or an {@code m2d/*} branch) back into {@dev-4}.
  * NOTE: The only acceptable option for this is {@code MAIN2DEV}, with flexible
  * casing.
  */
 const PR_TYPE_PORTION = "MAIN2DEV";
 /**
  * This regex portion matches the accepted Descriptor portion of a pull request
- * title merging {@code main} (or an {@code m2d/*} branch) back into {@dev}.
+ * title merging {@code main-4} (or an {@code m2d/*} branch) back into {@dev-4}.
  * It can contain anything, but its contents must include the words "merging" (as a
  * reminder that the PR must be merged with a merge commit as opposed to a squash or rebase),
  * and "vX.Y.Z", which should correspond to the new release.
  */
 const DESCRIPTOR_PORTION = ".*merging.+\\d+\\.\\d+\\.\\d+.*";
 /**
- * This RegExp matches the title format for pull requests merging {@code main} (or
- * an {@code m2d/*} branch) back into {@code dev}.
+ * This RegExp matches the title format for pull requests merging {@code main-4} (or
+ * an {@code m2d/*} branch) back into {@code dev-4}.
  */
 const MAIN2DEV_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}${DESCRIPTOR_PORTION}`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * merging {@code main} (or an {@code m2d/*} branch) back into {@code dev}.
+ * merging {@code main-4} (or an {@code m2d/*} branch) back into {@code dev-4}.
  * @param title
  */
 function verifyMain2DevPrTitle(title) {
@@ -119,12 +119,12 @@ const common_1 = __nccwpck_require__(6979);
 const PR_TYPE_PORTION = "RELEASE";
 /**
  * This RegExp matches the title format for Release Branch pull requests,
- * i.e., a PR aimed at the {@code release} or {@code main} branches.
+ * i.e., a PR aimed at the {@code release} or {@code main-4} branches.
  */
 const RELEASE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${common_1.SEPARATOR}${common_1.WORK_ITEM_PORTION}${common_1.SEPARATOR}[^\\s]+.*`, "i");
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * aimed at the {@code release} or {@code main} branches.
+ * aimed at the {@code release} or {@code main-4} branches.
  * @param title
  */
 function verifyReleasePrTitle(title) {
@@ -31239,20 +31239,20 @@ function run() {
         const baseBranch = base.ref;
         const head = pullRequest.head;
         const headBranch = head.ref;
-        if (headBranch.startsWith("m2d/") && baseBranch === "dev") {
-            // "m2d/" is the prefix of the auto-generated branches we use to merge `main` into `dev` post-release.
-            // Pull Requests merging these branches into `dev` have their own title convention separate from
-            // the convention for other aimed-at-`dev` PRs.
+        if (headBranch.startsWith("m2d/") && baseBranch === "dev-4") {
+            // "m2d/" is the prefix of the auto-generated branches we use to merge `main-4` into `dev-4` post-release.
+            // Pull Requests merging these branches into `dev-4` have their own title convention separate from
+            // the convention for other aimed-at-`dev-4` PRs.
             if ((0, verifyMain2DevPrTitle_1.verifyMain2DevPrTitle)(title)) {
-                console.log(`PR title '${title}' accepted for dev branch.`);
+                console.log(`PR title '${title}' accepted for dev-4 branch.`);
             }
             else {
                 core.setFailed(`PR title '${title}' does not match the template of "Main2Dev @W-XXXX@ Merging after vX.Y.Z"`);
                 return;
             }
         }
-        else if (baseBranch === "release" || baseBranch === "main") {
-            // There's a title convention for merging PRs into `release`/`main`.
+        else if (baseBranch === "release" || baseBranch === "main-4") {
+            // There's a title convention for merging PRs into `release`/`main-4`.
             if ((0, verifyReleasePrTitle_1.verifyReleasePrTitle)(title)) {
                 console.log(`PR title '${title}' accepted for ${baseBranch} branch`);
             }
@@ -31261,8 +31261,8 @@ function run() {
                 return;
             }
         }
-        else if (baseBranch == "dev" || /^release-\d+\.\d+\.\d+$/.test(baseBranch)) {
-            // There's a title convention for merging feature branch PRs into `dev` or `release-X.Y.Z`
+        else if (baseBranch == "dev-4" || /^release-\d+\.\d+\.\d+$/.test(baseBranch)) {
+            // There's a title convention for merging feature branch PRs into `dev-4` or `release-X.Y.Z`
             // branches.
             if ((0, verifyFeaturePrTitle_1.verifyFeaturePrTitle)(title)) {
                 console.log(`PR title '${title}' accepted for ${baseBranch} branch`);

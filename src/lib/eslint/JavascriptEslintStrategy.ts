@@ -10,7 +10,12 @@ const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
 		"globals": {
-			"$A": "readonly", // For Aura: https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_jsapi_dollarA.htm
+			"$A": "readonly",            // For Aura: https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_jsapi_dollarA.htm
+			"$Browser": "readonly",      // For Lightning Aura: https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/expr_source.htm
+			"$ContentAsset": "readonly", // For Lightning Aura: ^
+			"$Label": "readonly",        // For Lightning Aura: ^
+			"$Locale": "readonly",       // For Lightning Aura: ^
+			"$Resource": "readonly"      // For Lightning Aura: ^
 		},
 		"parser": "@babel/eslint-parser",
 		"parserOptions": {

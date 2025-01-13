@@ -58,7 +58,7 @@ describe("Tests for RuleListAction", () => {
 			await ruleListAction.run(inputs);
 
 			let tableData: Ux.Table.Data[] = display.getLastTableData();
-			expect(tableData).to.have.length(223);
+			expect(tableData).to.have.length(230);
 
 			for (const rowData of tableData) {
 				expect(rowData.engine).to.equal('eslint-lwc');

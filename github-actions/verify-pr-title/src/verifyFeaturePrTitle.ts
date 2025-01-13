@@ -14,15 +14,15 @@ const SCOPE_PORTION = "\\([^()]+\\)";
 
 /**
  * This RegExp matches the title format for Feature Branch pull requests,
- * i.e., a PR aimed at {@code dev} or a {@code release-x.y.z} branch, not
- * coming from {@code main}.
+ * i.e., a PR aimed at {@code dev-4} or a {@code release-x.y.z} branch, not
+ * coming from {@code main-4}.
  */
 const FEATURE_PR_REGEX = new RegExp(`^${PR_TYPE_PORTION}${SEPARATOR}${SCOPE_PORTION}${SEPARATOR}${WORK_ITEM_PORTION}${SEPARATOR}[^\\s]+.*`, "i");
 
 /**
  * Verifies that the provided string is an acceptable title for a PR
- * aimed at {@code dev} or a {@code release-x.y.z} branch, not coming
- * from {@code main}.
+ * aimed at {@code dev-4} or a {@code release-x.y.z} branch, not coming
+ * from {@code main-4}.
  * @param title
  */
 export function verifyFeaturePrTitle(title: string): boolean {
