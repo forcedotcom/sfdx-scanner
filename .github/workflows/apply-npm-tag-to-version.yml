@@ -44,11 +44,9 @@ jobs:
           echo "Invalid package name. Please choose one of the allowed package names."
           exit 1
 
-      - name: Prepare NPM Credentials
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Apply tag
         run: |
           echo "You have confirmed that using this action is only recommended for emergency rollback situations and that you are responsible for manually applying the ${{ github.event.inputs.tag_name }} tag to ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }}."
           echo "Applying tag..."
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           npm dist-tag add ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }} ${{ github.event.inputs.tag_name }}
