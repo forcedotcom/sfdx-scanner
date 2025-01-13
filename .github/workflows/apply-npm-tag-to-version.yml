@@ -1,0 +1,54 @@
+name: apply-npm-tag-to-version
+on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: 'Select Package Name:'
+        required: true
+        type: choice
+        options:
+          - '@salesforce/plugin-code-analyzer'
+          - '@salesforce/sfdx-scanner'
+      tag_name:
+        description: 'Tag Name (ex: latest):'
+        required: true
+        type: string
+      version:
+        description: 'Version (ex: 4.8.0):'
+        required: true
+        type: string
+      confirm:
+        description: 'Check this box to confirm that you understand that applying a tag using this action is only recommended for emergency rollback situations and that you understand the consequences.'
+        required: true
+        type: boolean
+
+jobs:
+  publish_package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Fail if not confirmed
+        if: ${{ github.event.inputs.confirm != 'true' }}
+        run: |
+          echo "::error::You did not confirm, so dist-tag not called."
+          exit 1
+
+      - name: Validate package name (sanity check)
+        if: ${{ github.event.inputs.package_name != '@salesforce/plugin-code-analyzer' && github.event.inputs.package_name != '@salesforce/sfdx-scanner' }}
+        run: |
+          echo "Invalid package name. Please choose one of the allowed package names."
+          exit 1
+
+      - name: Prepare NPM Credentials
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Apply tag
+        run: |
+          echo "You have confirmed that using this action is only recommended for emergency rollback situations and that you are responsible for manually applying the ${{ github.event.inputs.tag_name }} tag to ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }}."
+          echo "Applying tag..."
+          npm dist-tag add ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }} ${{ github.event.inputs.tag_name }}
