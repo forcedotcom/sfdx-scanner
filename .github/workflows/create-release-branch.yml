@@ -58,7 +58,6 @@ jobs:
           git push --set-upstream origin $INTERIM_BRANCH_NAME
       # Update dependencies.
       - run: |
-          yarn upgrade
           node tools/UpdateRetireJsVulns.js
       # Use the GraphQL API to create a signed commit with the various changes.
       - name: Commit to interim branch
@@ -70,12 +69,11 @@ jobs:
           MESSAGE="Preparing for v$NEW_VERSION release."
           # GraphQL needs the latest versions of the files we changed, as Base64 encoded strings.
           NEW_PACKAGE="$(cat package.json | base64)"
-          NEW_YARN_LOCK="$(cat yarn.lock | base64)"
           NEW_RETIREJS_VULNS="$(cat retire-js/RetireJsVulns.json | base64)"
           gh api graphql -F message="$MESSAGE" -F oldOid=`git rev-parse HEAD` -F branch="$BRANCH" \
-          -F newPackage="$NEW_PACKAGE" -F newYarnLock="$NEW_YARN_LOCK" -F newRetireJsVulns="$NEW_RETIREJS_VULNS" \
+          -F newPackage="$NEW_PACKAGE" -F newRetireJsVulns="$NEW_RETIREJS_VULNS" \
           -f query='
-            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newYarnLock: Base64String!, $newRetireJsVulns: Base64String!) {
+            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newRetireJsVulns: Base64String!) {
               createCommitOnBranch(input: {
                 branch: {
                   repositoryNameWithOwner: "forcedotcom/sfdx-scanner",
@@ -89,9 +87,6 @@ jobs:
                     {
                       path: "package.json",
                       contents: $newPackage
-                    }, {
-                      path: "yarn.lock",
-                      contents: $newYarnLock
                     }, {
                       path: "retire-js/RetireJsVulns.json",
                       contents: $newRetireJsVulns
