@@ -164,7 +164,7 @@ abstract class YamlFormatter {
 	private getDefaultRuleFor(engineName: string, ruleName: string): Rule|null {
 		try {
 			return this.allDefaultRules.getRule(engineName, ruleName);
-		} catch (e) {
+		} catch (_e) {
 			// istanbul ignore next
 			return null;
 		}
