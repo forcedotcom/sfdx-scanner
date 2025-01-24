@@ -143,13 +143,13 @@
 		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock && npm shrinkwrap",
 		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
 		"lint-typescript": "eslint ./src --ext .ts --max-warnings 0",
-		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
-		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
+		"test": "./gradlew test jacocoTestCoverageVerification && NODE_OPTIONS='--no-experimental-strip-types' nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
+		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && NODE_OPTIONS='--no-experimental-strip-types' nyc mocha --timeout 60000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-cli-messaging": "./gradlew cli-messaging:test cli-messaging:jacocoTestCoverageVerification",
 		"test-pmd-cataloger": "./gradlew pmd-cataloger:test pmd-cataloger:jacocoTestCoverageVerification",
 		"test-sfge": "./gradlew sfge:test sfge:jacocoTestCoverageVerification",
 		"test-sfge-quiet": "cross-env SFGE_LOGGING=false ./gradlew sfge:test sfge:jacocoTestCoverageVerification",
-		"test-typescript": "tsc -b && nyc mocha --timeout 60000 \"./test/**/*.test.ts\"",
+		"test-typescript": "tsc -b && NODE_OPTIONS='--no-experimental-strip-types' nyc mocha --timeout 60000 \"./test/**/*.test.ts\"",
 		"version": "oclif readme && git add README.md"
 	}
 }
