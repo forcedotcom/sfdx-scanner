@@ -4,7 +4,7 @@ export async function exists(filename: string): Promise<boolean> {
 	try {
 		await fs.promises.access(filename, fs.constants.F_OK);
 		return true;
-	} catch (e) {
+	} catch (_e) {
 		return false;
 	}
 }

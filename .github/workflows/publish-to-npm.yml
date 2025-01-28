@@ -79,6 +79,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11' # For now, Java version is hardcoded.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '>=3.10'
       # Install SF, and the release candidate version.
       - run: npm install -g @salesforce/cli
       - run: sf plugins install @salesforce/plugin-code-analyzer@latest-beta-rc

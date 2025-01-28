@@ -160,3 +160,5 @@ pmd-cataloger/bin
 sfge*.log.gz
 
 npm-shrinkwrap.json
+
+.npmrc

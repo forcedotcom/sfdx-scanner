@@ -1,6 +1,6 @@
 name: Report a Bug with scanner run dfa
 description: Report an issue with the scanner run dfa command.
-title: "[BUG] <YOUR_TITLE_HERE>"
+title: "[BUG][scanner run dfa] <YOUR_TITLE_HERE>"
 labels: []
 body:
 - type: dropdown
