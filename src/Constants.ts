@@ -2,7 +2,7 @@ import os = require('os');
 import path = require('path');
 
 // Keep this in sync with <repoRoot>/pmd7/build.gradle.kts > pmd7Version
-export const PMD7_VERSION = '7.9.0';
+export const PMD7_VERSION = '7.10.0';
 
 export const PMD_APPEXCHANGE_RULES_VERSION = '0.16';
 
