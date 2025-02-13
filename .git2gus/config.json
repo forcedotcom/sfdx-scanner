@@ -19,5 +19,6 @@
         "BUG P2": "a3QEE000000V67Z2AS",
         "BUG P3": "a3QEE000000V67Z2AS"
     },
-    "gusTitlePrefix": "[GitHub Issue]"
+    "gusTitlePrefix": "[GitHub Issue]",
+    "statusWhenClosed": "FIXED"
 }
