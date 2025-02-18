@@ -50,6 +50,7 @@ export class RunAction {
 	public async execute(input: RunInput): Promise<void> {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
+		this.dependencies.actionSummaryViewer.viewPreExecutionSummary(logWriter.getLogDestination());
 		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
 		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
@@ -80,7 +81,7 @@ export class RunAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.writer.write(results);
 		this.dependencies.resultsViewer.view(results);
-		this.dependencies.actionSummaryViewer.view(results, logWriter.getLogDestination(), input['output-file']);
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(results, logWriter.getLogDestination(), input['output-file']);
 
 		const thresholdValue = input['severity-threshold'];
 		if (thresholdValue) {

@@ -468,6 +468,8 @@ describe('ConfigAction tests', () => {
 				.map(e => e.data)
 				.join('\n'));
 
+			const preExecutionGoldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'pre-execution-summary.txt.goldfile'));
+			expect(displayedLogEvents).toContain(preExecutionGoldfileContents);
 			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'outfile-created.txt.goldfile'));
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
@@ -496,6 +498,8 @@ describe('ConfigAction tests', () => {
 				.map(e => e.data)
 				.join('\n'));
 
+			const preExecutionGoldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'pre-execution-summary.txt.goldfile'));
+			expect(displayedLogEvents).toContain(preExecutionGoldfileContents);
 			const goldfileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'action-summaries', 'no-outfile-created.txt.goldfile'));
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
@@ -519,8 +523,8 @@ describe('ConfigAction tests', () => {
 
 		// ==== OUTPUT PROCESSING ====
 		const displayEvents = spyDisplay.getDisplayEvents();
-		expect(displayEvents[0].type).toEqual(DisplayEventType.LOG);
-		return ansis.strip(displayEvents[0].data);
+		expect(displayEvents[4].type).toEqual(DisplayEventType.LOG);
+		return ansis.strip(displayEvents[4].data);
 	}
 });
 
