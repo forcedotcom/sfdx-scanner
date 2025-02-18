@@ -290,12 +290,14 @@ describe('RunAction tests', () => {
 			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
 			expect(actualTargetFiles).toEqual([path.resolve('.')]);
 			// Verify that the summary output matches the expectation.
+			const preExecutionGoldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'pre-execution-summary.txt.goldfile'), 'utf-8');
 			const goldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', goldfile), 'utf-8');
 			const displayEvents = spyDisplay.getDisplayEvents();
 			const displayedLogEvents = ansis.strip(displayEvents
 				.filter(e => e.type === DisplayEventType.LOG)
 				.map(e => e.data)
 				.join('\n'));
+			expect(displayedLogEvents).toContain(preExecutionGoldfileContents);
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 
@@ -337,6 +339,7 @@ describe('RunAction tests', () => {
 			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
 			expect(actualTargetFiles).toEqual([path.resolve('.')]);
 			// Verify that the summary output matches the expectation.
+			const preExecutionGoldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'pre-execution-summary.txt.goldfile'), 'utf-8');
 			const goldfileContents: string = (await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'some-outfiles.txt.goldfile'), 'utf-8'))
 				.replace(`{{PATH_TO_FILE1}}`, outfilePath1)
 				.replace(`{{PATH_TO_FILE2}}`, outfilePath2);
@@ -345,6 +348,7 @@ describe('RunAction tests', () => {
 				.filter(e => e.type === DisplayEventType.LOG)
 				.map(e => e.data)
 				.join('\n'));
+			expect(displayedLogEvents).toContain(preExecutionGoldfileContents);
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 	});
