@@ -1,6 +1,6 @@
 # common.streaming-logs-to
 
-**Streaming logs in real time to:**
+Streaming logs in real time to:
 
 # common.summary-header
 
