@@ -3,6 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as tmp from 'tmp';
 import {CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 import {LogFileWriter} from '../../../src/lib/writers/LogWriter';
+import {Clock} from '../../../src/lib/utils/DateTimeUtils';
 
 describe('LogWriter implementations', () => {
 
@@ -30,10 +31,11 @@ describe('LogWriter implementations', () => {
 			jest.restoreAllMocks();
 		})
 
-		it('Writes to file specified by config', async () => {
+		it('Writes properly-named file to config-specified folder', async () => {
 			// ==== TEST SETUP ====
 			const config = CodeAnalyzerConfig.withDefaults();
-			const logWriter = await LogFileWriter.fromConfig(config);
+			const fixedDate: Date = new Date(2025, 1, 20, 14, 30, 18, 14);
+			const logWriter = await LogFileWriter.fromConfig(config, new FixedClock(fixedDate));
 
 			// ==== TESTED BEHAVIOR ====
 			logWriter.writeToLog('beep');
@@ -44,6 +46,7 @@ describe('LogWriter implementations', () => {
 			const logFolderContents = await fs.readdir(tmpLogFolder);
 			expect(logFolderContents).toHaveLength(1);
 			const logFilePath = path.join(tmpLogFolder, logFolderContents[0]);
+			expect(path.basename(logFilePath)).toEqual('sfca-2025_02_20_14_30_18_014.log');
 			const logFileContents = await fs.readFile(logFilePath, {encoding: 'utf-8'});
 			expect(logFileContents).toContain('beep');
 			expect(logFileContents).toContain('boop');
@@ -51,3 +54,15 @@ describe('LogWriter implementations', () => {
 		});
 	});
 });
+
+class FixedClock implements Clock {
+	private readonly fixedDate: Date;
+
+	public constructor(fixedDate: Date) {
+		this.fixedDate = fixedDate;
+	}
+
+	public now(): Date {
+		return this.fixedDate;
+	}
+}
