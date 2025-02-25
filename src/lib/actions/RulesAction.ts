@@ -33,6 +33,7 @@ export class RulesAction {
 	public async execute(input: RulesInput): Promise<void> {
 		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
 		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
+		this.dependencies.actionSummaryViewer.viewPreExecutionSummary(logWriter.getLogDestination());
 		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.
 		this.dependencies.logEventListeners.push(new LogEventLogger(logWriter));
 		const core: CodeAnalyzer = new CodeAnalyzer(config);
@@ -60,7 +61,7 @@ export class RulesAction {
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
 		this.dependencies.viewer.view(rules);
-		this.dependencies.actionSummaryViewer.view(ruleSelection, logWriter.getLogDestination());
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination());
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {

@@ -41,6 +41,7 @@ export class ConfigAction {
 
 		// We always add a Logger Listener to the appropriate listeners list, because we should always be logging.
 		const logFileWriter: LogFileWriter = await LogFileWriter.fromConfig(userConfig);
+		this.dependencies.actionSummaryViewer.viewPreExecutionSummary(logFileWriter.getLogDestination());
 		const logEventLogger: LogEventLogger = new LogEventLogger(logFileWriter);
 		this.dependencies.logEventListeners.push(logEventLogger);
 
@@ -117,7 +118,7 @@ export class ConfigAction {
 			this.dependencies.viewer.view(configModel);
 		}
 
-		this.dependencies.actionSummaryViewer.view(logFileWriter.getLogDestination(), fileWritten ? input['output-file'] : undefined);
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(logFileWriter.getLogDestination(), fileWritten ? input['output-file'] : undefined);
 		return Promise.resolve();
 	}
 

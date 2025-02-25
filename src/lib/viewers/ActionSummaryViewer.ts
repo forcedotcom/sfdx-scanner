@@ -10,6 +10,15 @@ abstract class AbstractActionSummaryViewer {
 		this.display = display;
 	}
 
+	public viewPreExecutionSummary(logFile: string): void {
+		// Start with separator to cleanly break from anything that's already been logged.
+		this.displayLineSeparator();
+		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'common.streaming-logs-to'));
+		this.display.displayLog(indent(logFile));
+		// End with a separator to cleanly break with anything that comes next.
+		this.displayLineSeparator();
+	}
+
 	protected displaySummaryHeader(): void {
 		this.display.displayLog(toStyledHeader(getMessage(BundleName.ActionSummaryViewer, 'common.summary-header')));
 	}
@@ -29,7 +38,9 @@ export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public view(logFile: string, outfile?: string): void {
+	public viewPostExecutionSummary(logFile: string, outfile?: string): void {
+		// Start with separator to cleanly break from anything that's already been logged.
+		this.displayLineSeparator();
 		this.displaySummaryHeader();
 		this.displayLineSeparator();
 
@@ -52,7 +63,7 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public view(ruleSelection: RuleSelection, logFile: string): void {
+	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();
@@ -82,7 +93,7 @@ export class RunActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public view(results: RunResults, logFile: string, outfiles: string[]): void {
+	public viewPostExecutionSummary(results: RunResults, logFile: string, outfiles: string[]): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();

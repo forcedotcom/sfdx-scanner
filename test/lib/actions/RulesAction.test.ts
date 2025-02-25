@@ -160,6 +160,7 @@ describe('RulesAction tests', () => {
 			{quantifier: 'no', expectation: 'Summary indicates absence of rules', selector: 'NonsensicalTag', goldfile: 'no-rules.txt.goldfile'},
 			{quantifier: 'some', expectation: 'Summary provides breakdown by engine', selector: 'Recommended', goldfile: 'some-rules.txt.goldfile'}
 		])('When $quantifier rules are returned, $expectation', async ({selector, goldfile}) => {
+			const preExecutionGoldfilePath: string = path.join(PATH_TO_GOLDFILES, 'action-summaries', 'pre-execution-summary.txt.goldfile');
 			const goldfilePath: string = path.join(PATH_TO_GOLDFILES, 'action-summaries', goldfile);
 			const spyDisplay: SpyDisplay = new SpyDisplay();
 			const actionSummaryViewer: RulesActionSummaryViewer = new RulesActionSummaryViewer(spyDisplay);
@@ -183,6 +184,8 @@ describe('RulesAction tests', () => {
 				.filter(e => e.type === DisplayEventType.LOG)
 				.map(e => e.data)
 				.join('\n'));
+			const preExecutionGoldfileContents: string = await fsp.readFile(preExecutionGoldfilePath, 'utf-8');
+			expect(displayedLogEvents).toContain(preExecutionGoldfileContents);
 
 			const goldfileContents: string = await fsp.readFile(goldfilePath, 'utf-8');
 			expect(displayedLogEvents).toContain(goldfileContents);
