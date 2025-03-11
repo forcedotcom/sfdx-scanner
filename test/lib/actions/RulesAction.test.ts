@@ -1,12 +1,13 @@
-import * as path from 'node:path';
-import * as fsp from 'node:fs/promises';
 import ansis from 'ansis';
-import {RulesAction, RulesDependencies, RulesInput} from '../../../src/lib/actions/RulesAction';
-import {RulesActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryViewer';
-import {StubDefaultConfigFactory} from '../../stubs/StubCodeAnalyzerConfigFactories';
+import * as fsp from 'node:fs/promises';
+import * as path from 'node:path';
+import { RulesAction, RulesDependencies, RulesInput } from '../../../src/lib/actions/RulesAction';
+import { RulesActionSummaryViewer } from '../../../src/lib/viewers/ActionSummaryViewer';
+import { DisplayEventType, SpyDisplay } from '../../stubs/SpyDisplay';
+import { SpyRuleViewer } from '../../stubs/SpyRuleViewer';
+import { SpyRuleWriter } from '../../stubs/SpyRuleWriter';
+import { StubDefaultConfigFactory } from '../../stubs/StubCodeAnalyzerConfigFactories';
 import * as StubEnginePluginFactories from '../../stubs/StubEnginePluginsFactories';
-import {SpyRuleViewer} from '../../stubs/SpyRuleViewer';
-import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 
 const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'RulesAction.test.ts');
 
@@ -17,8 +18,9 @@ describe('RulesAction tests', () => {
 		viewer = new SpyRuleViewer();
 	})
 
-	it('Submitting the all-selector returns all rules', async () => {
+	it('Submitting the all-selector displays all rules', async () => {
 		const spyDisplay: SpyDisplay = new SpyDisplay();
+		const spyWriter: SpyRuleWriter = new SpyRuleWriter();
 		const actionSummaryViewer: RulesActionSummaryViewer = new RulesActionSummaryViewer(spyDisplay);
 		const dependencies: RulesDependencies = {
 			configFactory: new StubDefaultConfigFactory(),
@@ -47,6 +49,8 @@ describe('RulesAction tests', () => {
 			'stub2RuleB',
 			'stub2RuleC'
 		]);
+		const writerCallHistory = spyWriter.getCallHistory();
+		expect(writerCallHistory).toHaveLength(0);
 	});
 
 	it('Submitting a filtering selector returns only matching rules', async () => {
@@ -73,6 +77,63 @@ describe('RulesAction tests', () => {
 			'stub1RuleA',
 			'stub1RuleD'
 		]);
+	});
+
+	it('Writes output (does not view) with the presence of output file', async () => {
+		const spyDisplay: SpyDisplay = new SpyDisplay();
+		const spyWriter: SpyRuleWriter = new SpyRuleWriter();
+		const actionSummaryViewer: RulesActionSummaryViewer = new RulesActionSummaryViewer(spyDisplay);
+		const dependencies: RulesDependencies = {
+			configFactory: new StubDefaultConfigFactory(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
+			logEventListeners: [],
+			progressListeners: [],
+			actionSummaryViewer,
+			viewer,
+			writer: spyWriter
+		};
+		const action = RulesAction.createAction(dependencies);
+		const input: RulesInput = {
+			'rule-selector': ['CodeStyle'],
+			'output-file': 'selected-rules.json'
+		};
+
+		await action.execute(input);
+
+		const viewerCallHistory = viewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(0);
+
+		const writerCallHistory = spyWriter.getCallHistory();
+		expect(writerCallHistory).toHaveLength(1);
+	});
+
+	it('Writes output and views it with output file and view flag', async () => {
+		const spyDisplay: SpyDisplay = new SpyDisplay();
+		const spyWriter: SpyRuleWriter = new SpyRuleWriter();
+		const actionSummaryViewer: RulesActionSummaryViewer = new RulesActionSummaryViewer(spyDisplay);
+		const dependencies: RulesDependencies = {
+			configFactory: new StubDefaultConfigFactory(),
+			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withFunctionalStubEngine(),
+			logEventListeners: [],
+			progressListeners: [],
+			actionSummaryViewer,
+			viewer,
+			writer: spyWriter
+		};
+		const action = RulesAction.createAction(dependencies);
+		const input: RulesInput = {
+			'rule-selector': ['CodeStyle'],
+			'output-file': 'selected-rules.json',
+			'view': 'detail'
+		};
+
+		await action.execute(input);
+
+		const viewerCallHistory = viewer.getCallHistory();
+		expect(viewerCallHistory).toHaveLength(1);
+
+		const writerCallHistory = spyWriter.getCallHistory();
+		expect(writerCallHistory).toHaveLength(1);
 	});
 
 	it('Engines with target-dependent rules return the right rules', async () => {

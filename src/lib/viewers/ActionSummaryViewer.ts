@@ -63,7 +63,7 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string): void {
+	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, _outfile?: string): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();

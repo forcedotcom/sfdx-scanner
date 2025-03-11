@@ -24,6 +24,7 @@ export type RulesInput = {
 	'rule-selector': string[];
 	'output-file'?: string;
 	workspace?: string[];
+	view?: string;
 }
 
 export class RulesAction {
@@ -63,8 +64,18 @@ export class RulesAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
-		this.dependencies.viewer.view(rules);
-		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination());
+		let outfile: undefined | string = undefined;
+		if (this.dependencies.writer) {
+			this.dependencies.writer.write(ruleSelection)
+			outfile = input['output-file'];
+		}
+
+		// only call viewer if outfile not specified or view IS specified
+		if (!outfile || input['view']) {
+			this.dependencies.viewer.view(rules);
+		}
+		
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination(), outfile);
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {
