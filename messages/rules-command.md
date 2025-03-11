@@ -103,3 +103,13 @@ Format to display the rules in the terminal.
 # flags.view.description
 
 The format `table` is concise and shows minimal output, the format `detail` shows all available information.
+
+# flags.output-file.summary
+
+Output file location to write the selected rules. The file is written in JSON format.
+
+# flags.output-file.description
+
+Use this flag to print the results to a JSON file wherever you would like. For example: "--output-file ./out/rules.json” creates a JSON results file in the "./out" folder. If the file exists already, it will be overwritten.
+
+If you don't specify this flag, the command outputs the rules in the terminal. The view flag can be used in combination with this flag to save the file and output the results.

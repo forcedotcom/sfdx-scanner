@@ -9,6 +9,7 @@ import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
+import { RulesFileWriter } from '../../lib/writers/RulesWriter';
 
 export default class RulesCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -42,6 +43,12 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			char: 'c',
 			exists: true
 		}),
+		'output-file': Flags.file({
+			summary: getMessage(BundleName.RulesCommand, 'flags.output-file.summary'),
+			description: getMessage(BundleName.RulesCommand, 'flags.output-file.description'),
+			char: 'f'
+			//exists: true
+		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.view.summary'),
 			description: getMessage(BundleName.RulesCommand, 'flags.view.description'),
@@ -56,14 +63,14 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View);
+		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View, parsedFlags['output-file']);
 		const action: RulesAction = RulesAction.createAction(dependencies);
 		await action.execute(parsedFlags);
 	}
 
-	protected createDependencies(view: View): RulesDependencies {
+	protected createDependencies(view: View, outputFile?: string): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
-		return {
+		const dependencies: RulesDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
@@ -71,6 +78,12 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			actionSummaryViewer: new RulesActionSummaryViewer(uxDisplay),
 			viewer: view === View.TABLE ? new RuleTableDisplayer(uxDisplay) : new RuleDetailDisplayer(uxDisplay)
 		};
+
+		if (outputFile) {
+			dependencies.writer = new RulesFileWriter(outputFile);
+		}
+		
+		return dependencies;
 	}
 }
 
