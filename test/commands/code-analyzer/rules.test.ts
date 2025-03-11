@@ -1,5 +1,6 @@
 import { TestContext } from '@salesforce/core/lib/testSetup';
 import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
+import path from 'node:path';
 import RulesCommand from '../../../src/commands/code-analyzer/rules';
 import { RulesAction, RulesDependencies, RulesInput } from '../../../src/lib/actions/RulesAction';
 
@@ -106,7 +107,7 @@ describe('`code-analyzer rules` tests', () => {
 	
 	describe('--output-file', () => {
 		it('Accepts one file path', async () => {
-			const inputValue = 'my/rules-output.json';
+			const inputValue = path.join('my', 'rules-output.json');
 			await RulesCommand.run(['--output-file', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('output-file', inputValue);

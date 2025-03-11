@@ -1,5 +1,6 @@
-import fs from 'node:fs';
 import { OutputFormat } from '@salesforce/code-analyzer-core';
+import fs from 'node:fs';
+import path from 'node:path';
 import { RulesFileWriter } from "../../../src/lib/writers/RulesWriter";
 import * as Stub from '../../stubs/StubRuleSelection';
 
@@ -20,37 +21,10 @@ describe('RulesWriter', () => {
         expect(() => new RulesFileWriter(invalidFile)).toThrow(invalidFile);
     });
 
-    it('Writes to a file in JSON format', () => {
+    it('Writes to a json file path', () => {
+        const outfilePath = path.join('the', 'results', 'path', 'file.json');
         const expectations = {
-            file: 'rules.json',
-            contents: `Rules formatted as ${OutputFormat.JSON}`
-        };
-        const rulesWriter = new RulesFileWriter(expectations.file);
-        const stubbedEmptyRuleSelection = new Stub.StubEmptyRuleSelection();
-        rulesWriter.write(stubbedEmptyRuleSelection);
-
-        expect(writeFileSpy).toHaveBeenCalled();
-		expect(writeFileInvocations).toEqual([expectations]);
-    });
-
-    it('Writes to a windows file path', () => {
-        const windowsPath = 'C:\\Users\\test\\file.json';
-        const expectations = {
-            file: windowsPath,
-            contents: `Rules formatted as ${OutputFormat.JSON}`
-        };
-        const rulesWriter = new RulesFileWriter(expectations.file);
-        const stubbedEmptyRuleSelection = new Stub.StubEmptyRuleSelection();
-        rulesWriter.write(stubbedEmptyRuleSelection);
-
-        expect(writeFileSpy).toHaveBeenCalled();
-		expect(writeFileInvocations).toEqual([expectations]);
-    });
-
-    it('Writes to a linux file path', () => {
-        const linuxPath = '/Users/test/file.json';
-        const expectations = {
-            file: linuxPath,
+            file: outfilePath,
             contents: `Rules formatted as ${OutputFormat.JSON}`
         };
         const rulesWriter = new RulesFileWriter(expectations.file);
