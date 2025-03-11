@@ -14,6 +14,7 @@ export enum BundleName {
 	ResultsViewer = 'results-viewer',
 	RuleViewer = 'rule-viewer',
 	RulesCommand = 'rules-command',
+	RulesWriter = 'rules-writer',
 	ResultsWriter = 'results-writer',
 	RunAction = 'run-action',
 	RunCommand = 'run-command',

@@ -18,6 +18,10 @@ Configuration written to:
 
 Found 0 rules.
 
+# rules-action.outfile-location
+
+Rules written to:
+
 # rules-action.rules-total
 
 Found %d rule(s) from %d engine(s):

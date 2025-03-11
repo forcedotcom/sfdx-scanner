@@ -1,12 +1,13 @@
-import {CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection} from '@salesforce/code-analyzer-core';
-import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
-import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
-import {createWorkspace} from '../utils/WorkspaceUtil';
-import {ProgressEventListener} from '../listeners/ProgressEventListener';
-import {LogFileWriter} from '../writers/LogWriter';
-import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
-import {RuleViewer} from '../viewers/RuleViewer';
-import {RulesActionSummaryViewer} from '../viewers/ActionSummaryViewer';
+import { CodeAnalyzer, CodeAnalyzerConfig, Rule, RuleSelection } from '@salesforce/code-analyzer-core';
+import { CodeAnalyzerConfigFactory } from '../factories/CodeAnalyzerConfigFactory';
+import { EnginePluginsFactory } from '../factories/EnginePluginsFactory';
+import { LogEventListener, LogEventLogger } from '../listeners/LogEventListener';
+import { ProgressEventListener } from '../listeners/ProgressEventListener';
+import { createWorkspace } from '../utils/WorkspaceUtil';
+import { RulesActionSummaryViewer } from '../viewers/ActionSummaryViewer';
+import { RuleViewer } from '../viewers/RuleViewer';
+import { LogFileWriter } from '../writers/LogWriter';
+import { RulesWriter } from '../writers/RulesWriter';
 
 export type RulesDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
@@ -15,12 +16,15 @@ export type RulesDependencies = {
 	progressListeners: ProgressEventListener[];
 	actionSummaryViewer: RulesActionSummaryViewer,
 	viewer: RuleViewer;
+	writer: RulesWriter;
 }
 
 export type RulesInput = {
 	'config-file'?: string;
 	'rule-selector': string[];
+	'output-file'?: string[];
 	workspace?: string[];
+	view?: string;
 }
 
 export class RulesAction {
@@ -60,8 +64,14 @@ export class RulesAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
+		this.dependencies.writer.write(ruleSelection)
 		this.dependencies.viewer.view(rules);
-		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination());
+		
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(
+			ruleSelection,
+			logWriter.getLogDestination(),
+			input['output-file'] ?? []
+		);
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {
