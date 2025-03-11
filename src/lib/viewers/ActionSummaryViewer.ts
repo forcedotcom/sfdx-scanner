@@ -63,18 +63,25 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, _outfile?: string): void {
+	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, outfile?: string): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();
 		this.displayLineSeparator();
 
-		if (ruleSelection.getCount() === 0) {
+		const noRulesFound = ruleSelection.getCount() === 0;
+
+		if (noRulesFound) {
 			this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'rules-action.found-no-rules'));
 		} else {
 			this.displayRuleSelection(ruleSelection);
 		}
 		this.displayLineSeparator();
+
+		if (!noRulesFound && outfile) {
+			this.displayOutfile(outfile);
+			this.displayLineSeparator();
+		}
 
 		this.displayLogFileInfo(logFile);
 	}
@@ -85,6 +92,11 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 			const ruleCountForEngine: number = ruleSelection.getRulesFor(engineName).length;
 			this.display.displayLog(indent(getMessage(BundleName.ActionSummaryViewer, 'rules-action.rules-item', [ruleCountForEngine, engineName])));
 		}
+	}
+
+	private displayOutfile(outfile: string): void {
+		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'rules-action.outfile-location'));
+		this.display.displayLog(indent(outfile));
 	}
 }
 
