@@ -78,7 +78,7 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		}
 		this.displayLineSeparator();
 
-		if (!noRulesFound && outfile) {
+		if (outfile) {
 			this.displayOutfile(outfile);
 			this.displayLineSeparator();
 		}

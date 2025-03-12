@@ -223,7 +223,7 @@ describe('RulesAction tests', () => {
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 
-		it('Mentions an outfile in summary if provided and rules found', async () => {
+		it('Mentions an outfile in summary if provided', async () => {
 			const outfilePath = path.join('the', 'results.json');
 			const spyWriter: SpyRuleWriter = new SpyRuleWriter();
 			const summaryGoldfilePath: string = path.join(PATH_TO_GOLDFILES, 'action-summaries', 'rules-with-outfile.txt.goldfile');

@@ -9,7 +9,7 @@ import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import { RulesFileWriter } from '../../lib/writers/RulesWriter';
+import {RulesFileWriter} from '../../lib/writers/RulesWriter';
 
 export default class RulesCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -47,7 +47,6 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			summary: getMessage(BundleName.RulesCommand, 'flags.output-file.summary'),
 			description: getMessage(BundleName.RulesCommand, 'flags.output-file.description'),
 			char: 'f'
-			//exists: true
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.view.summary'),
