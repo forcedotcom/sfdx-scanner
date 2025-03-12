@@ -13,12 +13,14 @@ const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparis
 
 describe('RulesAction tests', () => {
 	let viewer: SpyRuleViewer;
+	let writer: SpyRuleWriter;
 	let spyDisplay: SpyDisplay;
 	let actionSummaryViewer: RulesActionSummaryViewer;
 	let defaultDependencies: RulesDependencies;
 
 	beforeEach(() => {
 		viewer = new SpyRuleViewer();
+		writer = new SpyRuleWriter();
 		spyDisplay = new SpyDisplay();
 		actionSummaryViewer = new RulesActionSummaryViewer(spyDisplay);
 		defaultDependencies = {
@@ -27,12 +29,12 @@ describe('RulesAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			actionSummaryViewer,
-			viewer
+			viewer,
+			writer
 		};
 	})
 
 	it('Submitting the all-selector displays all rules', async () => {
-		const spyWriter: SpyRuleWriter = new SpyRuleWriter();
 		const action = RulesAction.createAction(defaultDependencies);
 		const input: RulesInput = {
 			'rule-selector': ['all']
@@ -52,8 +54,8 @@ describe('RulesAction tests', () => {
 			'stub2RuleB',
 			'stub2RuleC'
 		]);
-		const writerCallHistory = spyWriter.getCallHistory();
-		expect(writerCallHistory).toHaveLength(0);
+		const writerCallHistory = writer.getCallHistory();
+		expect(writerCallHistory).toHaveLength(1);
 	});
 
 	it('Submitting a filtering selector returns only matching rules', async () => {
@@ -70,24 +72,6 @@ describe('RulesAction tests', () => {
 			'stub1RuleA',
 			'stub1RuleD'
 		]);
-	});
-
-	it('Writes output (does not view) with the presence of output file', async () => {
-		const spyWriter: SpyRuleWriter = new SpyRuleWriter();
-		defaultDependencies.writer = spyWriter;
-		const action = RulesAction.createAction(defaultDependencies);
-		const input: RulesInput = {
-			'rule-selector': ['CodeStyle'],
-			'output-file': 'selected-rules.json'
-		};
-
-		await action.execute(input);
-
-		const viewerCallHistory = viewer.getCallHistory();
-		expect(viewerCallHistory).toHaveLength(0);
-
-		const writerCallHistory = spyWriter.getCallHistory();
-		expect(writerCallHistory).toHaveLength(1);
 	});
 
 	it('Writes output and views it with output file and view flag', async () => {
@@ -117,7 +101,8 @@ describe('RulesAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			actionSummaryViewer,
-			viewer
+			viewer,
+			writer
 		};
 		const targetedFilesAndFolders = ['package.json', 'src', 'README.md'];
 		const action = RulesAction.createAction(dependencies);
@@ -151,7 +136,8 @@ describe('RulesAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			actionSummaryViewer,
-			viewer
+			viewer,
+			writer
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
@@ -172,7 +158,8 @@ describe('RulesAction tests', () => {
 			logEventListeners: [],
 			progressListeners: [],
 			actionSummaryViewer,
-			viewer
+			viewer,
+			writer
 		};
 		const action = RulesAction.createAction(dependencies);
 		const input: RulesInput = {
@@ -202,7 +189,8 @@ describe('RulesAction tests', () => {
 				logEventListeners: [],
 				progressListeners: [],
 				actionSummaryViewer,
-				viewer
+				viewer,
+				writer
 			};
 			const action = RulesAction.createAction(dependencies);
 			const input: RulesInput = {

@@ -2,14 +2,14 @@ import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {View} from '../../Constants';
 import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
-import {RuleDetailDisplayer, RuleTableDisplayer} from '../../lib/viewers/RuleViewer';
+import {RuleDetailDisplayer, RulesNoOpDisplayer, RuleTableDisplayer} from '../../lib/viewers/RuleViewer';
 import {RulesActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
 import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
-import {RulesFileWriter} from '../../lib/writers/RulesWriter';
+import {CompositeRulesWriter} from '../../lib/writers/RulesWriter';
 
 export default class RulesCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -62,12 +62,14 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View, parsedFlags['output-file']);
+		//use the parsedFlags key instead once we support multiple files
+		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];
+		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View, outputFiles);
 		const action: RulesAction = RulesAction.createAction(dependencies);
 		await action.execute(parsedFlags);
 	}
 
-	protected createDependencies(view: View, outputFile?: string): RulesDependencies {
+	protected createDependencies(view: View, outputFiles: string[] = []): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const dependencies: RulesDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
@@ -75,14 +77,31 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new RuleSelectionProgressSpinner(uxDisplay)],
 			actionSummaryViewer: new RulesActionSummaryViewer(uxDisplay),
-			viewer: view === View.TABLE ? new RuleTableDisplayer(uxDisplay) : new RuleDetailDisplayer(uxDisplay)
+			viewer: this.createRulesViewer(view, outputFiles, uxDisplay),
+			writer: CompositeRulesWriter.fromFiles(outputFiles)
 		};
-
-		if (outputFile) {
-			dependencies.writer = new RulesFileWriter(outputFile);
-		}
 		
 		return dependencies;
+	}
+
+	/**
+	 * Creates the {@link RuleViewer} that will be called from {@link RulesAction.execute} to display rules.
+	 * If a view option is set, rules will be displayed in the specified format.
+	 * If an output file is set, rules will not display.
+	 * By default, the details display will be used.
+	 */
+	private createRulesViewer(view: View, outputFiles: string[] = [], uxDisplay: UxDisplay) {
+		if (view === View.DETAIL) {
+			return new RuleDetailDisplayer(uxDisplay);
+		} else if (view === View.TABLE) {
+			return new RuleTableDisplayer(uxDisplay);
+		}
+		
+		if (outputFiles.length > 0) {
+			return new RulesNoOpDisplayer();
+		}
+
+		return new RuleDetailDisplayer(uxDisplay);
 	}
 }
 

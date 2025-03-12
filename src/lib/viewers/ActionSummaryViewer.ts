@@ -31,6 +31,13 @@ abstract class AbstractActionSummaryViewer {
 		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'common.logfile-location'));
 		this.display.displayLog(indent(logFile));
 	}
+
+	protected displayOutfiles(outfiles: string[], msgKey: string): void {
+		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, msgKey));
+		for (const outfile of outfiles) {
+			this.display.displayLog(indent(outfile));
+		}
+	}
 }
 
 export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
@@ -45,16 +52,11 @@ export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
 		this.displayLineSeparator();
 
 		if (outfile) {
-			this.displayOutfile(outfile);
+			this.displayOutfiles([outfile], 'config-action.outfile-location');
 			this.displayLineSeparator();
 		}
 
 		this.displayLogFileInfo(logFile);
-	}
-
-	private displayOutfile(outfile: string): void {
-		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'config-action.outfile-location'));
-		this.display.displayLog(indent(outfile));
 	}
 }
 
@@ -79,7 +81,7 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		this.displayLineSeparator();
 
 		if (outfile) {
-			this.displayOutfile(outfile);
+			this.displayOutfiles([outfile], 'rules-action.outfile-location');
 			this.displayLineSeparator();
 		}
 
@@ -92,11 +94,6 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 			const ruleCountForEngine: number = ruleSelection.getRulesFor(engineName).length;
 			this.display.displayLog(indent(getMessage(BundleName.ActionSummaryViewer, 'rules-action.rules-item', [ruleCountForEngine, engineName])));
 		}
-	}
-
-	private displayOutfile(outfile: string): void {
-		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'rules-action.outfile-location'));
-		this.display.displayLog(indent(outfile));
 	}
 }
 
@@ -119,7 +116,7 @@ export class RunActionSummaryViewer extends AbstractActionSummaryViewer {
 		this.displayLineSeparator();
 
 		if (outfiles.length > 0) {
-			this.displayOutfiles(outfiles);
+			this.displayOutfiles(outfiles, 'run-action.outfiles-total');
 			this.displayLineSeparator();
 		}
 
@@ -150,12 +147,5 @@ export class RunActionSummaryViewer extends AbstractActionSummaryViewer {
 			}
 		});
 		return fileSet.size;
-	}
-
-	private displayOutfiles(outfiles: string[]): void {
-		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'run-action.outfiles-total'));
-		for (const outfile of outfiles) {
-			this.display.displayLog(indent(outfile));
-		}
 	}
 }

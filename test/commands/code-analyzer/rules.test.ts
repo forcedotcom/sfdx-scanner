@@ -3,14 +3,18 @@ import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
 import path from 'node:path';
 import RulesCommand from '../../../src/commands/code-analyzer/rules';
 import { RulesAction, RulesDependencies, RulesInput } from '../../../src/lib/actions/RulesAction';
+import { CompositeRulesWriter } from '../../../src/lib/writers/RulesWriter';
 
 describe('`code-analyzer rules` tests', () => {
 	const $$ = new TestContext();
 	
 	let executeSpy: jest.SpyInstance;
 	let createActionSpy: jest.SpyInstance;
+	let fromFilesSpy: jest.SpyInstance;
 	let receivedActionInput: RulesInput;
 	let receivedActionDependencies: RulesDependencies;
+
+	let receivedFiles: string[];
 
 	beforeEach(() => {
 		stubSfCommandUx($$.SANDBOX);
@@ -23,6 +27,11 @@ describe('`code-analyzer rules` tests', () => {
 			receivedActionDependencies = dependencies;
 			return originalCreateAction(dependencies);
 		});
+		const originalFromFiles = CompositeRulesWriter.fromFiles;
+		fromFilesSpy = jest.spyOn(CompositeRulesWriter, 'fromFiles').mockImplementation(files => {
+			receivedFiles = files;
+			return originalFromFiles(files);
+		})
 	});
 	
 	afterEach(() => {
@@ -106,33 +115,38 @@ describe('`code-analyzer rules` tests', () => {
 	});
 	
 	describe('--output-file', () => {
+
+		const inputValue1 = path.join('my', 'rules-output.json');
+		const inputValue2 = path.join('my', 'second', 'rules-output.json');
+
 		it('Accepts one file path', async () => {
-			const inputValue = path.join('my', 'rules-output.json');
-			await RulesCommand.run(['--output-file', inputValue]);
+			await RulesCommand.run(['--output-file', inputValue1]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('output-file', inputValue);
-			expect(receivedActionDependencies.writer).toBeDefined();
+			expect(createActionSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('output-file', inputValue1);
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([inputValue1]);
 		});
-		
+				
 		it('Can only be supplied once', async () => {
-			const inputValue1 = 'rules-output1.json';
-			const inputValue2 = 'rules-output1.json';
 			const executionPromise = RulesCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
 			await expect(executionPromise).rejects.toThrow(`Flag --output-file can only be specified once`);
 			expect(executeSpy).not.toHaveBeenCalled();
 		});
 		
 		it('Can be referenced by its shortname, -f', async () => {
-			const inputValue = 'rules-output.json';
-			await RulesCommand.run(['-f', inputValue]);
+			await RulesCommand.run(['-f', inputValue1]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('output-file', inputValue);
+			expect(receivedActionInput).toHaveProperty('output-file', inputValue1);
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([inputValue1]);
 		});
 
 		it('Is optional', async () => {
 			await RulesCommand.run([]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionDependencies.writer).toBeUndefined();
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([]);
 		});
 	});
 	
@@ -242,7 +256,8 @@ describe('`code-analyzer rules` tests', () => {
 				await RulesCommand.run(['--output-file', outfileInput, '--view', viewInput]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(receivedActionDependencies.writer).toBeDefined();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
 				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 			});
 			
@@ -251,14 +266,16 @@ describe('`code-analyzer rules` tests', () => {
 				await RulesCommand.run(['--output-file', outfileInput]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(receivedActionDependencies.writer).toBeDefined();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
 				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 			});
 			
 			it('When --output-file and --view are both absent, writer is not set and --view defaults to "table"', async () => {
 				await RulesCommand.run([]);
 				expect(createActionSpy).toHaveBeenCalled();
-				expect(receivedActionDependencies.writer).toBeUndefined();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([]);
 				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 			});
 		});

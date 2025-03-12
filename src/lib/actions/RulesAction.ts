@@ -16,7 +16,7 @@ export type RulesDependencies = {
 	progressListeners: ProgressEventListener[];
 	actionSummaryViewer: RulesActionSummaryViewer,
 	viewer: RuleViewer;
-	writer?: RulesWriter;
+	writer: RulesWriter;
 }
 
 export type RulesInput = {
@@ -64,18 +64,10 @@ export class RulesAction {
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 		const rules: Rule[] = core.getEngineNames().flatMap(name => ruleSelection.getRulesFor(name));
 
-		let outfile: undefined | string = undefined;
-		if (this.dependencies.writer) {
-			this.dependencies.writer.write(ruleSelection)
-			outfile = input['output-file'];
-		}
-
-		// only call viewer if outfile not specified or view IS specified
-		if (!outfile || input['view']) {
-			this.dependencies.viewer.view(rules);
-		}
+		this.dependencies.writer.write(ruleSelection)
+		this.dependencies.viewer.view(rules);
 		
-		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination(), outfile);
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination(), input['output-file']);
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {
