@@ -130,7 +130,7 @@ Name of the file where the analysis results are written. The file format depends
 
 # flags.output-file.description
 
-If you don't specify this flag, the command outputs the results in the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, "--output-file results.csv" creates a comma-separated values file. You can specify one of these extensions:
+If you don't specify this flag, the command outputs the results to only the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, "--output-file results.csv" creates a comma-separated values file. You can specify one of these extensions:
 
 - .csv
 - .html or .htm
