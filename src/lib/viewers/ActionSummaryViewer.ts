@@ -65,7 +65,7 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, outfile?: string): void {
+	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, outfiles: string[]): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();
@@ -80,8 +80,8 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		}
 		this.displayLineSeparator();
 
-		if (outfile) {
-			this.displayOutfiles([outfile], 'rules-action.outfile-location');
+		if (outfiles.length > 0) {
+			this.displayOutfiles(outfiles, 'rules-action.outfile-location');
 			this.displayLineSeparator();
 		}
 

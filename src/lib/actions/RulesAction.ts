@@ -22,7 +22,7 @@ export type RulesDependencies = {
 export type RulesInput = {
 	'config-file'?: string;
 	'rule-selector': string[];
-	'output-file'?: string;
+	'output-file'?: string[];
 	workspace?: string[];
 	view?: string;
 }
@@ -67,7 +67,11 @@ export class RulesAction {
 		this.dependencies.writer.write(ruleSelection)
 		this.dependencies.viewer.view(rules);
 		
-		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(ruleSelection, logWriter.getLogDestination(), input['output-file']);
+		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(
+			ruleSelection,
+			logWriter.getLogDestination(),
+			input['output-file'] ?? []
+		);
 	}
 
 	public static createAction(dependencies: RulesDependencies): RulesAction {

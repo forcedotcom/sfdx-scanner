@@ -80,7 +80,7 @@ describe('RulesAction tests', () => {
 		const action = RulesAction.createAction(defaultDependencies);
 		const input: RulesInput = {
 			'rule-selector': ['CodeStyle'],
-			'output-file': 'selected-rules.json',
+			'output-file': ['selected-rules.json'],
 			'view': 'detail'
 		};
 
@@ -219,7 +219,7 @@ describe('RulesAction tests', () => {
 			const action = RulesAction.createAction(defaultDependencies);
 			const input: RulesInput = {
 				'rule-selector': ['Codestyle'],
-				'output-file': outfilePath
+				'output-file': [outfilePath]
 			};
 				
 			await action.execute(input);

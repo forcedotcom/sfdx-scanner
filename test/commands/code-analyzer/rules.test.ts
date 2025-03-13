@@ -123,7 +123,7 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run(['--output-file', inputValue1]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(createActionSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('output-file', inputValue1);
+			expect(receivedActionInput).toHaveProperty('output-file', [inputValue1]);
 			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue1]);
 		});
@@ -137,7 +137,7 @@ describe('`code-analyzer rules` tests', () => {
 		it('Can be referenced by its shortname, -f', async () => {
 			await RulesCommand.run(['-f', inputValue1]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('output-file', inputValue1);
+			expect(receivedActionInput).toHaveProperty('output-file', [inputValue1]);
 			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue1]);
 		});
@@ -155,7 +155,6 @@ describe('`code-analyzer rules` tests', () => {
 			const inputValue = 'table';
 			await RulesCommand.run(['--view', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
@@ -164,7 +163,6 @@ describe('`code-analyzer rules` tests', () => {
 			const inputValue = 'detail';
 			await RulesCommand.run(['--view', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});
@@ -179,7 +177,6 @@ describe('`code-analyzer rules` tests', () => {
 		it('Defaults to value of "table"', async () => {
 			await RulesCommand.run([]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', 'table');
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
@@ -197,7 +194,6 @@ describe('`code-analyzer rules` tests', () => {
 			const inputValue = 'detail';
 			await RulesCommand.run(['-v', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});

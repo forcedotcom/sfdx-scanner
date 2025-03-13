@@ -4,7 +4,7 @@ import {CodeAnalyzerConfigFactoryImpl} from '../../lib/factories/CodeAnalyzerCon
 import {EnginePluginsFactoryImpl} from '../../lib/factories/EnginePluginsFactory';
 import {RuleDetailDisplayer, RulesNoOpDisplayer, RuleTableDisplayer} from '../../lib/viewers/RuleViewer';
 import {RulesActionSummaryViewer} from '../../lib/viewers/ActionSummaryViewer';
-import {RulesAction, RulesDependencies} from '../../lib/actions/RulesAction';
+import {RulesAction, RulesDependencies, RulesInput} from '../../lib/actions/RulesAction';
 import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {Displayable, UxDisplay} from '../../lib/Display';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
@@ -62,14 +62,21 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		//use the parsedFlags key instead once we support multiple files
-		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];
+		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];		
 		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View, outputFiles);
 		const action: RulesAction = RulesAction.createAction(dependencies);
-		await action.execute(parsedFlags);
+
+		const rulesInput: RulesInput = {
+			'config-file': parsedFlags['config-file'],
+			'output-file': outputFiles,
+			'rule-selector': parsedFlags['rule-selector'],
+			'workspace': parsedFlags['workspace'],
+		};
+
+		await action.execute(rulesInput);
 	}
 
-	protected createDependencies(view: View, outputFiles: string[] = []): RulesDependencies {
+	protected createDependencies(view: View, outputFiles: string[]): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const dependencies: RulesDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
