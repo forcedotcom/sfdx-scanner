@@ -60,10 +60,10 @@ describe('`code-analyzer config` tests', () => {
 				expect(receivedActionInput).toHaveProperty('rule-selector', [...inputValue1, ...inputValue2]);
 			});
 
-			it('Defaults to value of "Recommended"', async () => {
+			it('Defaults to value of "all"', async () => {
 				await ConfigCommand.run([]);
 				expect(executeSpy).toHaveBeenCalled();
-				expect(receivedActionInput).toHaveProperty('rule-selector', ["Recommended"]);
+				expect(receivedActionInput).toHaveProperty('rule-selector', ["all"]);
 			})
 
 			it('Can be referenced by its shortname, -r', async () => {
