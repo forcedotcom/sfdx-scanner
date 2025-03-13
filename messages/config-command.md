@@ -12,33 +12,33 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
 # command.examples
 
-- Display the current state of the Code Analyzer configuration using the default behavior: display top level configuration, display the engine and rule override settings associated with all the rules that have a "Recommended" tag; and automatically apply any existing custom configuration settings found in a `code-analyzer.yml` or `code-analyzer.yaml` file in the current folder: 
+- Display the current state of the Code Analyzer configuration using the default behavior: display top level configuration, display the engine and rule override settings associated with all the rules; and automatically apply any existing custom configuration settings found in a `code-analyzer.yml` or `code-analyzer.yaml` file in the current folder: 
 
   <%= config.bin %> <%= command.id %>
 
 - This example is identical to the previous one, assuming that `./code-analyzer.yml` exists in your current folder.
 
-  <%= config.bin %> <%= command.id %> --config-file ./code-analyzer.yml --rule-selector Recommended
+  <%= config.bin %> <%= command.id %> --config-file ./code-analyzer.yml --rule-selector all
 
 - Write the current state of configuration to the file `code-analyzer.yml`, including any configuration from an existing `code-analyzer.yml` file. The command preserves all values from the original config, but overwrites any comments:
 
   <%= config.bin %> <%= command.id %> --config-file ./code-analyzer.yml --output-file code-analyzer.yml
 
-- Display the configuration state for all rules, instead of just the recommended ones:
+- Display the configuration state for just the recommended rules, instead of all the rules:
 
-  <%= config.bin %> <%= command.id %> --rule-selector all
+  <%= config.bin %> <%= command.id %> --rule-selector Recommended
 
-- Display the configuration state associated with recommended rules that are applicable to your workspace folder, `./src`:
+- Display the configuration state associated with all the rules that are applicable to your workspace folder, `./src`:
 
   <%= config.bin %> <%= command.id %> --workspace ./src
 
 - Display any relevant configuration settings associated with the rule name 'no-undef' from the 'eslint' engine:
 
-  <%= config.bin %> <%= command.id %> --rule-selection eslint:no-undef
+  <%= config.bin %> <%= command.id %> --rule-selector eslint:no-undef
 
 - Load an existing configuration file called `existing-config.yml`, and then write the configuration to a new file called `new-config.yml`, the configuration state that is applicable to all rules that are relevant to the workspace located in the current folder:
 
-  <%= config.bin %> <%= command.id %> --config-file ./existing-config.yml --rule-selection all --workspace . --output-file ./subfolder-config.yml
+  <%= config.bin %> <%= command.id %> --config-file ./existing-config.yml --workspace . --output-file ./subfolder-config.yml
 
 # flags.workspace.summary
 
@@ -62,9 +62,9 @@ Use the --rule-selector flag to display only the configuration associated with t
 
 You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, "--rule-selector eslint:Security" reduces the output to only contain the configuration state associated with the rules from the "eslint" engine that have the "Security" tag. To add multiple rule selectors together (a union), specify the --rule-selector flag multiple times, such as "--rule-selector eslint:Recommended --rule-selector retire-js:3".
 
-If you don't specify this flag, then the command uses the "Recommended" tag rule selector.
+If you don't specify this flag, then the command uses the "all" rule selector.
 
-Run `<%= config.bin %> <%= command.id %>  --rule-selector all` to display the configuration state associated with all possible rules available, and not just the recommended ones.
+Run `<%= config.bin %> <%= command.id %>  --rule-selector Recommended` to display the configuration state associated with just the 'Recommended' rules, instead of all the rules.
 
 # flags.config-file.summary
 
