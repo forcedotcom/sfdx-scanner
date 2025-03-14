@@ -35,7 +35,7 @@ describe('ConfigAction tests', () => {
 					logEventListeners: [],
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
-					configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
+					configFactory: new StubCodeAnalyzerConfigFactory(),
 					actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 					pluginsFactory: new StubEnginePluginFactory()
 				};
@@ -172,11 +172,6 @@ describe('ConfigAction tests', () => {
 				{position: 'start'},
 				{position: 'end'}
 			])('Top-level $position comment is correct', async ({position}) => {
-				// ==== SETUP ====
-				// Set the dummy config properties to null; it's fine for this test.
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
@@ -192,11 +187,6 @@ describe('ConfigAction tests', () => {
 				{section: 'rules'},
 				{section: 'engines'}
 			])('`$section` section header-comment is correct', async ({section}) => {
-				// ==== SETUP ====
-				// Set the dummy config properties to null; it's fine for this test.
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
@@ -210,10 +200,6 @@ describe('ConfigAction tests', () => {
 				{prop: 'config_root'},
 				{prop: 'log_folder'}
 			])('If derivable property $prop is explicitly null, then output is null and derived value is in a comment', async ({prop}) => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
@@ -231,8 +217,8 @@ describe('ConfigAction tests', () => {
 				{prop: 'log_folder'}
 			])('If derivable property $prop is explicitly its default value, then output is null and derived value is in a comment', async ({prop}) => {
 				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot(CodeAnalyzerConfig.withDefaults().getConfigRoot());
-				stubConfigFactory.setDummyLogFolder(CodeAnalyzerConfig.withDefaults().getLogFolder());
+				stubConfigFactory.dummyConfigRoot =CodeAnalyzerConfig.withDefaults().getConfigRoot();
+				stubConfigFactory.dummyLogFolder = CodeAnalyzerConfig.withDefaults().getLogFolder();
 
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
@@ -253,8 +239,8 @@ describe('ConfigAction tests', () => {
 				// ==== SETUP ====
 				// Make the config root and log folder both be the folder above this one.
 				const parentOfCurrentDirectory = path.resolve(__dirname, '..');
-				stubConfigFactory.setDummyConfigRoot(parentOfCurrentDirectory);
-				stubConfigFactory.setDummyLogFolder(parentOfCurrentDirectory);
+				stubConfigFactory.dummyConfigRoot = parentOfCurrentDirectory;
+				stubConfigFactory.dummyLogFolder = parentOfCurrentDirectory;
 
 				// ==== TESTED BEHAVIOR ====
 				// Just select all rules for this test, since we don't care about the rules here.
@@ -275,10 +261,6 @@ describe('ConfigAction tests', () => {
 				{overrideStatus: 'overridden tags and severity', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule3'},
 				{overrideStatus: 'no overrides', commentStatus: 'no comment', ruleName: 'Stub1Rule4'},
 			])('Selected and enabled rules with $overrideStatus are present with $commentStatus', async ({ruleName}) => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
@@ -292,10 +274,6 @@ describe('ConfigAction tests', () => {
 				{ruleType: 'Non-overridden and unselected rules', ruleName: 'Stub1Rule6'},
 				{ruleType: 'Selected rules on disabled engines', ruleName: 'Stub3Rule1'},
 			])('$ruleType are absent', async ({ruleName}) => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
@@ -304,10 +282,6 @@ describe('ConfigAction tests', () => {
 			});
 
 			it('Engines for selected rules use their existing configuration', async () => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
@@ -317,10 +291,6 @@ describe('ConfigAction tests', () => {
 			});
 
 			it('Engines for unselected rules have no configuration', async () => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
@@ -329,10 +299,6 @@ describe('ConfigAction tests', () => {
 			});
 
 			it('Disabled engines with selected rules use their configuration', async () => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
@@ -341,10 +307,8 @@ describe('ConfigAction tests', () => {
 				expect(output).toContain(goldFileContents);
 			});
 
-			it('Edge Case: When no rules are selected, `rules` and `engines` sections are commented empty objects', async () => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
+			it('Edge Case: When all engines are enabled and no rules are selected, `rules` and `engines` sections are commented empty objects', async () => {
+				stubConfigFactory.stub3DisableEngineValue = false;
 
 				// ==== TESTED BEHAVIOR ====
 				// Select the tag "NoRuleHasThisTag"
@@ -355,14 +319,44 @@ describe('ConfigAction tests', () => {
 				expect(output).toContain('engines: {} # Empty object used because rule selection returned no rules');
 			});
 
+			it('Edge Case: When an engine is disabled and no rules are selected, `rules` is empty but `engines` still contains the disable_engine flag', async () => {
+				// ==== SETUP ====
+				stubConfigFactory.stub3DisableEngineValue = true;
+
+				// ==== TESTED BEHAVIOR ====
+				// Select the tag "NoRuleHasThisTag"
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
+
+				// ==== ASSERTIONS ====
+				expect(output).toContain('rules: {} # Remove this empty object {} when you are ready to specify your first rule override');
+				expect(output).toContain('disable_engine: true # Modified from: false');
+			});
+
+			it('Edge Case: When plugin throws error when attempting to create engine config and engine is enabled, then error', async () => {
+				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory();
+
+				await expect(runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag'])).rejects.toThrowError();
+			});
+
+			it('Edge Case: When plugin thrown error when attempting to create engine config but engine is disabled, then do not error', async () => {
+				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
+					engines: {
+						uncreatableEngine: {
+							disable_engine: true
+						}
+					}
+				}));
+
+				const output: string = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
+				expect(output).toContain('disable_engine: true # Modified from: false');
+			});
+
 			it.each([
 				{overrideStatus: 'via override', commentStatus: 'there is a comment', ruleName: 'Stub1Rule7'},
 				{overrideStatus: 'by default', commentStatus: 'there is no comment', ruleName: 'Stub1Rule8'}
 			])('Edge Case: When selected rule has no tags $overrideStatus, `tags` is an empty array and $commentStatus', async ({ruleName}) => {
-				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot('null');
-				stubConfigFactory.setDummyLogFolder('null');
-
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, [ruleName]);
 
@@ -373,9 +367,7 @@ describe('ConfigAction tests', () => {
 
 			it('If config is provided with relative path to config_root, then it remains relative in config output even though core makes it absolute for engines', async () => {
 				// ==== SETUP ====
-				stubConfigFactory.setDummyConfigRoot(PATH_TO_EXAMPLE_WORKSPACE);
-				stubConfigFactory.setDummyLogFolder('null');
-
+				stubConfigFactory.dummyConfigRoot = PATH_TO_EXAMPLE_WORKSPACE;
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['Stub2Rule1']);
 
@@ -393,7 +385,7 @@ describe('ConfigAction tests', () => {
 				logEventListeners: [],
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
-				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
+				configFactory: new StubCodeAnalyzerConfigFactory(),
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			};
@@ -441,7 +433,7 @@ describe('ConfigAction tests', () => {
 				logEventListeners: [],
 				progressEventListeners: [],
 				viewer: new ConfigStyledYamlViewer(spyDisplay),
-				configFactory: new DefaultStubCodeAnalyzerConfigFactory(),
+				configFactory: new StubCodeAnalyzerConfigFactory(),
 				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
 				pluginsFactory: new StubEnginePluginFactory()
 			}
@@ -530,29 +522,29 @@ describe('ConfigAction tests', () => {
 
 // ====== STUBS ======
 
-class DefaultStubCodeAnalyzerConfigFactory implements CodeAnalyzerConfigFactory {
+class StubCodeAnalyzerConfigFactory implements CodeAnalyzerConfigFactory {
+	private readonly config: CodeAnalyzerConfig;
+
+	constructor(config: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults()) {
+		this.config = config;
+	}
+
 	public create(): CodeAnalyzerConfig {
-		return CodeAnalyzerConfig.withDefaults();
+		return this.config;
 	}
 }
 
 class AlternativeStubCodeAnalyzerConfigFactory implements CodeAnalyzerConfigFactory {
-	private dummyConfigRoot: string;
-	private dummyLogFolder: string;
-
-	public setDummyConfigRoot(dummyConfigRoot: string): void {
-		this.dummyConfigRoot = dummyConfigRoot;
-	}
-
-	public setDummyLogFolder(dummyLogFolder: string): void {
-		this.dummyLogFolder = dummyLogFolder;
-	}
+	dummyConfigRoot: string = 'null';
+	dummyLogFolder: string = 'null';
+	stub3DisableEngineValue: boolean = true;
 
 	public create(): CodeAnalyzerConfig {
 		const rawConfigFileContents = fs.readFileSync(path.join(PATH_TO_EXAMPLE_WORKSPACE, 'optional-input-config.yml'), 'utf-8');
 		const validatedConfigFileContents = rawConfigFileContents
 			.replaceAll('__DUMMY_CONFIG_ROOT__', this.dummyConfigRoot)
 			.replaceAll('__DUMMY_LOG_FOLDER__', this.dummyLogFolder)
+			.replaceAll('__STUB3_DISABLE_ENGINE_VALUE__', String(this.stub3DisableEngineValue))
 			.replaceAll('__DUMMY_STUBENGINE2_SUBFIELD__', this.dummyConfigRoot && this.dummyConfigRoot !== 'null' ?
 				path.join(this.dummyConfigRoot, 'optional-input-config.yml') : 'dummy');
 		return CodeAnalyzerConfig.fromYamlString(validatedConfigFileContents,  process.cwd());
@@ -800,4 +792,25 @@ class StubEngine3 extends EngineApi.Engine {
 			violations: []
 		});
 	}
+}
+
+
+class FactoryForThrowingEnginePlugin implements EnginePluginsFactory {
+    create(): EngineApi.EnginePlugin[] {
+        return [new ThrowingEnginePlugin()];
+    }
+}
+
+class ThrowingEnginePlugin extends EngineApi.EnginePluginV1 {
+    getAvailableEngineNames(): string[] {
+        return ['uncreatableEngine'];
+    }
+
+	createEngineConfig(_engineName: string, _configValueExtractor: EngineApi.ConfigValueExtractor): Promise<EngineApi.ConfigObject> {
+		throw new Error('Error thrown by createEngineConfig');
+	}
+
+    createEngine(_engineName: string, _resolvedConfig: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
+        throw new Error('Should not be called.');
+    }
 }
