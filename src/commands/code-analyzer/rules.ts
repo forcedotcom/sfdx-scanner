@@ -52,7 +52,6 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			summary: getMessage(BundleName.RulesCommand, 'flags.view.summary'),
 			description: getMessage(BundleName.RulesCommand, 'flags.view.description'),
 			char: 'v',
-			default: View.TABLE,
 			options: Object.values(View)
 		})
 	};
@@ -62,8 +61,10 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
 
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];		
-		const dependencies: RulesDependencies = this.createDependencies(parsedFlags.view as View, outputFiles);
+		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];
+		const view = parsedFlags.view as View | undefined;
+
+		const dependencies: RulesDependencies = this.createDependencies(view, outputFiles);
 		const action: RulesAction = RulesAction.createAction(dependencies);
 
 		const rulesInput: RulesInput = {
@@ -76,7 +77,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 		await action.execute(rulesInput);
 	}
 
-	protected createDependencies(view: View, outputFiles: string[]): RulesDependencies {
+	protected createDependencies(view: View | undefined, outputFiles: string[]): RulesDependencies {
 		const uxDisplay: UxDisplay = new UxDisplay(this, this.spinner);
 		const dependencies: RulesDependencies = {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
@@ -97,18 +98,16 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 	 * If an output file is set, rules will not display.
 	 * By default, the details display will be used.
 	 */
-	private createRulesViewer(view: View, outputFiles: string[] = [], uxDisplay: UxDisplay) {
+	private createRulesViewer(view: View | undefined, outputFiles: string[] = [], uxDisplay: UxDisplay) {
 		if (view === View.DETAIL) {
 			return new RuleDetailDisplayer(uxDisplay);
 		} else if (view === View.TABLE) {
 			return new RuleTableDisplayer(uxDisplay);
-		}
-		
-		if (outputFiles.length > 0) {
+		} else if (outputFiles.length > 0) {
 			return new RulesNoOpDisplayer();
 		}
 
-		return new RuleDetailDisplayer(uxDisplay);
+		return new RuleTableDisplayer(uxDisplay);
 	}
 }
 

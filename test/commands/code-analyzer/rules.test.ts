@@ -3,6 +3,7 @@ import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
 import path from 'node:path';
 import RulesCommand from '../../../src/commands/code-analyzer/rules';
 import { RulesAction, RulesDependencies, RulesInput } from '../../../src/lib/actions/RulesAction';
+import { RuleDetailDisplayer, RulesNoOpDisplayer, RuleTableDisplayer } from '../../../src/lib/viewers/RuleViewer';
 import { CompositeRulesWriter } from '../../../src/lib/writers/RulesWriter';
 
 describe('`code-analyzer rules` tests', () => {
@@ -246,7 +247,7 @@ describe('`code-analyzer rules` tests', () => {
 
 	describe('Flag interactions', () => {
 		describe('--output-file and --view', () => {
-			it('When --output-file and --view are both present, both are used', async () => {
+			it('When --output-file and --view is set to "detail", writer is set and view is set to "detail" display', async () => {
 				const outfileInput = 'rules-output.json';
 				const viewInput = 'detail';
 				await RulesCommand.run(['--output-file', outfileInput, '--view', viewInput]);
@@ -254,25 +255,36 @@ describe('`code-analyzer rules` tests', () => {
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFilesSpy).toHaveBeenCalled();
 				expect(receivedFiles).toEqual([outfileInput]);
-				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleDetailDisplayer);
 			});
 
-			it('When --output-file is present and --view is not, --view defaults to "table"', async () => {
+			it('When --output-file and --view is set to "table", writer is set and view is set to "table" display', async () => {
+				const outfileInput = 'rules-output.json';
+				const viewInput = 'table';
+				await RulesCommand.run(['--output-file', outfileInput, '--view', viewInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleTableDisplayer);
+			});
+
+			it('When --output-file is present and --view is not, view is set to a noop display', async () => {
 				const outfileInput= 'rules-output.json';
 				await RulesCommand.run(['--output-file', outfileInput]);
 				expect(executeSpy).toHaveBeenCalled();
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFilesSpy).toHaveBeenCalled();
 				expect(receivedFiles).toEqual([outfileInput]);
-				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RulesNoOpDisplayer);
 			});
 
-			it('When --output-file and --view are both absent, writer is not set and --view defaults to "table"', async () => {
+			it('When --output-file and --view are both absent, writer is not set and --view defaults to "table" display', async () => {
 				await RulesCommand.run([]);
 				expect(createActionSpy).toHaveBeenCalled();
 				expect(fromFilesSpy).toHaveBeenCalled();
 				expect(receivedFiles).toEqual([]);
-				expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleTableDisplayer);
 			});
 		});
 	});
