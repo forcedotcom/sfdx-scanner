@@ -126,11 +126,11 @@ If you specify neither --view nor --output-file, then the default table view is 
 
 # flags.output-file.summary
 
-Output file that contains the analysis results. The file format depends on the extension you specify, such as .csv, .html, .xml, and so on. 
+Name of the file where the analysis results are written. The file format depends on the extension you specify, such as .csv, .html, .xml, and so on. 
 
 # flags.output-file.description
 
-If you don't specify this flag, the command outputs the results in the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, "--output-file results.csv" creates a comma-separated values file. You can specify one of these extensions:
+If you don't specify this flag, the command outputs the results to only the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, "--output-file results.csv" creates a comma-separated values file. You can specify one of these extensions:
 
 - .csv
 - .html or .htm
@@ -138,8 +138,11 @@ If you don't specify this flag, the command outputs the results in the terminal.
 - .sarif or .sarif.json
 - .xml
 
-To output the results to multiple files, specify this flag multiple times.  For example: "--output-file ./out/results.json --output-file ./out/report.html" creates a JSON results file and an HTML file in the "./out" folder. 
+To output the results to multiple files, specify this flag multiple times.  For example: "--output-file results.json --output-file report.html" creates both a JSON results file and an HTML file.
+
+If you specify a folder, such as "--output-file ./out/results.json", the folder must already exist or you get an error. If the file already exists, it's overwritten without prompting.
 
 # error.invalid-severity-threshold
 
 Expected --severity-threshold=%s to be one of: %s
+
