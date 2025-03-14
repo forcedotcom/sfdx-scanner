@@ -9,6 +9,7 @@ import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {ConfigActionSummaryViewer} from '../viewers/ActionSummaryViewer';
 import {AnnotatedConfigModel, ConfigModel} from '../models/ConfigModel';
+import {EnginePlugin} from "@salesforce/code-analyzer-engine-api";
 
 export type ConfigDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
@@ -35,9 +36,9 @@ export class ConfigAction {
 	}
 
 	public async execute(input: ConfigInput): Promise<void> {
-		// We need the user's Config and the default Config.
+
+		// ==== PREPARE USER's CONFIG AND USER's CODE ANALYZER =========================================================
 		const userConfig: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
-		const defaultConfig: CodeAnalyzerConfig = CodeAnalyzerConfig.withDefaults();
 
 		// We always add a Logger Listener to the appropriate listeners list, because we should always be logging.
 		const logFileWriter: LogFileWriter = await LogFileWriter.fromConfig(userConfig);
@@ -45,37 +46,60 @@ export class ConfigAction {
 		const logEventLogger: LogEventLogger = new LogEventLogger(logFileWriter);
 		this.dependencies.logEventListeners.push(logEventLogger);
 
-		// The User's config produces one Core.
 		const userCore: CodeAnalyzer = new CodeAnalyzer(userConfig);
-		// The Default config produces two Cores, since we have to run two selections.
-		const defaultCoreForAllRules: CodeAnalyzer = new CodeAnalyzer(defaultConfig);
-		const defaultCoreForSelectRules: CodeAnalyzer = new CodeAnalyzer(defaultConfig);
 
 		// LogEventListeners should start listening as soon as the User Core is instantiated, since it can start emitting
 		// relevant events basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(userCore));
+
+		const enginePlugins: EnginePlugin[] = this.dependencies.pluginsFactory.create();
+		const enginePluginModules: string[] = userConfig.getCustomEnginePluginModules();
+
+		const userEnginePromises: Promise<void>[] = [
+			...enginePlugins.map(enginePlugin => userCore.addEnginePlugin(enginePlugin)),
+			...enginePluginModules.map(pluginModule => userCore.dynamicallyAddEnginePlugin(pluginModule)),
+		];
+		await Promise.all(userEnginePromises);
+
+
+		// ==== PREPARE DEFAULT CONFIG (with disable_engine settings kept) AND DEFAULT CODE ANALYZER ===================
+
+		// TODO: We are currently only passing in the enginePlugins here which are not all plugins. We need to
+		// include the dynamically loaded plugins... but dynamicallyAddEnginePlugin loads and adds and so we never get
+		// access to the plugins. We need to update core to separate the concerns so that we just have a
+		// dynamicallyLoadEnginePlugin to just return the plugin so that we can add these plugins to this list.
+		// And/Or we could just have the Code Analyzer class return a list of the engines that were disabled so that
+		// we don't need this helper function here.
+		const disabledEngines: string[] = getDisabledEngineNames(enginePlugins, new Set(userCore.getEngineNames()));
+
+		type engineDisableInfo = { engines: { [key: string]: { disable_engine: boolean } } };
+		const rawConfigOnlyWithEnginesDisabled: engineDisableInfo = {engines: {}};
+		for (const engineName of disabledEngines) {
+			rawConfigOnlyWithEnginesDisabled.engines[engineName] = { disable_engine: true };
+		}
+		const defaultConfigWithEnginesDisabled: CodeAnalyzerConfig = CodeAnalyzerConfig.fromObject(rawConfigOnlyWithEnginesDisabled);
+
+		// The Default config produces two Cores, since we have to run two selections.
+		const defaultCoreForAllRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
+		const defaultCoreForSelectRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
+
 		// Only the File Logger should listen to the Default Cores, since we don't want to bother the user with redundant
 		// logs printed to the console.
 		logEventLogger.listen(defaultCoreForAllRules);
 		logEventLogger.listen(defaultCoreForSelectRules);
 
-		const enginePlugins = this.dependencies.pluginsFactory.create();
-		const enginePluginModules = userConfig.getCustomEnginePluginModules();
-
-		const addEnginePromises: Promise<void>[] = [
-			// Assumption: It's safe for the different cores to share the same plugins, because all currently existent
-			// plugins return unique engines every time. This code may fail or behave unexpectedly if a plugin reuses engines.
-			...enginePlugins.map(enginePlugin => userCore.addEnginePlugin(enginePlugin)),
+		const defaultEnginePromises: Promise<void>[] = [
 			...enginePlugins.map(enginePlugin => defaultCoreForAllRules.addEnginePlugin(enginePlugin)),
 			...enginePlugins.map(enginePlugin => defaultCoreForSelectRules.addEnginePlugin(enginePlugin)),
-			...enginePluginModules.map(pluginModule => userCore.dynamicallyAddEnginePlugin(pluginModule)),
 			// Assumption: Every engine's default configuration is sufficient to allow that engine to be instantiated,
 			// or throw a clear error indicating the problem.
 			...enginePluginModules.map(pluginModule => defaultCoreForAllRules.dynamicallyAddEnginePlugin(pluginModule)),
 			...enginePluginModules.map(pluginModule => defaultCoreForSelectRules.dynamicallyAddEnginePlugin(pluginModule)),
 		];
-		await Promise.all(addEnginePromises);
+		await Promise.all(defaultEnginePromises);
 
+
+		// ==== PERFORM RULE SELECTIONS ================================================================================
 		const userSelectOptions = input.workspace
 			? {workspace: await createWorkspace(userCore, input.workspace)}
 			: undefined;
@@ -106,8 +130,15 @@ export class ConfigAction {
 		this.dependencies.progressEventListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
 
-		// We need the Set of all Engines that returned rules for the user's selection on both the Default and User Cores.
-		const relevantEngines: Set<string> = new Set([...userRules.getEngineNames(), ...selectedDefaultRules.getEngineNames()]);
+
+		// ==== CREATE AND WRITE CONFIG YAML ===========================================================================
+
+		// We need the Set of disabled engines plus all engines that returned rules for the user's selection on both the
+		// Default and User Cores.
+		const relevantEngines: Set<string> = new Set([
+			...disabledEngines,
+			...userRules.getEngineNames(),
+			...selectedDefaultRules.getEngineNames()]);
 
 		const configModel: ConfigModel = new AnnotatedConfigModel(userCore, userRules, allDefaultRules, relevantEngines);
 
@@ -125,4 +156,10 @@ export class ConfigAction {
 	public static createAction(dependencies: ConfigDependencies): ConfigAction {
 		return new ConfigAction(dependencies)
 	}
+}
+
+function getDisabledEngineNames(allEnginePlugins: EnginePlugin[], enabledEngineNames: Set<string>): string[] {
+	return allEnginePlugins.flatMap(enginePlugin =>
+		enginePlugin.getAvailableEngineNames().filter(engineName => !enabledEngineNames.has(engineName))
+	);
 }
