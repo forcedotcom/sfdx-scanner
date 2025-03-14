@@ -17,7 +17,7 @@ engines:
       sub_field:
         - __DUMMY_STUBENGINE2_SUBFIELD__
   StubEngine3:
-    disable_engine: true
+    disable_engine: __STUB3_DISABLE_ENGINE_VALUE__
 rules:
   StubEngine1:
     Stub1Rule1:
