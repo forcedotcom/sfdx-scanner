@@ -368,7 +368,8 @@ export class TimeableEngine2 extends BaseTimeableEngine {
  * EventConfigurableEngine1 - An engine with a {@code setWaitTime()} method allowing a delay to be added between update events.
  */
 export class EventConfigurableEngine1 extends EngineApi.Engine {
-	private events: {logLevel: LogLevel, message: string}[] = [];
+	private logEvents: {logLevel: LogLevel, message: string}[] = [];
+	private runProgressEvents: {percentComplete: number, message?: string}[] = [];
 
 	constructor(_config: EngineApi.ConfigObject) {
 		super();
@@ -382,8 +383,12 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 		return Promise.resolve("1.0.5");
 	}
 
-	addEvents(...events: {logLevel: LogLevel, message: string}[]): void {
-		this.events = [...this.events, ...events];
+	addLogEvents(...events: {logLevel: LogLevel, message: string}[]): void {
+		this.logEvents = [...this.logEvents, ...events];
+	}
+
+	addRunProgressEvents(...events: {percentComplete: number, message?: string}[]): void {
+		this.runProgressEvents = [...this.runProgressEvents, ...events];
 	}
 
 	describeRules(): Promise<EngineApi.RuleDescription[]> {
@@ -399,12 +404,15 @@ export class EventConfigurableEngine1 extends EngineApi.Engine {
 	}
 
 	async runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
-		for (const {logLevel, message} of this.events) {
+		for (const {logLevel, message} of this.logEvents) {
 			this.emitEvent<EngineApi.LogEvent>({
 				type: EngineApi.EventType.LogEvent,
 				message,
 				logLevel
 			});
+		}
+		for (const {percentComplete, message} of this.runProgressEvents) {
+			this.emitRunRulesProgressEvent(percentComplete, message);
 		}
 		return Promise.resolve({violations: []});
 	}

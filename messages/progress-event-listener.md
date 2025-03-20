@@ -13,8 +13,11 @@ Executing rules
 # execution-spinner.progress-summary
 %d of %d engines finished after %ds.
 
-# execution-spinner.engine-status
+# execution-spinner.engine-progress
  - %s at %d% completion.
+
+# execution-spinner.engine-progress-with-message
+ - %s at %d% completion - %s
 
 # execution-spinner.finished-status
 done. Executed rules from %s.

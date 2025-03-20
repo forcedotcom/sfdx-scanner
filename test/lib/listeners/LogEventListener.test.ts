@@ -36,7 +36,7 @@ describe('LogEventListener implementations', () => {
 			// ==== TEST SETUP ====
 			const expectedMessages: string[] = ['message1', 'message2', 'message3'];
 			for (const expectedMessage of expectedMessages) {
-				engine1.addEvents({logLevel, message: expectedMessage});
+				engine1.addLogEvents({logLevel, message: expectedMessage});
 			}
 			// The specific files we target in our workspace don't matter.
 			const workspace = await core.createWorkspace(['package.json']);
@@ -65,7 +65,7 @@ describe('LogEventListener implementations', () => {
 			// ==== TEST SETUP ====
 			const messages = ['message1', 'message2', 'message3'];
 			for (const message of messages) {
-				engine1.addEvents({logLevel, message});
+				engine1.addLogEvents({logLevel, message});
 			}
 			// The specific files we include in our workspace don't matter.
 			const workspace = await core.createWorkspace(['package.json']);
@@ -94,7 +94,7 @@ describe('LogEventListener implementations', () => {
 			// ==== TEST SETUP ====
 			const expectedMessages = ['message1', 'message2', 'message3'];
 			for (const expectedMessage of expectedMessages) {
-				engine1.addEvents({logLevel, message: expectedMessage});
+				engine1.addLogEvents({logLevel, message: expectedMessage});
 			}
 			// The specific files we include in our workspace don't matter.
 			const workspace = await core.createWorkspace(['package.json']);

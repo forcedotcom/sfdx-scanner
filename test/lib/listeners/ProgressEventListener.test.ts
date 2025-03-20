@@ -1,7 +1,7 @@
 import {CodeAnalyzer, CodeAnalyzerConfig} from '@salesforce/code-analyzer-core';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../../src/lib/listeners/ProgressEventListener';
 import {SpyDisplay, DisplayEvent, DisplayEventType} from '../../stubs/SpyDisplay';
-import {TimeableStubEnginePlugin1, TimeableEngine1, TimeableEngine2} from '../../stubs/StubEnginePlugins';
+import {ConfigurableStubEnginePlugin1, EventConfigurableEngine1, TimeableStubEnginePlugin1, TimeableEngine1, TimeableEngine2} from '../../stubs/StubEnginePlugins';
 import {StubEnginePluginsFactory_withFunctionalStubEngine} from '../../stubs/StubEnginePluginsFactories';
 
 describe('ProgressEventListener implementations', () => {
@@ -334,6 +334,54 @@ describe('ProgressEventListener implementations', () => {
 			expect(endEvent).toHaveProperty('type', DisplayEventType.SPINNER_STOP);
 			expect(endEvent.data).toContain('done. Executed rules from timeableEngine1.');
 		}, 10000);
+
+		it('When an engine supplies status messages with its progress, those messages are displayed', async () => {
+			// ==== TEST SETUP ====
+			// Assign our event-configurable engine to the core.
+			const engine: EventConfigurableEngine1 = new EventConfigurableEngine1({});
+			const plugin = new ConfigurableStubEnginePlugin1();
+			plugin.addEngine(engine);
+			await codeAnalyzer.addEnginePlugin(plugin);
+			// Give the engine some progress events.
+			engine.addRunProgressEvents(
+				{percentComplete: 10},
+				{percentComplete: 15, message: 'Progress Message 1'},
+				{percentComplete: 25},
+				{percentComplete: 50, message: 'Progress Message 2'},
+				{percentComplete: 75},
+				{percentComplete: 90, message: 'Progress Message 3'},
+			);
+			const ruleSelection = await codeAnalyzer.selectRules(['eventConfigurableEngine1']);
+			// We don't want automated ticking to mess with the messages, so just turn it off for now.
+			spinner = new EngineRunProgressSpinner(spyDisplay, -1);
+
+			// The specific targets we use for our workspace don't matter.
+			const workspace = await codeAnalyzer.createWorkspace(['package.json']);
+
+			// ==== TESTED BEHAVIOR ====
+			// Start listening, then execute the rules, then stop listening.
+			spinner.listen(codeAnalyzer);
+			await codeAnalyzer.run(ruleSelection, {
+				workspace
+			});
+			spinner.stopListening();
+
+			// ==== ASSERTIONS ====
+			const displayEvents = spyDisplay.getDisplayEvents();
+			// The first event should have been the Spinner Start.
+			const startEvent = displayEvents[0];
+			expect(startEvent).toHaveProperty('type', DisplayEventType.SPINNER_START);
+			// The start event should always start with at least 1 known engine, to prevent "0 of 0 engines" scenarios.
+			expect(startEvent.data).toContain("0 of 1 engines");
+			const progressEventsInOrder: string[] = displayEvents.slice(1, displayEvents.length - 1).map(e => e.data);
+			expect(progressEventsInOrder[0]).toContain("- eventConfigurableEngine1 at 0% completion.");
+			expect(progressEventsInOrder[1]).toContain("- eventConfigurableEngine1 at 10% completion.");
+			expect(progressEventsInOrder[2]).toContain("- eventConfigurableEngine1 at 15% completion - Progress Message 1");
+			expect(progressEventsInOrder[3]).toContain("- eventConfigurableEngine1 at 25% completion.");
+			expect(progressEventsInOrder[4]).toContain("- eventConfigurableEngine1 at 50% completion - Progress Message 2");
+			expect(progressEventsInOrder[5]).toContain("- eventConfigurableEngine1 at 75% completion.");
+			expect(progressEventsInOrder[6]).toContain("- eventConfigurableEngine1 at 90% completion - Progress Message 3");
+		});
 
 		// There's currently no need for this Spinner to accept multiple Cores, so we've opted to not implement that
 		// functionality. We're locking that in with a test, and we can change this test if we ever decide to support it.

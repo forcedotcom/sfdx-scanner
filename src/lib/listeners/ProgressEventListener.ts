@@ -148,7 +148,7 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 	 * Mapping from each engine's name to a number indicating its completion percentage.
 	 * @private
 	 */
-	private progressMap: Map<string, number>;
+	private progressMap: Map<string, {percentComplete: number, message?: string}>;
 
 	/**
 	 * @param display The display with which to show output to the user
@@ -187,7 +187,7 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 		}
 
 		// Update the progress map at the start so that the updated information is used in the next status.
-		this.progressMap.set(e.engineName, e.percentComplete);
+		this.progressMap.set(e.engineName, {percentComplete: e.percentComplete, message: e.message});
 
 		if (!this.isSpinning()) {
 			this.startSpinning(getMessage(BundleName.ProgressEventListener, 'execution-spinner.action'));
@@ -201,10 +201,14 @@ export class EngineRunProgressSpinner extends ProgressSpinner implements Progres
 		let unfinishedEngines = 0;
 		const engineLines: string[] = [];
 		for (const [name, progress] of this.progressMap.entries()) {
-			if (progress !== 100) {
+			if (progress.percentComplete !== 100) {
 				unfinishedEngines += 1;
 			}
-			engineLines.push(getMessage(BundleName.ProgressEventListener, 'execution-spinner.engine-status', [name, progress]));
+			if (progress.message) {
+				engineLines.push(getMessage(BundleName.ProgressEventListener, 'execution-spinner.engine-progress-with-message', [name, progress.percentComplete, progress.message]));
+			} else {
+				engineLines.push(getMessage(BundleName.ProgressEventListener, 'execution-spinner.engine-progress', [name, progress.percentComplete]));
+			}
 		}
 		return [
 			getMessage(BundleName.ProgressEventListener, 'execution-spinner.progress-summary', [totalEngines - unfinishedEngines, totalEngines, secondsRunning]),
