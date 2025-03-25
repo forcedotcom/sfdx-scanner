@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'path';
 import ansis from 'ansis';
-import {RuleDetailDisplayer, RuleTableDisplayer} from '../../../src/lib/viewers/RuleViewer';
+import {RuleDetailDisplayer, RulesNoOpDisplayer, RuleTableDisplayer} from '../../../src/lib/viewers/RuleViewer';
 import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
 import * as StubRules from '../../stubs/StubRules';
 
@@ -156,6 +156,18 @@ describe('RuleViewer implementations', () => {
 			}]);
 		});
 	});
+
+	describe('RuleNoopDisplayer', () => {
+		it('Does not display', () => {
+			const display = new SpyDisplay();
+			const viewer = new RulesNoOpDisplayer();
+
+			viewer.view([]);
+
+			const displayEvents = display.getDisplayEvents();
+			expect(displayEvents).toHaveLength(0);
+		});
+	})
 });
 
 function readComparisonFile(fileName: string): string {

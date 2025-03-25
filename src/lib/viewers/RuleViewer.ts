@@ -8,7 +8,6 @@ export interface RuleViewer {
 	view(rules: Rule[]): void;
 }
 
-
 abstract class AbstractRuleDisplayer implements RuleViewer {
 	protected display: Display;
 
@@ -111,3 +110,8 @@ export class RuleTableDisplayer extends AbstractRuleDisplayer {
 	}
 }
 
+export class RulesNoOpDisplayer implements RuleViewer {
+	public view(_rules: Rule[]): void {
+		return;
+	}
+}

@@ -31,6 +31,13 @@ abstract class AbstractActionSummaryViewer {
 		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'common.logfile-location'));
 		this.display.displayLog(indent(logFile));
 	}
+
+	protected displayOutfiles(outfiles: string[], msgKey: string): void {
+		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, msgKey));
+		for (const outfile of outfiles) {
+			this.display.displayLog(indent(outfile));
+		}
+	}
 }
 
 export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
@@ -45,16 +52,11 @@ export class ConfigActionSummaryViewer extends AbstractActionSummaryViewer {
 		this.displayLineSeparator();
 
 		if (outfile) {
-			this.displayOutfile(outfile);
+			this.displayOutfiles([outfile], 'config-action.outfile-location');
 			this.displayLineSeparator();
 		}
 
 		this.displayLogFileInfo(logFile);
-	}
-
-	private displayOutfile(outfile: string): void {
-		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'config-action.outfile-location'));
-		this.display.displayLog(indent(outfile));
 	}
 }
 
@@ -63,18 +65,25 @@ export class RulesActionSummaryViewer extends AbstractActionSummaryViewer {
 		super(display);
 	}
 
-	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string): void {
+	public viewPostExecutionSummary(ruleSelection: RuleSelection, logFile: string, outfiles: string[]): void {
 		// Start with separator to cleanly break from anything that's already been logged.
 		this.displayLineSeparator();
 		this.displaySummaryHeader();
 		this.displayLineSeparator();
 
-		if (ruleSelection.getCount() === 0) {
+		const noRulesFound = ruleSelection.getCount() === 0;
+
+		if (noRulesFound) {
 			this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'rules-action.found-no-rules'));
 		} else {
 			this.displayRuleSelection(ruleSelection);
 		}
 		this.displayLineSeparator();
+
+		if (outfiles.length > 0) {
+			this.displayOutfiles(outfiles, 'rules-action.outfile-location');
+			this.displayLineSeparator();
+		}
 
 		this.displayLogFileInfo(logFile);
 	}
@@ -107,7 +116,7 @@ export class RunActionSummaryViewer extends AbstractActionSummaryViewer {
 		this.displayLineSeparator();
 
 		if (outfiles.length > 0) {
-			this.displayOutfiles(outfiles);
+			this.displayOutfiles(outfiles, 'run-action.outfiles-total');
 			this.displayLineSeparator();
 		}
 
@@ -138,12 +147,5 @@ export class RunActionSummaryViewer extends AbstractActionSummaryViewer {
 			}
 		});
 		return fileSet.size;
-	}
-
-	private displayOutfiles(outfiles: string[]): void {
-		this.display.displayLog(getMessage(BundleName.ActionSummaryViewer, 'run-action.outfiles-total'));
-		for (const outfile of outfiles) {
-			this.display.displayLog(indent(outfile));
-		}
 	}
 }

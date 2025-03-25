@@ -1,15 +1,22 @@
-import {stubSfCommandUx} from '@salesforce/sf-plugins-core';
-import {TestContext} from '@salesforce/core/lib/testSetup';
+import { TestContext } from '@salesforce/core/lib/testSetup';
+import { stubSfCommandUx } from '@salesforce/sf-plugins-core';
+import path from 'node:path';
 import RulesCommand from '../../../src/commands/code-analyzer/rules';
-import {RulesAction, RulesDependencies, RulesInput} from '../../../src/lib/actions/RulesAction';
+import { RulesAction, RulesDependencies, RulesInput } from '../../../src/lib/actions/RulesAction';
+import { RuleDetailDisplayer, RulesNoOpDisplayer, RuleTableDisplayer } from '../../../src/lib/viewers/RuleViewer';
+import { CompositeRulesWriter } from '../../../src/lib/writers/RulesWriter';
 
 describe('`code-analyzer rules` tests', () => {
 	const $$ = new TestContext();
 
 	let executeSpy: jest.SpyInstance;
 	let createActionSpy: jest.SpyInstance;
+	let fromFilesSpy: jest.SpyInstance;
 	let receivedActionInput: RulesInput;
 	let receivedActionDependencies: RulesDependencies;
+
+	let receivedFiles: string[];
+
 	beforeEach(() => {
 		stubSfCommandUx($$.SANDBOX);
 		executeSpy = jest.spyOn(RulesAction.prototype, 'execute').mockImplementation((input) => {
@@ -21,6 +28,11 @@ describe('`code-analyzer rules` tests', () => {
 			receivedActionDependencies = dependencies;
 			return originalCreateAction(dependencies);
 		});
+		const originalFromFiles = CompositeRulesWriter.fromFiles;
+		fromFilesSpy = jest.spyOn(CompositeRulesWriter, 'fromFiles').mockImplementation(files => {
+			receivedFiles = files;
+			return originalFromFiles(files);
+		})
 	});
 
 	afterEach(() => {
@@ -103,12 +115,47 @@ describe('`code-analyzer rules` tests', () => {
 		});
 	});
 
+	describe('--output-file', () => {
+
+		const inputValue1 = path.join('my', 'rules-output.json');
+		const inputValue2 = path.join('my', 'second', 'rules-output.json');
+
+		it('Accepts one file path', async () => {
+			await RulesCommand.run(['--output-file', inputValue1]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(createActionSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('output-file', [inputValue1]);
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([inputValue1]);
+		});
+				
+		it('Can only be supplied once', async () => {
+			const executionPromise = RulesCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
+			await expect(executionPromise).rejects.toThrow(`Flag --output-file can only be specified once`);
+			expect(executeSpy).not.toHaveBeenCalled();
+		});
+		
+		it('Can be referenced by its shortname, -f', async () => {
+			await RulesCommand.run(['-f', inputValue1]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(receivedActionInput).toHaveProperty('output-file', [inputValue1]);
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([inputValue1]);
+		});
+
+		it('Is optional', async () => {
+			await RulesCommand.run([]);
+			expect(executeSpy).toHaveBeenCalled();
+			expect(fromFilesSpy).toHaveBeenCalled();
+			expect(receivedFiles).toEqual([]);
+		});
+	});
+	
 	describe('--view', () => {
 		it('Accepts the value, "table"', async () => {
 			const inputValue = 'table';
 			await RulesCommand.run(['--view', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
@@ -117,7 +164,6 @@ describe('`code-analyzer rules` tests', () => {
 			const inputValue = 'detail';
 			await RulesCommand.run(['--view', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});
@@ -132,7 +178,6 @@ describe('`code-analyzer rules` tests', () => {
 		it('Defaults to value of "table"', async () => {
 			await RulesCommand.run([]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', 'table');
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleTableDisplayer');
 		});
@@ -150,7 +195,6 @@ describe('`code-analyzer rules` tests', () => {
 			const inputValue = 'detail';
 			await RulesCommand.run(['-v', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('view', inputValue);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.viewer.constructor.name).toEqual('RuleDetailDisplayer');
 		});
@@ -198,6 +242,50 @@ describe('`code-analyzer rules` tests', () => {
 			await RulesCommand.run(['-w', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('workspace', [inputValue]);
+		});
+	});
+
+	describe('Flag interactions', () => {
+		describe('--output-file and --view', () => {
+			it('When --output-file and --view is set to "detail", writer is set and view is set to "detail" display', async () => {
+				const outfileInput = 'rules-output.json';
+				const viewInput = 'detail';
+				await RulesCommand.run(['--output-file', outfileInput, '--view', viewInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleDetailDisplayer);
+			});
+
+			it('When --output-file and --view is set to "table", writer is set and view is set to "table" display', async () => {
+				const outfileInput = 'rules-output.json';
+				const viewInput = 'table';
+				await RulesCommand.run(['--output-file', outfileInput, '--view', viewInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleTableDisplayer);
+			});
+
+			it('When --output-file is present and --view is not, view is set to a noop display', async () => {
+				const outfileInput= 'rules-output.json';
+				await RulesCommand.run(['--output-file', outfileInput]);
+				expect(executeSpy).toHaveBeenCalled();
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([outfileInput]);
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RulesNoOpDisplayer);
+			});
+
+			it('When --output-file and --view are both absent, writer is not set and --view defaults to "table" display', async () => {
+				await RulesCommand.run([]);
+				expect(createActionSpy).toHaveBeenCalled();
+				expect(fromFilesSpy).toHaveBeenCalled();
+				expect(receivedFiles).toEqual([]);
+				expect(receivedActionDependencies.viewer.constructor).toEqual(RuleTableDisplayer);
+			});
 		});
 	});
 });

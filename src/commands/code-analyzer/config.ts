@@ -34,7 +34,7 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			char: 'r',
 			multiple: true,
 			delimiter: ',',
-			default: ["Recommended"]
+			default: ["all"]
 		}),
 		'config-file': Flags.file({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.config-file.summary'),

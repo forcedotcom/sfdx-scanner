@@ -32,9 +32,9 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
   <%= config.bin %> <%= command.id %>  --rule-selector eslint:all
 
-- List all rules for all engines:
+- List the details about all rules for all engines; also write the rules in JSON format to a file called "rules.json" in the "out" folder, which must already exist:
 
-    <%= config.bin %> <%= command.id %>  --rule-selector all
+    <%= config.bin %> <%= command.id %>  --rule-selector all --output-file ./out/rules.json --view detail
 
 - Get a more accurate list of the rules that apply specifically to your workspace (all the files in the current folder): 
 
@@ -102,4 +102,16 @@ Format to display the rules in the terminal.
 
 # flags.view.description
 
-The format `table` is concise and shows minimal output, the format `detail` shows all available information.
+The format `table` is concise and shows minimal output, the format `detail` shows all available information. 
+
+If you specify neither --view nor --output-file, then the default table view is shown. If you specify --output-file but not --view, only summary information is shown in the terminal.
+
+# flags.output-file.summary
+
+Name of the file where the selected rules are written. The file format depends on the extension you specify; currently, only .json is supported for JSON-formatted output.
+
+# flags.output-file.description
+
+If you specify a folder, such as "--output-file ./out/rules.json", the folder must already exist or you get an error. If the file already exists, it's overwritten without prompting.
+
+If you don't specify this flag, the command outputs the rules to only the terminal. 
