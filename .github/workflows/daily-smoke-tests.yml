@@ -12,6 +12,7 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
+  #TODO: remove v4 with April Release
   v4-smoke-test:
     runs-on: macos-latest
     steps:
@@ -25,4 +26,18 @@ jobs:
               repo: context.repo.repo,
               workflow_id: 'daily-smoke-tests.yml',
               ref: 'dev-4'
+            });
+  v5-smoke-test:
+    runs-on: macos-latest
+    steps:
+      - name: Invoke v5 smoke tests
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'daily-smoke-tests.yml',
+              ref: 'dev'
             });

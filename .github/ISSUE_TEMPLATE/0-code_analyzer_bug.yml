@@ -74,7 +74,7 @@ body:
       description: |
         What do you get from the command "sf plugins"?
       placeholder: |
-        Example: code-analyzer 5.0.0-beta.0
+        Example: code-analyzer 5.0.0
     validations:
       required: true
   - type: input
