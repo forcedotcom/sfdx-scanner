@@ -193,7 +193,13 @@ abstract class YamlFormatter {
 
 	private toYamlEngineOverridesForEngine(engineName: string): string {
 		const engineConfigDescriptor: ConfigDescription = this.codeAnalyzer.getEngineConfigDescription(engineName);
-		const userEngineConfig: EngineConfig = this.codeAnalyzer.getEngineConfig(engineName);
+
+		// We get the normalized (validated) engine config if it is available. But if an engine failed validation then
+		// getEngineConfig will just error... so instead we fall back to the raw config that the user may have supplied
+		// to keep things untouched. This is ok because we are already throwing an error log event displaying the issue.
+		// So now users can still see create a config file and make changes as needed.
+		const userEngineConfig: EngineConfig = this.codeAnalyzer.getEngineNames().includes(engineName) ?
+			this.codeAnalyzer.getEngineConfig(engineName) : this.codeAnalyzer.getConfig().getEngineOverridesFor(engineName);
 
 		let yamlCode: string = '\n' +
 			this.toYamlSectionHeadingComment(engineConfigDescriptor.overview) + '\n' +

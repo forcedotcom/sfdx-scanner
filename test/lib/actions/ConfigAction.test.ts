@@ -13,7 +13,8 @@ import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryV
 
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
 import {SpyConfigViewer} from '../../stubs/SpyConfigViewer';
-import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
+import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
+import { LogEventDisplayer } from '../../../src/lib/listeners/LogEventListener';
 
 const PATH_TO_FIXTURES = path.join(__dirname, '..', '..', 'fixtures');
 
@@ -32,7 +33,7 @@ describe('ConfigAction tests', () => {
 			beforeEach(() => {
 				spyDisplay = new SpyDisplay();
 				dependencies = {
-					logEventListeners: [],
+					logEventListeners: [new LogEventDisplayer(spyDisplay)],
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new StubCodeAnalyzerConfigFactory(),
@@ -158,7 +159,7 @@ describe('ConfigAction tests', () => {
 				stubConfigFactory = new AlternativeStubCodeAnalyzerConfigFactory();
 				spyDisplay = new SpyDisplay();
 				dependencies = {
-					logEventListeners: [],
+					logEventListeners: [new LogEventDisplayer(spyDisplay)],
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
@@ -332,25 +333,44 @@ describe('ConfigAction tests', () => {
 				expect(output).toContain('disable_engine: true # Modified from: false');
 			});
 
-			it('Edge Case: When plugin throws error when attempting to create engine config and engine is enabled, then error', async () => {
-				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
-				dependencies.configFactory = new StubCodeAnalyzerConfigFactory();
-
-				await expect(runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag'])).rejects.toThrowError();
-			});
-
-			it('Edge Case: When plugin thrown error when attempting to create engine config but engine is disabled, then do not error', async () => {
+			it('Edge Case: When plugin throws error when attempting to create engine config but engine is disabled, then do not error', async () => {
 				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
 				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
 					engines: {
 						uncreatableEngine: {
-							disable_engine: true
+							disable_engine: true,
+							someField: 'some non default value'
 						}
 					}
 				}));
 
 				const output: string = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
+
+				expect(spyDisplay.getDisplayEvents().filter(e => e.type == DisplayEventType.ERROR)).toHaveLength(0);
+
 				expect(output).toContain('disable_engine: true # Modified from: false');
+				expect(output).toContain('someField: some non default value # Modified from: "someDefault"');
+			});
+
+			it('Edge Case: When plugin throws error when attempting to create engine config, but engine is enabled, then issue error log but continue with whatever is in the users config for that engine', async () => {
+				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
+					engines: {
+						uncreatableEngine: {
+							disable_engine: false,
+							someField: 'some non default value'
+						}
+					}
+				}));
+
+				const output: string = await runActionAndGetDisplayedConfig(dependencies, ['uncreatableEngine']);
+
+				const errorEvents: DisplayEvent[] = spyDisplay.getDisplayEvents().filter(e => e.type == DisplayEventType.ERROR);
+				expect(errorEvents).toHaveLength(1);
+				expect(errorEvents[0].data).toContain('Error thrown by createEngineConfig');
+
+				expect(output).toContain('disable_engine: false');
+				expect(output).toContain('someField: some non default value # Modified from: "someDefault"');
 			});
 
 			it.each([
@@ -515,8 +535,13 @@ describe('ConfigAction tests', () => {
 
 		// ==== OUTPUT PROCESSING ====
 		const displayEvents = spyDisplay.getDisplayEvents();
-		expect(displayEvents[4].type).toEqual(DisplayEventType.LOG);
-		return ansis.strip(displayEvents[4].data);
+		if (displayEvents[4].type === DisplayEventType.LOG) {
+			return ansis.strip(displayEvents[4].data);
+		} else if (displayEvents[5].type === DisplayEventType.LOG) {
+			return ansis.strip(displayEvents[5].data);
+		} else {
+			return 'Could Not Get Specific Output';
+		}
 	}
 });
 
@@ -805,6 +830,19 @@ class ThrowingEnginePlugin extends EngineApi.EnginePluginV1 {
     getAvailableEngineNames(): string[] {
         return ['uncreatableEngine'];
     }
+
+	describeEngineConfig(): EngineApi.ConfigDescription {
+		return {
+			overview: 'Some Overview',
+			fieldDescriptions: {
+				someField: {
+					descriptionText: 'some description',
+					valueType: 'string',
+					defaultValue: 'someDefault'
+				}
+			}
+		}
+	}
 
 	createEngineConfig(_engineName: string, _configValueExtractor: EngineApi.ConfigValueExtractor): Promise<EngineApi.ConfigObject> {
 		throw new Error('Error thrown by createEngineConfig');
