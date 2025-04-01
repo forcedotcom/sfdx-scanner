@@ -8,13 +8,14 @@ on:
         type: choice
         options:
           - '@salesforce/plugin-code-analyzer'
-          - '@salesforce/sfdx-scanner'
+          # TODO: Remove after April Release
+          - '@salesforce/sfdx-scanner' 
       tag_name:
         description: 'Tag Name (ex: latest):'
         required: true
         type: string
       version:
-        description: 'Version (ex: 4.8.0):'
+        description: 'Version (ex: 5.2.0):'
         required: true
         type: string
       confirm:

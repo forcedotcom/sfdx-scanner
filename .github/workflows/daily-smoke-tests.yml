@@ -1,6 +1,6 @@
 name: daily-smoke-tests
 on:
-  workflow_dispatch: # As per documentation, the colon is necessary even though no config is required.
+  workflow_dispatch:
   schedule:
     # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value,' and multiple values
     # can be specified with comma-separated lists. All times are UTC.
@@ -9,20 +9,8 @@ on:
     - cron: "30 13 * * *"
 jobs:
   smoke-test:
+  # We run the daily smoke tests against 'dev' to validate that the code currently in development is still valid
     uses: ./.github/workflows/run-tests.yml
     with:
       node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
-  v4-smoke-test:
-    runs-on: macos-latest
-    steps:
-      - name: Invoke v4 smoke tests
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'daily-smoke-tests.yml',
-              ref: 'dev-4'
-            });
+      branch: dev
