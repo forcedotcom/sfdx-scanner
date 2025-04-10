@@ -11,7 +11,7 @@ describe('EnginePluginsFactoryImpl', () => {
 		expect(enginePlugins[1].getAvailableEngineNames()).toEqual(['pmd', 'cpd']);
 		expect(enginePlugins[2].getAvailableEngineNames()).toEqual(['retire-js']);
 		expect(enginePlugins[3].getAvailableEngineNames()).toEqual(['regex']);
-		expect(enginePlugins[4].getAvailableEngineNames()).toEqual(['flowtest']);
+		expect(enginePlugins[4].getAvailableEngineNames()).toEqual(['flow']);
 		expect(enginePlugins[5].getAvailableEngineNames()).toEqual(['sfge']);
 	});
 });

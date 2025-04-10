@@ -80,42 +80,42 @@ describe('`code-analyzer run` tests', () => {
 		});
 	});
 
-	describe('--path-start', () => {
+	describe('--target', () => {
 		it('Can be supplied once with a single value', async () => {
 			const inputValue = './somefile.cls';
-			await RunCommand.run(['--path-start', inputValue]);
+			await RunCommand.run(['--target', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('path-start', [inputValue]);
+			expect(receivedActionInput).toHaveProperty('target', [inputValue]);
 		});
 
 		it('Can be supplied once with multiple comma-separated values', async () => {
 			const inputValue =['./somefile.cls', './someotherfile.cls'];
-			await RunCommand.run(['--path-start', inputValue.join(',')]);
+			await RunCommand.run(['--target', inputValue.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('path-start', inputValue);
+			expect(receivedActionInput).toHaveProperty('target', inputValue);
 		});
 
 		it('Can be supplied multiple times with one value each', async () => {
 			const inputValue1 = './somefile.cls';
 			const inputValue2 = './someotherfile.cls';
-			await RunCommand.run(['--path-start', inputValue1, '--path-start', inputValue2]);
+			await RunCommand.run(['--target', inputValue1, '--target', inputValue2]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('path-start', [inputValue1, inputValue2]);
+			expect(receivedActionInput).toHaveProperty('target', [inputValue1, inputValue2]);
 		});
 
 		it('Can be supplied multiple times with multiple comma-separated values', async () => {
 			const inputValue1 = ['./somefile.cls', './anotherfile.cls'];
 			const inputValue2 = ['./someotherfile.cls', './yetanotherfile.cls'];
-			await RunCommand.run(['--path-start', inputValue1.join(','), '--path-start', inputValue2.join(',')]);
+			await RunCommand.run(['--target', inputValue1.join(','), '--target', inputValue2.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('path-start', [...inputValue1, ...inputValue2]);
+			expect(receivedActionInput).toHaveProperty('target', [...inputValue1, ...inputValue2]);
 		});
 
-		it('Can be referenced by its shortname, -s', async () => {
+		it('Can be referenced by its shortname, -t', async () => {
 			const inputValue = './somefile.cls';
-			await RunCommand.run(['-s', inputValue]);
+			await RunCommand.run(['-t', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('path-start', [inputValue]);
+			expect(receivedActionInput).toHaveProperty('target', [inputValue]);
 		});
 	});
 
@@ -198,9 +198,9 @@ describe('`code-analyzer run` tests', () => {
 			expect(receivedActionInput['severity-threshold']).toBeUndefined();
 		});
 
-		it('Can be referenced by its shortname, -t', async () => {
+		it('Can be referenced by its shortname, -s', async () => {
 			const inputValue = `3`
-			await RunCommand.run(['-t', inputValue]);
+			await RunCommand.run(['-s', inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
 			expect(receivedActionInput).toHaveProperty('severity-threshold', parseInt(inputValue));
 		});

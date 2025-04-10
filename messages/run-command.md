@@ -52,35 +52,35 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
     <%= config.bin %> <%= command.id %> --rule-selector eslint:getter-return --rule-selector no-inner-declarations
 
-# command.examples.temporarily-hidden-for-now
-
-- Specify three method starting points to be applied to the path-based recommended rules of the Salesforce Graph Engine, "sfge", while specifying the "./src" folder as the workspace to be used to build the source graph:
-
-    <%= config.bin %> <%= command.id %> --rule-selector sfge:Recommended --workspace ./src --path-start ./src/classes/Utils.cls#init --path-start ./src/classes/Helpers.cls#method1;method2
-
 # flags.workspace.summary
 
-Set of files you want to include in the code analysis. 
+Set of files that make up your workspace.
 
 # flags.workspace.description
 
-Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders. 
+Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-# flags.path-start.summary
+Note that even if you wish to only target (via the --target flag) a subset of the files within your workspace, some engines may still require your complete workspace to perform its analysis on your targeted files. For example, the Salesforce Graph Engine may need to compile your entire project in order to properly build a graph so that it may perform data flow analysis on the paths that start in your targeted files.
 
-Starting points within your workspace to restrict any path-based analysis rules to.
+If the --workspace flag is not specified then:
+- if one or more files are explicitly targeted via the --target flag, then
+  the targeted files will be used as the workspace.
+- if a --target flag is also not specified, then the present working folder
+  (i.e. '.') will be used and all its files will be targeted.
 
-# flags.path-start.description
+# flags.target.summary
 
-If you don't specify this flag, then any path-based analysis rules automatically discover and use all starting points found in your workspace. Use this flag to restrict the starting points to only those you want in your code analysis. 
+Subset of files within your workspace to be targeted for analysis.
 
-This flag only applies to path-based analysis rules, which are of type DataFlow and Flow. These types of rules are only available from some engines, like the Salesforce Graph Engine, "sfge" for example.
+# flags.target.description
 
-If you specify a file or a folder as your starting point, then the analysis uses only the methods that have public or global accessibility. 
+A target may be specified as a file, a folder, or a glob pattern.
 
-To specify individual methods as a starting point, use the syntax "<file>#methodName" to select a single method or "<file>#methodName1;methodName2" to select multiple methods. For example, "SomeClass.cls#method1" (single method) or "SomeClass.cls#method1;method2" (multiple methods).
+If you specify this flag multiple times, then the full list of targeted files will be the union of the specified target values.
 
-You can use glob patterns (wildcards) only when specifying files and folders; you can't use glob patterns when specifying individual methods.
+Each targeted file must live within the workspace specified by the –-workspace flag.
+
+If the --target flag is not specified, then all of the files within your workspace (supplied by the --workspace flag) will be targeted for analysis.
 
 # flags.rule-selector.summary
 

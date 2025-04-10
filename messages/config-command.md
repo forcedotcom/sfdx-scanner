@@ -42,7 +42,7 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
 # flags.workspace.summary
 
-Set of files you want to include in the code analysis.
+Set of files that make up your workspace.
 
 # flags.workspace.description
 
@@ -51,6 +51,20 @@ Use the --workspace flag to display only the configuration associated with the r
 This command uses the type of file in the workspace, such as JavaScript or Typescript, to determine the rules to include in the configuration state. For example, if your workspace contains only JavaScript files, the command doesn't include TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
 Some engines may be configured to add additional rules based on what it finds in your workspace.  For example, if you set the "engines.eslint.auto_discover_eslint_config" value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
+
+# flags.target.summary
+
+Subset of files within your workspace to be the basis of your configuration.
+
+# flags.target.description
+
+Use the --target flag to display only the configuration associated with rules that apply to a specific subset of files in your workspace.
+
+If you specify this flag multiple times, then the full list of targeted files will ber the union of the specified target values.
+
+If --target is specified and --workspace is not, then --workspace will default to the current directory.
+
+If --target is not specified, then all of the files within your workspace (if one is supplied) will be used.
 
 # flags.rule-selector.summary
 

@@ -26,6 +26,13 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			multiple: true,
 			delimiter: ',',
 		}),
+		target: Flags.string({
+			summary: getMessage(BundleName.RulesCommand, 'flags.target.summary'),
+			description: getMessage(BundleName.RulesCommand,'flags.target.description'),
+			char: 't',
+			multiple: true,
+			delimiter: ','
+		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.RulesCommand, 'flags.rule-selector.summary'),
 			description: getMessage(BundleName.RulesCommand, 'flags.rule-selector.description'),
@@ -55,6 +62,9 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
+		if (parsedFlags.target && !parsedFlags.workspace) {
+			parsedFlags.workspace = ['.'];
+		}
 		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];
 		const view = parsedFlags.view as View | undefined;
 
@@ -66,6 +76,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			'output-file': outputFiles,
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace'],
+			'target': parsedFlags['target']
 		};
 
 		await action.execute(rulesInput);
@@ -82,7 +93,7 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 			viewer: this.createRulesViewer(view, outputFiles, uxDisplay),
 			writer: CompositeRulesWriter.fromFiles(outputFiles)
 		};
-		
+
 		return dependencies;
 	}
 
