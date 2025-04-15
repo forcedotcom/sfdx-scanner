@@ -84,9 +84,9 @@ Selection of rules, based on engine name, severity level, rule name, tag, or a c
 
 # flags.rule-selector.description
 
-Use the `--rule-selector` flag to select the list of rules to run based on specific criteria.  For example, you can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names. Every rule has a name, which is unique within the scope of an engine. Most rules have tags, although it's not required. An example of a tag is "Recommended".
+Use the `--rule-selector` flag to select the list of rules to run based on specific criteria. For example, you can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names. Every rule has a name, which is unique within the scope of an engine. Most rules have tags, although it's not required. An example of a tag is "Recommended".
 
-You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, `--rule-selector eslint:Security` runs rules associated only with the "eslint" engine that have the Security tag.  The flag `--rule-selector eslint:Security:3` flag runs the "eslint" rules that have the Security tag and moderate severity (3). To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
+You can combine different criteria using colons to further filter the list; the colon works as an intersection. For example, `--rule-selector eslint:Security` runs rules associated only with the "eslint" engine that have the Security tag. The flag `--rule-selector eslint:Security:3` flag runs the "eslint" rules that have the Security tag and moderate severity (3). To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
 
 Run `<%= config.bin %> code-analyzer rules --rule-selector all` to see the possible values for engine name, rule name, tags, and severity levels that you can use with this flag.
 
@@ -134,7 +134,7 @@ If you don't specify this flag, the command outputs the results to only the term
 - .sarif or .sarif.json
 - .xml
 
-To output the results to multiple files, specify this flag multiple times.  For example: `--output-file results.json --output-file report.html` creates both a JSON results file and an HTML file.
+To output the results to multiple files, specify this flag multiple times. For example: `--output-file results.json --output-file report.html` creates both a JSON results file and an HTML file.
 
 If you specify a file within a folder, such as `--output-file ./out/results.json`, the folder must already exist, or you get an error. If the file already exists, it's overwritten without prompting.
 

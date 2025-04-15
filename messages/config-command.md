@@ -4,7 +4,7 @@ Display the current state of configuration for Code Analyzer.
 
 # command.description
 
-Code Analyzer gives you the ability to configure settings that modify Code Analyzer's behavior, to override the tags and severity levels of rules, and to configure the engine specific settings.  Use this command to see the current state of this configuration. You can also save this state to a YAML-formatted file that you can modify for your needs.
+Code Analyzer gives you the ability to configure settings that modify Code Analyzer's behavior, to override the tags and severity levels of rules, and to configure the engine specific settings. Use this command to see the current state of this configuration. You can also save this state to a YAML-formatted file that you can modify for your needs.
 
 To apply a custom configuration with Code Analyzer, either keep your custom configuration settings in a `code-analyzer.yml` file located in the current folder from which you are executing commands, or specify the location of your custom configuration file to the Code Analyzer commands with the --config-file flag.
 
@@ -48,9 +48,9 @@ Set of files that make up your workspace.
 
 Use the `--workspace` flag to display only the configuration associated with the rules that apply to the files that make up your workspace. Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-This command uses the types of file in the workspace, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if your workspace contains only JavaScript files,  then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+This command uses the types of file in the workspace, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if your workspace contains only JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
-Some engines may be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to  true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
+Some engines may be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
 
 If `--workspace` is not specified but `--target` is specified, then the current folder '.' will be used.
 
@@ -76,11 +76,11 @@ Selection of rules, based on engine name, severity level, rule name, tag, or a c
 
 Use the `--rule-selector` flag to display only the configuration associated with the rules based on specific criteria. You can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names.
 
-You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, `--rule-selector eslint:Security` reduces the output to only contain the configuration state associated with the rules from the "eslint" engine that have the "Security" tag. To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
+You can combine different criteria using colons to further filter the list; the colon works as an intersection. For example, `--rule-selector eslint:Security` reduces the output to only contain the configuration state associated with the rules from the "eslint" engine that have the "Security" tag. To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
 
 If you don't specify this flag, then the command uses the "all" rule selector.
 
-Run `<%= config.bin %> <%= command.id %>  --rule-selector Recommended` to display the configuration state associated with just the 'Recommended' rules, instead of all the rules.
+Run `<%= config.bin %> <%= command.id %> --rule-selector Recommended` to display the configuration state associated with just the 'Recommended' rules, instead of all the rules.
 
 # flags.config-file.summary
 
