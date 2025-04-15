@@ -36,7 +36,7 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
     <%= config.bin %> <%= command.id %> --rule-selector all
 
-- Analyze files using the recommended "retire-js" rules, targeting all files in the folder "./other-source" and only the Apex class files (extension .cls) in the folder "./force-app":
+- Analyze files using the recommended "retire-js" rules; target all the files in the folder "./other-source" and only the Apex class files (extension .cls) in the folder "./force-app":
 
     <%= config.bin %> <%= command.id %> --rule-selector retire-js:Recommended --target ./other-source --target ./force-app/**/*.cls
 
@@ -60,9 +60,9 @@ Set of files that make up your workspace.
 
 Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-Note that even if you wish to only target (via the `--target` flag) a subset of the files within your workspace, some engines may still require your complete workspace to perform its analysis on your targeted files. For example, the Salesforce Graph Engine may need to compile your entire project in order to properly build a graph so that it may perform data flow analysis on the paths that start in your targeted files.
+Some engines often need your entire code base to perform an analysis, even if you want to target only a subset of the files within your workspace , such as with the `--target` flag. For example, the Salesforce Graph Engine might need to compile your entire project in order to properly build a graph so it can perform a data flow analysis on the paths that start in your targeted files.
 
-If the `--workspace` flag is not specified then the current folder '.' will be used.
+If you don't specify the `--workspace` flag, then the current folder '.' is used as your workspace.
 
 # flags.target.summary
 
@@ -70,13 +70,13 @@ Subset of files within your workspace to be targeted for analysis.
 
 # flags.target.description
 
-A target may be specified as a file, a folder, or a glob pattern.
+You can specify a target as a file, a folder, or a glob pattern.
 
-If you specify this flag multiple times, then the full list of targeted files will be the sum of the files and folders.
+If you specify this flag multiple times, then the full list of targeted files is the sum of the files and folders.
 
-Each targeted file must live within the workspace specified by the –-workspace flag.
+Each targeted file must live within the workspace that you specified with the `–-workspace` flag.
 
-If the `--target` flag is not specified, then all the files within your workspace (supplied by the `--workspace` flag) will be targeted for analysis.
+If you don't specify the `--target` flag, then all the files within your workspace (specified by the `--workspace` flag) are targeted for analysis.
 
 # flags.rule-selector.summary
 

@@ -48,25 +48,25 @@ Set of files that make up your workspace.
 
 Use the `--workspace` flag to display only the configuration associated with the rules that apply to the files that make up your workspace. Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-This command uses the types of file in the workspace, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if your workspace contains only JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+This command uses the types of files in the workspace, such as JavaScript or Typescript, to determine the applicable configuration state. For example, if your workspace contains only JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
 Some engines can be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
 
-If `--workspace` is not specified but `--target` is specified, then the current folder '.' will be used.
+If you specify `--target` but not `--workspace`, then the current folder '.' is used as your workspace.
 
 # flags.target.summary
 
-Subset of files within your workspace to be targeted for analysis.
+Subset of files within your workspace that you want to target for analysis.
 
 # flags.target.description
 
-Use the `--target` flag to display only the configuration state associated with the rules that apply to a subset of targeted files within your workspace. A target may be specified as a file, a folder, or a glob pattern. If you specify this flag multiple times, then the full list of targeted files will be the sum of the files and folders.
+Use the `--target` flag to display the configuration state associated with the rules that apply to only a subset of targeted files within your workspace. You can specify a target as a file, a folder, or a glob pattern. If you specify this flag multiple times, then the full list of targeted files is the sum of the files and folders.
 
-The command uses the type of the targeted files, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if you only target JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+The command uses the type of the targeted files, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if you target only JavaScript files, then the command doesn't display the configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
 Each targeted file must live within the workspace specified by the `–-workspace` flag.
 
-If `--target` is not specified but `--workspace` is specified, then all the files within your workspace will be targeted.
+If you specify `--workspace` but not `--target`, then all the files within your workspace are targeted.
 
 # flags.rule-selector.summary
 
@@ -98,6 +98,6 @@ Output file to write the configuration state to. The file is written in YAML for
 
 # flags.output-file.description
 
-If you specify a file within folder, such as `--output-file ./config/code-analyzer.yml`, the folder must already exist, or you get an error. If the file already exists, a prompt will ask if you would like to override it.
+If you specify a file within folder, such as `--output-file ./config/code-analyzer.yml`, the folder must already exist, or you get an error. If the file already exists, a prompt asks if you want to overwrite it.
 
 If you don't specify this flag, the command outputs the configuration state to the terminal.
