@@ -412,7 +412,7 @@ describe('ConfigAction tests', () => {
 
 		it.each([
 			{
-				case: 'an workspace is applied to the config',
+				case: 'a workspace is applied to the config',
 				workspace: [path.join(baseDir, 'package.json'), path.join(baseDir, 'README.md')],
 				target: undefined
 			},
