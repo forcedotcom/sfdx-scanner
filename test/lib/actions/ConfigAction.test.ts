@@ -398,6 +398,55 @@ describe('ConfigAction tests', () => {
 		});
 	});
 
+	describe('Target/Workspace resolution', () => {
+		const originalCwd: string = process.cwd();
+		const baseDir: string = path.resolve(__dirname, '..', '..', '..');
+
+		beforeEach(() => {
+			process.chdir(baseDir);
+		});
+
+		afterEach(() => {
+			process.chdir(originalCwd);
+		});
+
+		it.each([
+			{
+				case: 'a workspace is applied to the config',
+				workspace: [path.join(baseDir, 'package.json'), path.join(baseDir, 'README.md')],
+				target: undefined
+			},
+			{
+				case: 'a target further narrows the explicitly defined workspace',
+				workspace: ['.'],
+				target: ['package.json', 'README.md']
+			},
+			{
+				case: 'a target further narrows an implicitly defined workspace',
+				workspace: undefined,
+				target: ['package.json', 'README.md']
+			}
+		])('When $case, only the relevant rules are returned', async ({workspace, target}) => {
+			// ==== SETUP ====
+			spyDisplay = new SpyDisplay();
+			dependencies = {
+				logEventListeners: [new LogEventDisplayer(spyDisplay)],
+				progressEventListeners: [],
+				viewer: new ConfigStyledYamlViewer(spyDisplay),
+				configFactory: new StubCodeAnalyzerConfigFactory(),
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
+				pluginsFactory: new WorkspaceAwareEnginePluginFactory()
+			};
+
+			// ==== TESTED BEHAVIOR ====
+			const output: string = await runActionAndGetDisplayedConfig(dependencies, ['all'], undefined, workspace, target);
+
+			// ==== ASSERTIONS ====
+			const goldFileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'workspace-resolution', 'workspaceAwareRules.yml.goldfile'));
+			expect(output).toContain(goldFileContents);
+		});
+	});
+
 	describe('File Creation', () => {
 		beforeEach(() => {
 			spyDisplay = new SpyDisplay();
@@ -522,12 +571,14 @@ describe('ConfigAction tests', () => {
 		return fsp.readFile(goldFilePath, {encoding: 'utf-8'});
 	}
 
-	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string): Promise<string> {
+	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string, workspace?: string[], target?: string[]): Promise<string> {
 		// ==== SETUP ====
 		const action = ConfigAction.createAction(dependencies);
 		const input: ConfigInput = {
 			'rule-selector': ruleSelectors,
-			'config-file': configFile
+			'config-file': configFile,
+			workspace,
+			target
 		};
 
 		// ==== TESTED BEHAVIOR ====
@@ -819,6 +870,71 @@ class StubEngine3 extends EngineApi.Engine {
 	}
 }
 
+class WorkspaceAwareEnginePluginFactory implements EnginePluginsFactory {
+	public create(): EngineApi.EnginePlugin[] {
+		return [new WorkspaceAwareEnginePlugin()];
+	}
+}
+
+class WorkspaceAwareEnginePlugin extends EngineApi.EnginePluginV1 {
+	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	getAvailableEngineNames(): string[] {
+		return ['workspaceAwareEngine'];
+	}
+
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
+		if (engineName === 'workspaceAwareEngine') {
+			this.createdEngines.set(engineName, new WorkspaceAwareEngine(config));
+		} else {
+			throw new Error(`no engine named ${engineName}`);
+		}
+		return Promise.resolve(this.getCreatedEngine(engineName));
+	}
+
+	public getCreatedEngine(engineName: string): EngineApi.Engine {
+		if (this.createdEngines.has(engineName)) {
+			return this.createdEngines.get(engineName)!;
+		}
+		throw new Error(`Engine named ${engineName} not yet instantiated`);
+	}
+}
+
+class WorkspaceAwareEngine extends EngineApi.Engine {
+	public constructor(_config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	public getName(): string {
+		return 'workspaceAwareEngine';
+	}
+
+	public getEngineVersion(): Promise<string> {
+		return Promise.resolve('1.0.0');
+	}
+
+	public async describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
+		if (!describeOptions.workspace) {
+			return Promise.resolve([]);
+		}
+
+		// Derive a rule for each of the targeted files.
+		return (await describeOptions.workspace.getTargetedFiles()).map(fileOrFolder => {
+			return {
+				name: `ruleFor${path.basename(fileOrFolder)}`,
+				severityLevel: EngineApi.SeverityLevel.Low,
+				tags: ['Recommended'],
+				description: `Rule synthesized for target "${fileOrFolder}`,
+				resourceUrls: [`https://example.com/${fileOrFolder}`]
+			};
+		});
+	}
+
+	public runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		// Don't need to actually run any rules, since we're just testing configuration.
+		return Promise.resolve({violations: []});
+	}
+}
 
 class FactoryForThrowingEnginePlugin implements EnginePluginsFactory {
     create(): EngineApi.EnginePlugin[] {

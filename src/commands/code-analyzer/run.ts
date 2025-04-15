@@ -29,13 +29,12 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			delimiter: ',',
 			default: ['.']
 		}),
-		'path-start': Flags.string({
-			summary: getMessage(BundleName.RunCommand, 'flags.path-start.summary'),
-			description: getMessage(BundleName.RunCommand, 'flags.path-start.description'),
-			char: 's',
+		'target': Flags.string({
+			summary: getMessage(BundleName.RunCommand, 'flags.target.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.target.description'),
+			char: 't',
 			multiple: true,
-			delimiter: ',',
-			hidden: true
+			delimiter: ','
 		}),
 		// === Flags pertaining to rule selection ===
 		'rule-selector': Flags.string({
@@ -50,7 +49,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		'severity-threshold': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.severity-threshold.summary'),
 			description: getMessage(BundleName.RunCommand, 'flags.severity-threshold.description'),
-			char: 't'
+			char: 's'
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
@@ -81,11 +80,11 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
 			'output-file': parsedFlags['output-file'] ?? [],
-			'path-start': parsedFlags['path-start'], // TODO: We should move validation of this here instead of having it in the RunAction.
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace'],
 			'severity-threshold': parsedFlags['severity-threshold'] === undefined ? undefined :
-				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase())
+				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase()),
+			'target': parsedFlags['target']
 		};
 		await action.execute(runInput);
 	}

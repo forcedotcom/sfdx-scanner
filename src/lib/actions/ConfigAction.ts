@@ -26,6 +26,7 @@ export type ConfigInput = {
 	'output-file'?: string;
 	'rule-selector': string[];
 	workspace?: string[];
+	target?: string[];
 };
 
 export class ConfigAction {
@@ -100,14 +101,15 @@ export class ConfigAction {
 
 
 		// ==== PERFORM RULE SELECTIONS ================================================================================
-		const userSelectOptions = input.workspace
-			? {workspace: await createWorkspace(userCore, input.workspace)}
+		const workspace: string[]|undefined = input.workspace || (input.target ? ['.'] : undefined);
+		const userSelectOptions = workspace
+			? {workspace: await createWorkspace(userCore, workspace, input.target)}
 			: undefined;
-		const defaultSelectOptionsForAllRules = input.workspace
-			? {workspace: await createWorkspace(defaultCoreForAllRules, input.workspace)}
+		const defaultSelectOptionsForAllRules = workspace
+			? {workspace: await createWorkspace(defaultCoreForAllRules, workspace, input.target)}
 			: undefined;
-		const defaultSelectOptionsForSelectRules = input.workspace
-			? {workspace: await createWorkspace(defaultCoreForSelectRules, input.workspace)}
+		const defaultSelectOptionsForSelectRules = workspace
+			? {workspace: await createWorkspace(defaultCoreForSelectRules, workspace, input.target)}
 			: undefined;
 
 		// EngineProgressListeners should start listening right before we call the Cores' `.selectRules()` methods, since

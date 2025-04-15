@@ -128,13 +128,13 @@ describe('`code-analyzer rules` tests', () => {
 			expect(fromFilesSpy).toHaveBeenCalled();
 			expect(receivedFiles).toEqual([inputValue1]);
 		});
-				
+
 		it('Can only be supplied once', async () => {
 			const executionPromise = RulesCommand.run(['--output-file', inputValue1, '--output-file', inputValue2]);
 			await expect(executionPromise).rejects.toThrow(`Flag --output-file can only be specified once`);
 			expect(executeSpy).not.toHaveBeenCalled();
 		});
-		
+
 		it('Can be referenced by its shortname, -f', async () => {
 			await RulesCommand.run(['-f', inputValue1]);
 			expect(executeSpy).toHaveBeenCalled();
@@ -150,7 +150,7 @@ describe('`code-analyzer rules` tests', () => {
 			expect(receivedFiles).toEqual([]);
 		});
 	});
-	
+
 	describe('--view', () => {
 		it('Accepts the value, "table"', async () => {
 			const inputValue = 'table';
@@ -200,35 +200,38 @@ describe('`code-analyzer rules` tests', () => {
 		});
 	});
 
-	describe('--workspace', () => {
+	describe.each([
+		{flag: '--workspace', shortflag: '-w', property: 'workspace'},
+		{flag: '--target', shortflag: '-t', property: 'target'},
+	])('$flag', ({flag, shortflag, property}) => {
 		it('Can be supplied once with a single value', async () => {
 			const inputValue = './somedirectory';
-			await RulesCommand.run(['--workspace', inputValue]);
+			await RulesCommand.run([flag, inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', [inputValue]);
+			expect(receivedActionInput).toHaveProperty(property, [inputValue]);
 		});
 
 		it('Can be supplied once with multiple comma-separated values', async () => {
 			const inputValue =['./somedirectory', './someotherdirectory'];
-			await RulesCommand.run(['--workspace', inputValue.join(',')]);
+			await RulesCommand.run([flag, inputValue.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', inputValue);
+			expect(receivedActionInput).toHaveProperty(property, inputValue);
 		});
 
 		it('Can be supplied multiple times with one value each', async () => {
 			const inputValue1 = './somedirectory';
 			const inputValue2 = './someotherdirectory';
-			await RulesCommand.run(['--workspace', inputValue1, '--workspace', inputValue2]);
+			await RulesCommand.run([flag, inputValue1, flag, inputValue2]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', [inputValue1, inputValue2]);
+			expect(receivedActionInput).toHaveProperty(property, [inputValue1, inputValue2]);
 		});
 
 		it('Can be supplied multiple times with multiple comma-separated values', async () => {
 			const inputValue1 = ['./somedirectory', './anotherdirectory'];
 			const inputValue2 = ['./someotherdirectory', './yetanotherdirectory'];
-			await RulesCommand.run(['--workspace', inputValue1.join(','), '--workspace', inputValue2.join(',')]);
+			await RulesCommand.run([flag, inputValue1.join(','), flag, inputValue2.join(',')]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', [...inputValue1, ...inputValue2]);
+			expect(receivedActionInput).toHaveProperty(property, [...inputValue1, ...inputValue2]);
 		});
 
 		it('Is unused if not directly specified', async () => {
@@ -237,11 +240,11 @@ describe('`code-analyzer rules` tests', () => {
 			expect(receivedActionInput.workspace).toBeUndefined();
 		});
 
-		it('Can be referenced by its shortname, -w', async () => {
+		it(`Can be referenced by its shortname, ${shortflag}`, async () => {
 			const inputValue = './somedirectory';
-			await RulesCommand.run(['-w', inputValue]);
+			await RulesCommand.run([shortflag, inputValue]);
 			expect(executeSpy).toHaveBeenCalled();
-			expect(receivedActionInput).toHaveProperty('workspace', [inputValue]);
+			expect(receivedActionInput).toHaveProperty(property, [inputValue]);
 		});
 	});
 

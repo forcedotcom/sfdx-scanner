@@ -93,35 +93,65 @@ describe('RulesAction tests', () => {
 		expect(writerCallHistory).toHaveLength(1);
 	});
 
-	it('Engines with target-dependent rules return the right rules', async () => {
-		const dependencies: RulesDependencies = {
-			configFactory: new StubDefaultConfigFactory(),
-			// The engine we're using here will synthesize one rule per target.
-			pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withTargetDependentStubEngine(),
-			logEventListeners: [],
-			progressListeners: [],
-			actionSummaryViewer,
-			viewer,
-			writer
-		};
-		const targetedFilesAndFolders = ['package.json', 'src', 'README.md'];
-		const action = RulesAction.createAction(dependencies);
-		const input: RulesInput = {
-			'rule-selector': ['Recommended'],
-			workspace: targetedFilesAndFolders
-		};
+	describe('Target/Workspace resolution', () => {
+		const originalCwd: string = process.cwd();
+		const baseDir: string = path.resolve(__dirname, '..', '..', '..');
 
-		await action.execute(input);
+		beforeEach(() => {
+			process.chdir(baseDir);
+		});
 
-		const viewerCallHistory = viewer.getCallHistory();
-		expect(viewerCallHistory).toHaveLength(1);
-		const expectedRuleNames = targetedFilesAndFolders.map(t => `ruleFor${path.resolve(t)}`);
-		const actualRuleNames = viewerCallHistory[0].map(rule => rule.getName());
-		expect(actualRuleNames).toHaveLength(expectedRuleNames.length);
-		// The rules' order might not exactly match the provided targets', but as long as they're all present, it's fine.
-		for (const expectedRuleName of expectedRuleNames) {
-			expect(actualRuleNames).toContain(expectedRuleName);
-		}
+		afterEach(() => {
+			process.chdir(originalCwd);
+		})
+
+		it.each([
+			{
+				case: 'a workspace narrows the applicable files',
+				workspace: [path.join(baseDir, 'package.json'), path.join(baseDir, 'README.md')],
+				target: undefined
+			},
+			{
+				case: 'a target further narrows an explicitly defined workspace',
+				workspace: ['.'],
+				target: ['package.json', 'README.md']
+			},
+			{
+				case: 'a target further narrows an implicitly defined workspace',
+				workspace: undefined,
+				target: ['package.json', 'README.md']
+			}
+		])('When $case, only the relevant rules are returned', async ({workspace, target}) => {
+			const dependencies: RulesDependencies = {
+				configFactory: new StubDefaultConfigFactory(),
+				// The engine we're using here will synthesize one rule per target.
+				pluginsFactory: new StubEnginePluginFactories.StubEnginePluginsFactory_withTargetDependentStubEngine(),
+				logEventListeners: [],
+				progressListeners: [],
+				actionSummaryViewer,
+				viewer,
+				writer
+			};
+			const action = RulesAction.createAction(dependencies);
+			const input: RulesInput = {
+				'rule-selector': ['Recommended'],
+				workspace,
+				target
+			};
+
+			await action.execute(input);
+
+			const viewerCallHistory = viewer.getCallHistory();
+			expect(viewerCallHistory).toHaveLength(1);
+			const expectedFilesAndFolders = ['package.json', 'README.md'];
+			const expectedRuleNames = expectedFilesAndFolders.map(t => `ruleFor${path.resolve(t)}`);
+			const actualRuleNames = viewerCallHistory[0].map(rule => rule.getName());
+			expect(actualRuleNames).toHaveLength(expectedRuleNames.length);
+			// The rules' order might not exactly match the provided targets', but as long as they're all present, it's fine.
+			for (const expectedRuleName of expectedRuleNames) {
+				expect(actualRuleNames).toContain(expectedRuleName);
+			}
+		});
 	});
 
 	/**
@@ -221,9 +251,9 @@ describe('RulesAction tests', () => {
 				'rule-selector': ['Codestyle'],
 				'output-file': [outfilePath]
 			};
-				
+
 			await action.execute(input);
-			
+
 			const preExecutionGoldfileContents: string = await fsp.readFile(preExecutionGoldfilePath, 'utf-8');
 			const goldfileContents: string = (await fsp.readFile(summaryGoldfilePath, 'utf-8'))
 				.replace(`{{PATH_TO_FILE}}`, outfilePath);

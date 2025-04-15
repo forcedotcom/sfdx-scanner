@@ -25,6 +25,13 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			multiple: true,
 			delimiter: ','
 		}),
+		target: Flags.string({
+			summary: getMessage(BundleName.ConfigCommand, 'flags.target.summary'),
+			description: getMessage(BundleName.ConfigCommand, 'flags.target.description'),
+			char: 't',
+			multiple: true,
+			delimiter: ','
+		}),
 		'rule-selector': Flags.string({
 			summary: getMessage(BundleName.ConfigCommand, 'flags.rule-selector.summary'),
 			description: getMessage(BundleName.ConfigCommand, 'flags.rule-selector.description'),
