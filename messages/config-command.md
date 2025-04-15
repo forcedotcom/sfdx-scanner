@@ -50,7 +50,7 @@ Use the `--workspace` flag to display only the configuration associated with the
 
 This command uses the types of file in the workspace, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if your workspace contains only JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
-Some engines may be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
+Some engines can be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
 
 If `--workspace` is not specified but `--target` is specified, then the current folder '.' will be used.
 
