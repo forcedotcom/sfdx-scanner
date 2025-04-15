@@ -55,9 +55,6 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(ConfigCommand)).flags;
-		if (parsedFlags.target && !parsedFlags.workspace) {
-			parsedFlags.workspace = ['.'];
-		}
 		const dependencies: ConfigDependencies = this.createDependencies(parsedFlags['output-file']);
 		const action: ConfigAction = ConfigAction.createAction(dependencies);
 		await action.execute(parsedFlags);

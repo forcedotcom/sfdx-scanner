@@ -62,9 +62,6 @@ export default class RulesCommand extends SfCommand<void> implements Displayable
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RulesCommand)).flags;
-		if (parsedFlags.target && !parsedFlags.workspace) {
-			parsedFlags.workspace = ['.'];
-		}
 		const outputFiles = parsedFlags['output-file'] ? [parsedFlags['output-file']] : [];
 		const view = parsedFlags.view as View | undefined;
 

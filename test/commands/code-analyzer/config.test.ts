@@ -200,16 +200,4 @@ describe('`code-analyzer config` tests', () => {
 			expect(receivedActionInput['output-file']).toBeUndefined();
 		});
 	});
-
-	describe('Flag interactions', () => {
-		describe('--workspace and --target', () => {
-			it('If --target is specified, --workspace defaults to "."', async () => {
-				const targetFile: string = 'beep.json';
-				await ConfigCommand.run(['--target', targetFile]);
-				expect(executeSpy).toHaveBeenCalled();
-				expect(receivedActionInput).toHaveProperty('target', [targetFile]);
-				expect(receivedActionInput).toHaveProperty('workspace', ['.']);
-			});
-		});
-	})
 });

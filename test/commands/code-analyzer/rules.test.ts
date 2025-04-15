@@ -249,16 +249,6 @@ describe('`code-analyzer rules` tests', () => {
 	});
 
 	describe('Flag interactions', () => {
-		describe('--workspace and --target', () => {
-			it('If --target is specified, --workspace defaults to "."', async () => {
-				const targetFile: string = 'beep.json';
-				await RulesCommand.run(['--target', targetFile]);
-				expect(executeSpy).toHaveBeenCalled();
-				expect(receivedActionInput).toHaveProperty('target', [targetFile]);
-				expect(receivedActionInput).toHaveProperty('workspace', ['.']);
-			});
-		})
-
 		describe('--output-file and --view', () => {
 			it('When --output-file and --view is set to "detail", writer is set and view is set to "detail" display', async () => {
 				const outfileInput = 'rules-output.json';

@@ -94,7 +94,16 @@ describe('RulesAction tests', () => {
 	});
 
 	describe('Target/Workspace resolution', () => {
+		const originalCwd: string = process.cwd();
 		const baseDir: string = path.resolve(__dirname, '..', '..', '..');
+
+		beforeEach(() => {
+			process.chdir(baseDir);
+		});
+
+		afterEach(() => {
+			process.chdir(originalCwd);
+		})
 
 		it.each([
 			{
@@ -103,9 +112,14 @@ describe('RulesAction tests', () => {
 				target: undefined
 			},
 			{
-				case: 'a workspace is itself narrowed by a target subset',
-				workspace: [baseDir],
-				target: [path.join(baseDir, 'package.json'), path.join(baseDir, 'README.md')]
+				case: 'a target further narrows an explicitly defined workspace',
+				workspace: ['.'],
+				target: ['package.json', 'README.md']
+			},
+			{
+				case: 'a target further narrows an implicitly defined workspace',
+				workspace: undefined,
+				target: ['package.json', 'README.md']
 			}
 		])('When $case, only the relevant rules are returned', async ({workspace, target}) => {
 			const dependencies: RulesDependencies = {
