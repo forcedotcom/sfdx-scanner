@@ -6,19 +6,19 @@ Analyze your code with a selection of rules to ensure good coding practices.
 
 You can scan your codebase with the recommended rules. Or use flags to filter the rules based on engines (such as "retire-js" or "eslint"), rule names, tags, and more. 
 
-If you want to preview the list of rules before you actually run them, use the `code-analyzer rules` command, which also has the "--rules-selector", "--workspace", and "--config-file" flags that together define the list of rules to be run.
+If you want to preview the list of rules before you actually run them, use the `code-analyzer rules` command, which also has the `--config-file`, `--rule-selector`, `--target`, and `--workspace` flags that together define the list of rules to be run.
 
-We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at http://sfdc.co/CodeAnalyzerFeedback.
+We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at https://sfdc.co/CodeAnalyzerFeedback.
 
 # command.examples
 
-- Analyze code using the default behavior: analyze the files in the current folder (default workspace) using the Recommended rules; display the output in the terminal with the concise table view; and automatically apply rule or engine overrides if a "code-analyzer.yml" or "code-analyzer.yaml" file exists in the current folder:
+- Analyze code using the default behavior: analyze all the files in the current folder (default workspace) using the Recommended rules; display the output in the terminal with the concise table view; and automatically apply rule or engine overrides if a `code-analyzer.yml` or `code-analyzer.yaml` file exists in the current folder:
 
     <%= config.bin %> <%= command.id %>
 
 - The previous example is equivalent to this example:
 
-    <%= config.bin %> <%= command.id %> --rule-selector Recommended --workspace . --view table --config-file ./code-analyzer.yml
+    <%= config.bin %> <%= command.id %> --rule-selector Recommended --workspace . --target . --view table --config-file ./code-analyzer.yml
 
 - Analyze the files using the recommended "eslint" rules and show details of the violations:
 
@@ -30,15 +30,15 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
 - The previous example is equivalent to this example:
 
-  <%= config.bin %> <%= command.id %>  --rule-selector eslint:all
+  <%= config.bin %> <%= command.id %> --rule-selector eslint:all
 
 - Analyze the files using all rules for all engines:
 
     <%= config.bin %> <%= command.id %> --rule-selector all
 
-- Analyze files using the recommended "retire-js" rules analyze in a workspace that consists of all files in the folder "./other-source" and only the Apex class files (extension .cls) in the folder "./force-app":
+- Analyze files using the recommended "retire-js" rules, targeting all files in the folder "./other-source" and only the Apex class files (extension .cls) in the folder "./force-app":
 
-    <%= config.bin %> <%= command.id %> --rule-selector retire-js:Recommended --workspace ./other-source --workspace ./force-app/**/*.cls
+    <%= config.bin %> <%= command.id %> --rule-selector retire-js:Recommended --target ./other-source --target ./force-app/**/*.cls
 
 - Specify a custom configuration file and output the results to the "results.csv" file in CSV format; the commands fails if it finds a violation that exceeds the moderate severity level (3):
 
@@ -60,13 +60,9 @@ Set of files that make up your workspace.
 
 Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-Note that even if you wish to only target (via the --target flag) a subset of the files within your workspace, some engines may still require your complete workspace to perform its analysis on your targeted files. For example, the Salesforce Graph Engine may need to compile your entire project in order to properly build a graph so that it may perform data flow analysis on the paths that start in your targeted files.
+Note that even if you wish to only target (via the `--target` flag) a subset of the files within your workspace, some engines may still require your complete workspace to perform its analysis on your targeted files. For example, the Salesforce Graph Engine may need to compile your entire project in order to properly build a graph so that it may perform data flow analysis on the paths that start in your targeted files.
 
-If the --workspace flag is not specified then:
-- if one or more files are explicitly targeted via the --target flag, then
-  the targeted files will be used as the workspace.
-- if a --target flag is also not specified, then the present working folder
-  (i.e. '.') will be used and all its files will be targeted.
+If the `--workspace` flag is not specified then the current folder '.' will be used.
 
 # flags.target.summary
 
@@ -76,11 +72,11 @@ Subset of files within your workspace to be targeted for analysis.
 
 A target may be specified as a file, a folder, or a glob pattern.
 
-If you specify this flag multiple times, then the full list of targeted files will be the union of the specified target values.
+If you specify this flag multiple times, then the full list of targeted files will be the sum of the files and folders.
 
 Each targeted file must live within the workspace specified by the –-workspace flag.
 
-If the --target flag is not specified, then all of the files within your workspace (supplied by the --workspace flag) will be targeted for analysis.
+If the `--target` flag is not specified, then all the files within your workspace (supplied by the `--workspace` flag) will be targeted for analysis.
 
 # flags.rule-selector.summary
 
@@ -88,9 +84,9 @@ Selection of rules, based on engine name, severity level, rule name, tag, or a c
 
 # flags.rule-selector.description
 
-Use the --rule-selector flag to select the list of rules to run based on specific criteria.  For example, you can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names. Every rule has a name, which is unique within the scope of an engine. Most rules have tags, although it's not required. An example of a tag is "Recommended".
+Use the `--rule-selector` flag to select the list of rules to run based on specific criteria.  For example, you can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names. Every rule has a name, which is unique within the scope of an engine. Most rules have tags, although it's not required. An example of a tag is "Recommended".
 
-You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, "--rule-selector eslint:Security" runs rules associated only with the "eslint" engine that have the Security tag.  The flag "--rule-selector eslint:Security:3" flag runs the "eslint" rules that have the Security tag and moderate severity (3). To add multiple rule selectors together (a union), specify the --rule-selector flag multiple times, such as "--rule-selector eslint:Recommended --rule-selector retire-js:3".
+You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, `--rule-selector eslint:Security` runs rules associated only with the "eslint" engine that have the Security tag.  The flag `--rule-selector eslint:Security:3` flag runs the "eslint" rules that have the Security tag and moderate severity (3). To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
 
 Run `<%= config.bin %> code-analyzer rules --rule-selector all` to see the possible values for engine name, rule name, tags, and severity levels that you can use with this flag.
 
@@ -110,7 +106,7 @@ Path to the configuration file used to customize the engines and rules.
 
 Code Analyzer has an internal default configuration for its rule and engine properties. If you want to override these defaults, you can create a Code Analyzer configuration file.
 
-We recommend that you name your Code Analyzer configuration file "code-analyzer.yml" or "code-analyzer.yaml" and put it at the root of your workspace. You then don't need to use this flag when you run the `<%= command.id %>` command from the root of your workspace, because it automatically looks for either file in the current folder, and if found, applies its rule overrides and engine settings. If you want to name the file something else, or put it in an alternative folder, then you must specify this flag.
+We recommend that you name your Code Analyzer configuration file `code-analyzer.yml` or `code-analyzer.yaml` and put it at the root of your workspace. You then don't need to use this flag when you run the `<%= command.id %>` command from the root of your workspace, because it automatically looks for either file in the current folder, and if found, applies its rule overrides and engine settings. If you want to name the file something else, or put it in an alternative folder, then you must specify this flag.
 
 To help you get started, use the `code-analyzer config` command to create your first Code Analyzer configuration file. With it, you can change the severity of an existing rule, change a rule's tags, and so on. Then use this flag to specify the file so that the command takes your customizations into account.
 
@@ -122,7 +118,7 @@ Format to display the command results in the terminal.
 
 The format `table` is concise and shows minimal output, the format `detail` shows all available information.
 
-If you specify neither --view nor --output-file, then the default table view is shown. If you specify --output-file but not --view, only summary information is shown.
+If you specify neither `--view` nor `--output-file`, then the default table view is shown. If you specify `--output-file` but not `--view`, only summary information is shown.
 
 # flags.output-file.summary
 
@@ -130,7 +126,7 @@ Name of the file where the analysis results are written. The file format depends
 
 # flags.output-file.description
 
-If you don't specify this flag, the command outputs the results to only the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, "--output-file results.csv" creates a comma-separated values file. You can specify one of these extensions:
+If you don't specify this flag, the command outputs the results to only the terminal. Use this flag to print the results to a file; the format of the results depends on the extension you provide. For example, `--output-file results.csv` creates a comma-separated values file. You can specify one of these extensions:
 
 - .csv
 - .html or .htm
@@ -138,9 +134,9 @@ If you don't specify this flag, the command outputs the results to only the term
 - .sarif or .sarif.json
 - .xml
 
-To output the results to multiple files, specify this flag multiple times.  For example: "--output-file results.json --output-file report.html" creates both a JSON results file and an HTML file.
+To output the results to multiple files, specify this flag multiple times.  For example: `--output-file results.json --output-file report.html` creates both a JSON results file and an HTML file.
 
-If you specify a folder, such as "--output-file ./out/results.json", the folder must already exist or you get an error. If the file already exists, it's overwritten without prompting.
+If you specify a file within a folder, such as `--output-file ./out/results.json`, the folder must already exist, or you get an error. If the file already exists, it's overwritten without prompting.
 
 # error.invalid-severity-threshold
 
