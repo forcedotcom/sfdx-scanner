@@ -50,8 +50,7 @@
 		"/lib",
 		"/messages",
 		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json",
-		"/oclif.lock"
+		"/oclif.manifest.json"
 	],
 	"homepage": "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview",
 	"keywords": [
@@ -126,7 +125,7 @@
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
 		"build": "tsc --build tsconfig.build.json",
-		"prepack": "rm -rf lib && tsc --build tsconfig.build.json && oclif manifest && oclif readme && oclif lock && npm shrinkwrap",
+		"prepack": "rm -rf lib && tsc --build tsconfig.build.json && oclif manifest && oclif readme && npm shrinkwrap",
 		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
 		"lint": "eslint ./src --max-warnings 0",
 		"version": "oclif readme && git add README.md",
