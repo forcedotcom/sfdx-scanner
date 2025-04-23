@@ -365,7 +365,7 @@ describe('RunAction tests', () => {
 		});
 	});
 
-	describe('Telemetry Logging', () => {
+	describe('Telemetry Emission', () => {
 		it('When a telemetry emitter is provided, it is used', async () => {
 			// ==== SETUP ====
 			// Create a telemetry emitter and set it to be used.

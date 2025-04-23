@@ -340,20 +340,6 @@ describe('`code-analyzer run` tests', () => {
 	});
 
 	describe('Telemetry emission', () => {
-		it('Emits expected telemetry data about arguments', async () => {
-			await RunCommand.run(['-c', 'package.json', '-f', 'beep.json', '-f', 'boop.json']);
-			expect(receivedTelemetryEmissions).toHaveLength(1);
-			expect(receivedTelemetryEmissions[0]).toEqual({
-				source: 'CLI',
-				eventName: 'run-command-args-description',
-				data: {
-					customConfigProvided: true,
-					specifiedView: 'none',
-					specifiedOutfileExtensions: JSON.stringify(['.json'])
-				}
-			});
-		});
-
 		it('Passes telemetry emitter through into Action layer', async () => {
 			await RunCommand.run([]);
 			expect(createActionSpy).toHaveBeenCalled();

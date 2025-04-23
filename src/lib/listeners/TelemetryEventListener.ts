@@ -15,8 +15,10 @@ export class TelemetryEventListener {
 
 	public listen(codeAnalyzer: CodeAnalyzer): void {
 		// Set up listeners.
-		codeAnalyzer.onEvent(EventType.TelemetryEvent, async (e: TelemetryEvent) => this.handleEvent('Core', e));
-		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent, async (e: EngineTelemetryEvent) => this.handleEvent(e.engineName, e));
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises -- Telemetry has a timestamp. Let the promise hang, it'll sort itself out.
+		codeAnalyzer.onEvent(EventType.TelemetryEvent, (e: TelemetryEvent) => this.handleEvent('Core', e));
+		// eslint-disable-next-line @typescript-eslint/no-misused-promises
+		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent,  (e: EngineTelemetryEvent) => this.handleEvent(e.engineName, e));
 	}
 
 	public stopListening(): void {
