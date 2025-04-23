@@ -18,12 +18,15 @@ import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {BundleName, getMessage} from '../messages';
+import {NoOpTelemetryEmitter, TelemetryEmitter} from "../Telemetry";
+import {TelemetryEventListener} from "../listeners/TelemetryEventListener";
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
 	progressListeners: ProgressEventListener[];
+	telemetryEmitter?: TelemetryEmitter;
 	writer: ResultsWriter;
 	resultsViewer: ResultsViewer;
 	actionSummaryViewer: RunActionSummaryViewer;
@@ -56,6 +59,8 @@ export class RunAction {
 		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
 		// events they listen for basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
+		const telemetryListener: TelemetryEventListener = new TelemetryEventListener(this.dependencies.telemetryEmitter ?? new NoOpTelemetryEmitter());
+		telemetryListener.listen(core);
 		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const enginePluginModules = config.getCustomEnginePluginModules();
 		const addEnginePromises: Promise<void>[] = [
@@ -71,10 +76,12 @@ export class RunAction {
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {workspace};
 		const results: RunResults = await core.run(ruleSelection, runOptions);
+		await this.emitEngineExecutionTelemetry(ruleSelection, results, enginePlugins.flatMap(p => p.getAvailableEngineNames()));
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
 		// or file handlers that must be gracefully ended.
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
+		telemetryListener.stopListening();
 		this.dependencies.writer.write(results);
 		this.dependencies.resultsViewer.view(results);
 		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(results, logWriter.getLogDestination(), input['output-file']);
@@ -87,6 +94,23 @@ export class RunAction {
 
 	public static createAction(dependencies: RunDependencies): RunAction {
 		return new RunAction(dependencies);
+	}
+
+	private emitEngineExecutionTelemetry(ruleSelection: RuleSelection, results: RunResults, coreEngineNames: string[]): Promise<void> {
+		const selectedEngineNames: Set<string> = new Set(ruleSelection.getEngineNames());
+		const executedEngineNames: Set<string> = new Set(results.getEngineNames());
+		const engineTelemetryObject: Record<string, boolean|number> = {};
+		for (const coreEngineName of coreEngineNames) {
+			const selected: boolean = selectedEngineNames.has(coreEngineName);
+			const executed: boolean = executedEngineNames.has(coreEngineName);
+			const resultCount: number = (selected && executed) ? results.getEngineRunResults(coreEngineName).getViolationCount() : 0;
+			engineTelemetryObject[`${coreEngineName}_selected`] = selected;
+			engineTelemetryObject[`${coreEngineName}_executed`] = executed;
+			engineTelemetryObject[`${coreEngineName}_violation_count`] = resultCount;
+		}
+		return this.dependencies.telemetryEmitter
+			? this.dependencies.telemetryEmitter.emitTelemetry('RunAction', 'core-engine-data', engineTelemetryObject)
+			: Promise.resolve();
 	}
 }
 

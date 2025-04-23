@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import {Flags, SfCommand} from '@salesforce/sf-plugins-core';
 import {SeverityLevel} from '@salesforce/code-analyzer-core';
 import {RunAction, RunDependencies, RunInput} from '../../lib/actions/RunAction';
@@ -11,6 +12,7 @@ import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
+import {SfCliTelemetryEmitter} from "../../lib/Telemetry";
 
 export default class RunCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -75,7 +77,9 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RunCommand)).flags;
+		const telemetryEmitter: SfCliTelemetryEmitter = new SfCliTelemetryEmitter();
 		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View|undefined, parsedFlags['output-file']);
+		dependencies.telemetryEmitter = telemetryEmitter;
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
@@ -86,6 +90,16 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase()),
 			'target': parsedFlags['target']
 		};
+
+		const argInvocationDescriptor = {
+			customConfigProvided: parsedFlags['config-file'] != null,
+			specifiedView: parsedFlags['view'] ?? 'none',
+			specifiedOutfileExtensions: JSON.stringify([
+				...new Set((parsedFlags['output-file'] ?? [])
+					.map(f => path.extname(f).toLowerCase())
+				).values()])
+		}
+		await telemetryEmitter.emitTelemetry('CLI', 'run-command-args-description', argInvocationDescriptor);
 		await action.execute(runInput);
 	}
 

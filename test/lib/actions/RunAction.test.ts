@@ -14,6 +14,7 @@ import {
 	StubEnginePluginsFactory_withPreconfiguredStubEngines,
 	StubEnginePluginsFactory_withThrowingStubPlugin
 } from '../../stubs/StubEnginePluginsFactories';
+import {SpyTelemetryEmitter} from "../../stubs/SpyTelemetryEmitter";
 
 const PATH_TO_FILE_A = path.resolve('test', 'sample-code', 'fileA.cls');
 const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'RunAction.test.ts');
@@ -363,6 +364,37 @@ describe('RunAction tests', () => {
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 	});
+
+	describe('Telemetry Logging', () => {
+		it('When a telemetry emitter is provided, it is used', async () => {
+			// ==== SETUP ====
+			// Create a telemetry emitter and set it to be used.
+			const spyTelemetryEmitter: SpyTelemetryEmitter = new SpyTelemetryEmitter();
+			dependencies.telemetryEmitter = spyTelemetryEmitter;
+			// Create the input.
+			const input: RunInput = {
+				// Select all rules.
+				'rule-selector': ['all'],
+				// Use the current directory, for convenience.
+				'workspace': ['.'],
+				// Outfiles can just be an empty list.
+				'output-file': []
+			};
+			// ==== TESTED BEHAVIOR ====
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(3);
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('engine1DescribeTelemetry');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('engine1ExecuteTelemetry');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('core-engine-data');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data).toEqual({
+				'stubEngine1_selected': true,
+				'stubEngine1_executed': true,
+				'stubEngine1_violation_count': 0
+			});
+		});
+	})
 });
 
 // TODO: Whenever we decide to document the custom_engine_plugin_modules flag in our configuration file, then we'll want
