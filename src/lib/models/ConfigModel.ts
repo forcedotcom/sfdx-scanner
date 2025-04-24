@@ -126,6 +126,9 @@ abstract class YamlFormatter {
 			this.toYamlFieldWithFieldDescription('log_folder', this.config.getLogFolder(),
 				topLevelDescription.fieldDescriptions.log_folder) + '\n' +
 			'\n' +
+			this.toYamlFieldWithFieldDescription('log_level', this.config.getLogLevel(),
+			topLevelDescription.fieldDescriptions.log_level) + '\n' +
+			'\n' +
 			this.toYamlComment(topLevelDescription.fieldDescriptions.rules.descriptionText) + '\n' +
 			this.toYamlRuleOverrides() + '\n' +
 			'\n' +
