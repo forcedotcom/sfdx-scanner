@@ -392,7 +392,6 @@ describe('RunAction tests', () => {
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('core-engine-data');
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data).toEqual({
 				'stubEngine1_selected': true,
-				'stubEngine1_executed': true,
 				'stubEngine1_violation_count': 0
 			});
 		});

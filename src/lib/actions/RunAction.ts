@@ -98,14 +98,11 @@ export class RunAction {
 
 	private emitEngineExecutionTelemetry(ruleSelection: RuleSelection, results: RunResults, coreEngineNames: string[]): Promise<void> {
 		const selectedEngineNames: Set<string> = new Set(ruleSelection.getEngineNames());
-		const executedEngineNames: Set<string> = new Set(results.getEngineNames());
 		const engineTelemetryObject: Record<string, boolean|number> = {};
 		for (const coreEngineName of coreEngineNames) {
 			const selected: boolean = selectedEngineNames.has(coreEngineName);
-			const executed: boolean = executedEngineNames.has(coreEngineName);
-			const resultCount: number = (selected && executed) ? results.getEngineRunResults(coreEngineName).getViolationCount() : 0;
+			const resultCount: number = selected ? results.getEngineRunResults(coreEngineName).getViolationCount() : 0;
 			engineTelemetryObject[`${coreEngineName}_selected`] = selected;
-			engineTelemetryObject[`${coreEngineName}_executed`] = executed;
 			engineTelemetryObject[`${coreEngineName}_violation_count`] = resultCount;
 		}
 		return this.dependencies.telemetryEmitter
