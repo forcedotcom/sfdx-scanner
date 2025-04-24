@@ -58,6 +58,7 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{section: 'config_root'},
 				{section: 'log_folder'},
+				{section: 'log_level'},
 				{section: 'rules'},
 				{section: 'engines'}
 			])('`$section` section header-comment is correct', async ({section}) => {
@@ -185,6 +186,7 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{section: 'config_root'},
 				{section: 'log_folder'},
+				{section: 'log_level'},
 				{section: 'rules'},
 				{section: 'engines'}
 			])('`$section` section header-comment is correct', async ({section}) => {
@@ -254,6 +256,17 @@ describe('ConfigAction tests', () => {
 					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', 'null')
 					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', 'null')
 				expect(output).toContain(goldFileContents);
+			});
+
+			it('When using non-default logLevel, it shows the change', async () => {
+				// ==== SETUP ====
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
+					log_level: "warn"
+				}));
+				
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
+				
+				expect(output).toContain('log_level: 2 # Modified from: 4');
 			});
 
 			it.each([
