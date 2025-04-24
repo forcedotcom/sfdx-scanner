@@ -76,9 +76,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 
 	public async run(): Promise<void> {
 		const parsedFlags = (await this.parse(RunCommand)).flags;
-		const telemetryEmitter: SfCliTelemetryEmitter = new SfCliTelemetryEmitter();
 		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View|undefined, parsedFlags['output-file']);
-		dependencies.telemetryEmitter = telemetryEmitter;
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
@@ -99,6 +97,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			telemetryEmitter: new SfCliTelemetryEmitter(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
 			resultsViewer,

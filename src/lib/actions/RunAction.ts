@@ -18,7 +18,7 @@ import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {BundleName, getMessage} from '../messages';
-import {NoOpTelemetryEmitter, TelemetryEmitter} from "../Telemetry";
+import {TelemetryEmitter} from "../Telemetry";
 import {TelemetryEventListener} from "../listeners/TelemetryEventListener";
 
 export type RunDependencies = {
@@ -26,7 +26,7 @@ export type RunDependencies = {
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
 	progressListeners: ProgressEventListener[];
-	telemetryEmitter?: TelemetryEmitter;
+	telemetryEmitter: TelemetryEmitter;
 	writer: ResultsWriter;
 	resultsViewer: ResultsViewer;
 	actionSummaryViewer: RunActionSummaryViewer;
@@ -59,7 +59,7 @@ export class RunAction {
 		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
 		// events they listen for basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
-		const telemetryListener: TelemetryEventListener = new TelemetryEventListener(this.dependencies.telemetryEmitter ?? new NoOpTelemetryEmitter());
+		const telemetryListener: TelemetryEventListener = new TelemetryEventListener(this.dependencies.telemetryEmitter);
 		telemetryListener.listen(core);
 		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const enginePluginModules = config.getCustomEnginePluginModules();

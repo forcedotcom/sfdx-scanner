@@ -50,6 +50,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: pluginsFactory,
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
@@ -231,6 +232,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
