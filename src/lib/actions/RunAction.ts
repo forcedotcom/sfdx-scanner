@@ -6,7 +6,6 @@ import {
 	RunOptions,
 	RunResults,
 	SeverityLevel,
-	TelemetryData,
 	Workspace
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
@@ -78,7 +77,7 @@ export class RunAction {
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
 		const runOptions: RunOptions = {workspace};
 		const results: RunResults = await core.run(ruleSelection, runOptions);
-		await Promise.all(this.emitEngineTelemetry(ruleSelection, results, enginePlugins.flatMap(p => p.getAvailableEngineNames())));
+		this.emitEngineTelemetry(ruleSelection, results, enginePlugins.flatMap(p => p.getAvailableEngineNames()));
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
 		// or file handlers that must be gracefully ended.
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
@@ -98,34 +97,24 @@ export class RunAction {
 		return new RunAction(dependencies);
 	}
 
-	private emitEngineTelemetry(ruleSelection: RuleSelection, results: RunResults, coreEngineNames: string[]): Promise<void>[] {
+	private emitEngineTelemetry(ruleSelection: RuleSelection, results: RunResults, coreEngineNames: string[]): void {
 		const selectedEngineNames: Set<string> = new Set(ruleSelection.getEngineNames());
-		const selectionTelemetryEvents: TelemetryData[] = [];
-		const executionTelemetryEvents: TelemetryData[] = [];
 		for (const coreEngineName of coreEngineNames) {
 			if (!selectedEngineNames.has(coreEngineName)) {
 				continue;
 			}
-			selectionTelemetryEvents.push({
+			this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, {
 				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_SELECTION,
 				engine: coreEngineName,
 				ruleCount: ruleSelection.getRulesFor(coreEngineName).length
 			});
 
-			executionTelemetryEvents.push({
+			this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, {
 				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_EXECUTION,
 				engine: coreEngineName,
 				violationCount: results.getEngineRunResults(coreEngineName).getViolationCount()
 			});
 		}
-		const telemetryPromises: Promise<void>[] = [];
-		for (const selectionTelemetry of selectionTelemetryEvents) {
-			telemetryPromises.push(this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, selectionTelemetry));
-		}
-		for (const executionTelemetry of executionTelemetryEvents) {
-			telemetryPromises.push(this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, executionTelemetry));
-		}
-		return telemetryPromises;
 	}
 }
 

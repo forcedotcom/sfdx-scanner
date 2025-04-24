@@ -10,9 +10,8 @@ export type CapturedTelemetryEmission = {
 export class SpyTelemetryEmitter implements TelemetryEmitter {
 	private capturedTelemetry: CapturedTelemetryEmission[] = [];
 
-	public emitTelemetry(source: string, eventName: string, data: TelemetryData): Promise<void> {
+	public emitTelemetry(source: string, eventName: string, data: TelemetryData): void {
 		this.capturedTelemetry.push({source, eventName, data});
-		return Promise.resolve();
 	}
 
 	public getCapturedTelemetry(): CapturedTelemetryEmission[] {

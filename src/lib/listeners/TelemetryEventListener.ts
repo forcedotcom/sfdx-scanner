@@ -16,15 +16,15 @@ export class TelemetryEventListener {
 
 	public listen(codeAnalyzer: CodeAnalyzer): void {
 		// Set up listeners.
-		codeAnalyzer.onEvent(EventType.TelemetryEvent, (e: TelemetryEvent) => void this.handleEvent('Core', e));
-		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent,  (e: EngineTelemetryEvent) => void this.handleEvent(e.engineName, e));
+		codeAnalyzer.onEvent(EventType.TelemetryEvent, (e: TelemetryEvent) => this.handleEvent('Core', e));
+		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent,  (e: EngineTelemetryEvent) => this.handleEvent(e.engineName, e));
 	}
 
 	public stopListening(): void {
 		// Intentional no-op, because no cleanup is required.
 	}
 
-	private handleEvent(source: string, event: TelemetryEvent|EngineTelemetryEvent): Promise<void> {
+	private handleEvent(source: string, event: TelemetryEvent|EngineTelemetryEvent): void {
 		return this.telemetryEmitter.emitTelemetry(source, constants.TelemetryEventName, {
 			...event.data,
 			sfcaEvent: event.eventName,
