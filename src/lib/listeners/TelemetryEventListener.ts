@@ -5,6 +5,7 @@ import {
 	TelemetryEvent
 } from "@salesforce/code-analyzer-core";
 import {TelemetryEmitter} from '../Telemetry';
+import * as constants from '../../Constants';
 
 export class TelemetryEventListener {
 	private telemetryEmitter: TelemetryEmitter;
@@ -24,8 +25,9 @@ export class TelemetryEventListener {
 	}
 
 	private handleEvent(source: string, event: TelemetryEvent|EngineTelemetryEvent): Promise<void> {
-		return this.telemetryEmitter.emitTelemetry(source, event.eventName, {
+		return this.telemetryEmitter.emitTelemetry(source, constants.TelemetryEventName, {
 			...event.data,
+			sfcaEvent: event.eventName,
 			timestamp: event.timestamp.getTime(),
 			uuid: event.uuid
 		});

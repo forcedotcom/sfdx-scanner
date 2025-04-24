@@ -386,14 +386,25 @@ describe('RunAction tests', () => {
 			await action.execute(input);
 
 			// ==== ASSERTIONS ====
-			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(3);
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('engine1DescribeTelemetry');
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('engine1ExecuteTelemetry');
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('core-engine-data');
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data).toEqual({
-				'stubEngine1_selected': true,
-				'stubEngine1_violation_count': 0
-			});
+			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(4);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].data.sfcaEvent).toEqual('engine1DescribeTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].data.sfcaEvent).toEqual('engine1ExecuteTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].source).toEqual('RunAction');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.sfcaEvent).toEqual('engine_selection');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.ruleCount).toEqual(5);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].source).toEqual('RunAction');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.sfcaEvent).toEqual('engine_execution');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.violationCount).toEqual(0);
 		});
 	})
 });
