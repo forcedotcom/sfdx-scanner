@@ -14,6 +14,7 @@ import {
 	StubEnginePluginsFactory_withPreconfiguredStubEngines,
 	StubEnginePluginsFactory_withThrowingStubPlugin
 } from '../../stubs/StubEnginePluginsFactories';
+import {SpyTelemetryEmitter} from "../../stubs/SpyTelemetryEmitter";
 
 const PATH_TO_FILE_A = path.resolve('test', 'sample-code', 'fileA.cls');
 const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'RunAction.test.ts');
@@ -49,6 +50,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: pluginsFactory,
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
@@ -230,6 +232,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
@@ -363,6 +366,47 @@ describe('RunAction tests', () => {
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 	});
+
+	describe('Telemetry Emission', () => {
+		it('When a telemetry emitter is provided, it is used', async () => {
+			// ==== SETUP ====
+			// Create a telemetry emitter and set it to be used.
+			const spyTelemetryEmitter: SpyTelemetryEmitter = new SpyTelemetryEmitter();
+			dependencies.telemetryEmitter = spyTelemetryEmitter;
+			// Create the input.
+			const input: RunInput = {
+				// Select all rules.
+				'rule-selector': ['all'],
+				// Use the current directory, for convenience.
+				'workspace': ['.'],
+				// Outfiles can just be an empty list.
+				'output-file': []
+			};
+			// ==== TESTED BEHAVIOR ====
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(4);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].data.sfcaEvent).toEqual('engine1DescribeTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].data.sfcaEvent).toEqual('engine1ExecuteTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].source).toEqual('RunAction');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.sfcaEvent).toEqual('engine_selection');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.ruleCount).toEqual(5);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].source).toEqual('RunAction');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.sfcaEvent).toEqual('engine_execution');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.violationCount).toEqual(0);
+		});
+	})
 });
 
 // TODO: Whenever we decide to document the custom_engine_plugin_modules flag in our configuration file, then we'll want

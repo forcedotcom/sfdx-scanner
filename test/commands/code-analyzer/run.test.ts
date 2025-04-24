@@ -1,14 +1,23 @@
 import {stubSfCommandUx} from '@salesforce/sf-plugins-core';
+import {TelemetryData} from '@salesforce/code-analyzer-core';
 import {TestContext} from '@salesforce/core/lib/testSetup';
 import RunCommand from '../../../src/commands/code-analyzer/run';
 import {RunAction, RunDependencies, RunInput} from '../../../src/lib/actions/RunAction';
 import {CompositeResultsWriter} from '../../../src/lib/writers/ResultsWriter';
+import {SfCliTelemetryEmitter} from "../../../src/lib/Telemetry";
+
+type TelemetryEmission = {
+	source: string,
+	eventName: string,
+	data: TelemetryData
+};
 
 describe('`code-analyzer run` tests', () => {
 	const $$ = new TestContext();
 
 	let executeSpy: jest.SpyInstance;
 	let createActionSpy: jest.SpyInstance;
+	let receivedTelemetryEmissions: TelemetryEmission[];
 	let receivedActionInput: RunInput;
 	let receivedActionDependencies: RunDependencies;
 	let fromFilesSpy: jest.SpyInstance;
@@ -17,6 +26,11 @@ describe('`code-analyzer run` tests', () => {
 		stubSfCommandUx($$.SANDBOX);
 		executeSpy = jest.spyOn(RunAction.prototype, 'execute').mockImplementation((input) => {
 			receivedActionInput = input;
+			return Promise.resolve();
+		});
+		receivedTelemetryEmissions = [];
+		jest.spyOn(SfCliTelemetryEmitter.prototype, 'emitTelemetry').mockImplementation((source, eventName, data) => {
+			receivedTelemetryEmissions.push({source, eventName, data});
 			return Promise.resolve();
 		});
 		const originalCreateAction = RunAction.createAction;
@@ -322,6 +336,14 @@ describe('`code-analyzer run` tests', () => {
 			await RunCommand.run(['-v', inputValue]);
 			expect(createActionSpy).toHaveBeenCalled();
 			expect(receivedActionDependencies.resultsViewer.constructor.name).toEqual('ResultsDetailDisplayer');
+		});
+	});
+
+	describe('Telemetry emission', () => {
+		it('Passes telemetry emitter through into Action layer', async () => {
+			await RunCommand.run([]);
+			expect(createActionSpy).toHaveBeenCalled();
+			expect(receivedActionDependencies.telemetryEmitter!.constructor.name).toEqual('SfCliTelemetryEmitter');
 		});
 	});
 

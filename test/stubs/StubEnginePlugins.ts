@@ -80,6 +80,9 @@ export class StubEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.DescribeRulesProgressEvent,
 			percentComplete: 0
 		});
+		this.emitTelemetryEvent('engine1DescribeTelemetry', {
+			someArg: true
+		});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscFineMessageFromStubEngine1",
@@ -137,6 +140,9 @@ export class StubEngine1 extends EngineApi.Engine {
 		this.emitEvent<EngineApi.RunRulesProgressEvent>({
 			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 0
+		});
+		this.emitTelemetryEvent('engine1ExecuteTelemetry', {
+			someArg: true
 		});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,

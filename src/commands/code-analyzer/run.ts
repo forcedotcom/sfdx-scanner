@@ -11,6 +11,7 @@ import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
+import {SfCliTelemetryEmitter} from "../../lib/Telemetry";
 
 export default class RunCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -96,6 +97,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			telemetryEmitter: new SfCliTelemetryEmitter(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
 			resultsViewer,
