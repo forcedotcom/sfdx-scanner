@@ -84,11 +84,6 @@ export class ConfigAction {
 		const defaultCoreForAllRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
 		const defaultCoreForSelectRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
 
-		// Only the File Logger should listen to the Default Cores, since we don't want to bother the user with redundant
-		// logs printed to the console.
-		logEventLogger.listen(defaultCoreForAllRules);
-		logEventLogger.listen(defaultCoreForSelectRules);
-
 		const defaultEnginePromises: Promise<void>[] = [
 			...enginePlugins.map(enginePlugin => defaultCoreForAllRules.addEnginePlugin(enginePlugin)),
 			...enginePlugins.map(enginePlugin => defaultCoreForSelectRules.addEnginePlugin(enginePlugin)),
