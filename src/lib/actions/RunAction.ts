@@ -105,9 +105,7 @@ export class RunAction {
 			engineTelemetryObject[`${coreEngineName}_selected`] = selected;
 			engineTelemetryObject[`${coreEngineName}_violation_count`] = resultCount;
 		}
-		return this.dependencies.telemetryEmitter
-			? this.dependencies.telemetryEmitter.emitTelemetry('RunAction', 'core-engine-data', engineTelemetryObject)
-			: Promise.resolve();
+		return this.dependencies.telemetryEmitter.emitTelemetry('RunAction', 'core-engine-data', engineTelemetryObject);
 	}
 }
 
