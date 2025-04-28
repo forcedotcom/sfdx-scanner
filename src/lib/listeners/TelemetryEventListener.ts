@@ -16,8 +16,11 @@ export class TelemetryEventListener {
 
 	public listen(codeAnalyzer: CodeAnalyzer): void {
 		// Set up listeners.
-		codeAnalyzer.onEvent(EventType.TelemetryEvent, (e: TelemetryEvent) => this.handleEvent('Core', e));
-		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent,  (e: EngineTelemetryEvent) => this.handleEvent(e.engineName, e));
+		codeAnalyzer.onEvent(EventType.TelemetryEvent, (e: TelemetryEvent) => this.handleEvent('code-analyzer-core', e));
+		codeAnalyzer.onEvent(EventType.EngineTelemetryEvent,  (e: EngineTelemetryEvent) => {
+			e.data.engine = e.data.engine ?? e.engineName;
+			this.handleEvent('code-analyzer-core', e)
+		});
 	}
 
 	public stopListening(): void {

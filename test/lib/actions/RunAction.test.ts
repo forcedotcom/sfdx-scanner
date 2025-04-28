@@ -389,12 +389,14 @@ describe('RunAction tests', () => {
 			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(4);
 
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('plugin-code-analyzer');
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].source).toEqual('code-analyzer-core');
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].data.sfcaEvent).toEqual('engine1DescribeTelemetry');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].data.engine).toEqual('stubEngine1');
 
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('plugin-code-analyzer');
-			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].source).toEqual('code-analyzer-core');
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].data.sfcaEvent).toEqual('engine1ExecuteTelemetry');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].data.engine).toEqual('stubEngine1');
 
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('plugin-code-analyzer');
 			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].source).toEqual('RunAction');
