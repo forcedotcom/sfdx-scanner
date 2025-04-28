@@ -5,6 +5,7 @@ export enum View {
 }
 
 export const TelemetryEventName = 'plugin-code-analyzer';
+export const TelemetrySource = 'CLI';
 
 export const CliTelemetryEvents = {
 	ENGINE_SELECTION: 'engine_selection',
