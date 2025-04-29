@@ -6,6 +6,7 @@ on:
 jobs:
   # We want to prevent cross-contamination between the 4.x and 5.x pipelines. So we should prevent PRs
   # based on this flow to merge into `dev-4` or `main-4`.
+  # TODO: Remove this after the April release, since we won't care after that to maintain v4
   verify_target_branch:
     runs-on: ubuntu-latest
     steps:

@@ -11,6 +11,7 @@ import {BundleName, getMessage, getMessages} from '../../lib/messages';
 import {LogEventDisplayer} from '../../lib/listeners/LogEventListener';
 import {EngineRunProgressSpinner, RuleSelectionProgressSpinner} from '../../lib/listeners/ProgressEventListener';
 import {Displayable, UxDisplay} from '../../lib/Display';
+import {SfCliTelemetryEmitter} from "../../lib/Telemetry";
 
 export default class RunCommand extends SfCommand<void> implements Displayable {
 	// We don't need the `--json` output for this command.
@@ -18,9 +19,6 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	public static readonly summary = getMessage(BundleName.RunCommand, 'command.summary');
 	public static readonly description = getMessage(BundleName.RunCommand, 'command.description');
 	public static readonly examples = getMessages(BundleName.RunCommand, 'command.examples');
-
-	// TODO: Remove when we go GA
-	public static readonly state = getMessage(BundleName.Shared, 'label.command-state');
 
 	public static readonly flags = {
 		// === Flags pertaining to targeting ===
@@ -32,13 +30,12 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			delimiter: ',',
 			default: ['.']
 		}),
-		'path-start': Flags.string({
-			summary: getMessage(BundleName.RunCommand, 'flags.path-start.summary'),
-			description: getMessage(BundleName.RunCommand, 'flags.path-start.description'),
-			char: 's',
+		'target': Flags.string({
+			summary: getMessage(BundleName.RunCommand, 'flags.target.summary'),
+			description: getMessage(BundleName.RunCommand, 'flags.target.description'),
+			char: 't',
 			multiple: true,
-			delimiter: ',',
-			hidden: true
+			delimiter: ','
 		}),
 		// === Flags pertaining to rule selection ===
 		'rule-selector': Flags.string({
@@ -53,7 +50,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 		'severity-threshold': Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.severity-threshold.summary'),
 			description: getMessage(BundleName.RunCommand, 'flags.severity-threshold.description'),
-			char: 't'
+			char: 's'
 		}),
 		view: Flags.string({
 			summary: getMessage(BundleName.RunCommand, 'flags.view.summary'),
@@ -78,20 +75,17 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 	};
 
 	public async run(): Promise<void> {
-		// TODO: Remove when we go GA
-		this.warn(getMessage(BundleName.Shared, "warning.command-state", [getMessage(BundleName.Shared, 'label.command-state')]));
-
 		const parsedFlags = (await this.parse(RunCommand)).flags;
 		const dependencies: RunDependencies = this.createDependencies(parsedFlags.view as View|undefined, parsedFlags['output-file']);
 		const action: RunAction = RunAction.createAction(dependencies);
 		const runInput: RunInput = {
 			'config-file': parsedFlags['config-file'],
 			'output-file': parsedFlags['output-file'] ?? [],
-			'path-start': parsedFlags['path-start'], // TODO: We should move validation of this here instead of having it in the RunAction.
 			'rule-selector': parsedFlags['rule-selector'],
 			'workspace': parsedFlags['workspace'],
 			'severity-threshold': parsedFlags['severity-threshold'] === undefined ? undefined :
-				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase())
+				convertThresholdToEnum(parsedFlags['severity-threshold'].toLowerCase()),
+			'target': parsedFlags['target']
 		};
 		await action.execute(runInput);
 	}
@@ -103,6 +97,7 @@ export default class RunCommand extends SfCommand<void> implements Displayable {
 			configFactory: new CodeAnalyzerConfigFactoryImpl(),
 			pluginsFactory: new EnginePluginsFactoryImpl(),
 			writer: CompositeResultsWriter.fromFiles(outputFiles),
+			telemetryEmitter: new SfCliTelemetryEmitter(),
 			logEventListeners: [new LogEventDisplayer(uxDisplay)],
 			progressListeners: [new EngineRunProgressSpinner(uxDisplay), new RuleSelectionProgressSpinner(uxDisplay)],
 			resultsViewer,

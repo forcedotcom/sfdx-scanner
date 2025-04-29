@@ -53,7 +53,7 @@ jobs:
     with:
       ctc: false # We've been told we don't have to care about this until someone makes us care.
       sign: true
-      tag: latest-beta-rc # Publish as a release candidate, so we can do our validations against it.
+      tag: latest-rc # Publish as a release candidate, so we can do our validations against it.
       githubTag: ${{ github.event.release.tag_name || inputs.tag }}
     secrets: inherit
   # Step 3: Run smoke tests against the release candidate.
@@ -84,7 +84,7 @@ jobs:
           python-version: '>=3.10'
       # Install SF, and the release candidate version.
       - run: npm install -g @salesforce/cli
-      - run: sf plugins install @salesforce/plugin-code-analyzer@latest-beta-rc
+      - run: sf plugins install @salesforce/plugin-code-analyzer@latest-rc
       # Log the installed plugins for easier debugging.
       - run: sf plugins
       # Attempt to run the smoke tests.
@@ -105,7 +105,6 @@ jobs:
           node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/plugin-code-analyzer@${{ github.event.release.tag_name || inputs.tag }} latest-beta
           npm dist-tag add @salesforce/plugin-code-analyzer@${{ github.event.release.tag_name || inputs.tag }} latest
   # Step 5: Create a Pull Request for merging `main` into `dev`
   create-main2dev-pull-request:

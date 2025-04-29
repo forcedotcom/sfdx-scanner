@@ -1,19 +1,19 @@
 {
 	"name": "@salesforce/plugin-code-analyzer",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "5.0.0-beta.3",
+	"version": "5.0.0",
 	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
 		"@oclif/core": "3.27.0",
-		"@salesforce/code-analyzer-core": "0.25.1",
-		"@salesforce/code-analyzer-engine-api": "0.20.0",
-		"@salesforce/code-analyzer-eslint-engine": "0.20.1",
-		"@salesforce/code-analyzer-flowtest-engine": "0.18.1",
-		"@salesforce/code-analyzer-pmd-engine": "0.21.0",
-		"@salesforce/code-analyzer-regex-engine": "0.18.1",
-		"@salesforce/code-analyzer-retirejs-engine": "0.18.1",
-		"@salesforce/code-analyzer-sfge-engine": "0.1.0",
+		"@salesforce/code-analyzer-core": "0.28.0",
+		"@salesforce/code-analyzer-engine-api": "0.23.0",
+		"@salesforce/code-analyzer-eslint-engine": "0.23.0",
+		"@salesforce/code-analyzer-flow-engine": "0.21.0",
+		"@salesforce/code-analyzer-pmd-engine": "0.24.0",
+		"@salesforce/code-analyzer-regex-engine": "0.21.0",
+		"@salesforce/code-analyzer-retirejs-engine": "0.21.0",
+		"@salesforce/code-analyzer-sfge-engine": "0.6.0",
 		"@salesforce/core": "6.7.6",
 		"@salesforce/sf-plugins-core": "5.0.13",
 		"@salesforce/ts-types": "^2.0.12",
@@ -50,8 +50,7 @@
 		"/lib",
 		"/messages",
 		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json",
-		"/oclif.lock"
+		"/oclif.manifest.json"
 	],
 	"homepage": "https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview",
 	"keywords": [
@@ -126,7 +125,7 @@
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
 		"build": "tsc --build tsconfig.build.json",
-		"prepack": "rm -rf lib && tsc --build tsconfig.build.json && oclif manifest && oclif readme && oclif lock && npm shrinkwrap",
+		"prepack": "rm -rf lib && tsc --build tsconfig.build.json && oclif manifest && oclif readme && npm shrinkwrap",
 		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
 		"lint": "eslint ./src --max-warnings 0",
 		"version": "oclif readme && git add README.md",

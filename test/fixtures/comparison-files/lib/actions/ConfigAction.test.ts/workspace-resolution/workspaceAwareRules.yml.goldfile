@@ -1,0 +1,14 @@
+rules:
+
+  # ======================================================================
+  # WORKSPACEAWAREENGINE ENGINE RULE OVERRIDES
+  # ======================================================================
+  workspaceAwareEngine:
+    "ruleForREADME.md":
+      severity: 4
+      tags:
+        - Recommended
+    "ruleForpackage.json":
+      severity: 4
+      tags:
+        - Recommended

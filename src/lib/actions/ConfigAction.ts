@@ -26,6 +26,7 @@ export type ConfigInput = {
 	'output-file'?: string;
 	'rule-selector': string[];
 	workspace?: string[];
+	target?: string[];
 };
 
 export class ConfigAction {
@@ -83,11 +84,6 @@ export class ConfigAction {
 		const defaultCoreForAllRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
 		const defaultCoreForSelectRules: CodeAnalyzer = new CodeAnalyzer(defaultConfigWithEnginesDisabled);
 
-		// Only the File Logger should listen to the Default Cores, since we don't want to bother the user with redundant
-		// logs printed to the console.
-		logEventLogger.listen(defaultCoreForAllRules);
-		logEventLogger.listen(defaultCoreForSelectRules);
-
 		const defaultEnginePromises: Promise<void>[] = [
 			...enginePlugins.map(enginePlugin => defaultCoreForAllRules.addEnginePlugin(enginePlugin)),
 			...enginePlugins.map(enginePlugin => defaultCoreForSelectRules.addEnginePlugin(enginePlugin)),
@@ -100,14 +96,15 @@ export class ConfigAction {
 
 
 		// ==== PERFORM RULE SELECTIONS ================================================================================
-		const userSelectOptions = input.workspace
-			? {workspace: await createWorkspace(userCore, input.workspace)}
+		const workspace: string[]|undefined = input.workspace || (input.target ? ['.'] : undefined);
+		const userSelectOptions = workspace
+			? {workspace: await createWorkspace(userCore, workspace, input.target)}
 			: undefined;
-		const defaultSelectOptionsForAllRules = input.workspace
-			? {workspace: await createWorkspace(defaultCoreForAllRules, input.workspace)}
+		const defaultSelectOptionsForAllRules = workspace
+			? {workspace: await createWorkspace(defaultCoreForAllRules, workspace, input.target)}
 			: undefined;
-		const defaultSelectOptionsForSelectRules = input.workspace
-			? {workspace: await createWorkspace(defaultCoreForSelectRules, input.workspace)}
+		const defaultSelectOptionsForSelectRules = workspace
+			? {workspace: await createWorkspace(defaultCoreForSelectRules, workspace, input.target)}
 			: undefined;
 
 		// EngineProgressListeners should start listening right before we call the Cores' `.selectRules()` methods, since

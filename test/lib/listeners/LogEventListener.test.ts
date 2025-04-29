@@ -83,25 +83,21 @@ describe('LogEventListener implementations', () => {
 	});
 
 	describe('LogEventLogger', () => {
-
-		it.each([
-			{levelName: 'Error', logLevel: LogLevel.Error},
-			{levelName: 'Warn', logLevel: LogLevel.Warn},
-			{levelName: 'Info', logLevel: LogLevel.Info},
-			{levelName: 'Debug', logLevel: LogLevel.Debug},
-			{levelName: 'Fine', logLevel: LogLevel.Fine}
-		])(`Writes to logfile for events of level $levelName`, async ({levelName, logLevel}) => {
-			// ==== TEST SETUP ====
-			const expectedMessages = ['message1', 'message2', 'message3'];
-			for (const expectedMessage of expectedMessages) {
-				engine1.addLogEvents({logLevel, message: expectedMessage});
-			}
-			// The specific files we include in our workspace don't matter.
-			const workspace = await core.createWorkspace(['package.json']);
-			const ruleSelection = await core.selectRules(['all'], {workspace});
+		it('When using default log level, log writer includes all but fine messags', async () => {
+			engine1.addLogEvents(
+				{logLevel: LogLevel.Fine, message: 'fineMessage'},
+				{logLevel: LogLevel.Debug, message: 'debugMessage'},
+				{logLevel: LogLevel.Info, message: 'infoMessage'},
+				{logLevel: LogLevel.Warn, message: 'warnMessage'},
+				{logLevel: LogLevel.Error, message: 'errorMessage'}
+			);
 
 			const spyLogWriter = new SpyLogWriter();
 			const logListener = new LogEventLogger(spyLogWriter);
+
+			// The specific files we include in our workspace don't matter.
+			const workspace = await core.createWorkspace(['package.json']);
+			const ruleSelection = await core.selectRules(['all'], {workspace});
 
 			// ==== TESTED BEHAVIOR ====
 			logListener.listen(core);
@@ -111,9 +107,45 @@ describe('LogEventListener implementations', () => {
 			// ==== ASSERTIONS ====
 			// Verify that the right messages were logged.
 			const logContents = spyLogWriter.getWrittenLog();
-			for (const expectedMessage of expectedMessages) {
-				expect(logContents).toMatch(new RegExp(`${levelName}.+${expectedMessage}`));
-			}
+			expect(logContents).not.toContain('fineMessage');
+			expect(logContents).toContain('debugMessage');
+			expect(logContents).toContain('infoMessage');
+			expect(logContents).toContain('warnMessage');
+			expect(logContents).toContain('errorMessage');
+		});
+
+		it('When user specify fine level logs, then they are included as well as the others', async () => {
+			core = new CodeAnalyzer(CodeAnalyzerConfig.fromObject({log_level: LogLevel.Fine}));
+			await core.addEnginePlugin(stubEnginePlugin);
+
+			engine1.addLogEvents(
+				{logLevel: LogLevel.Fine, message: 'fineMessage'},
+				{logLevel: LogLevel.Debug, message: 'debugMessage'},
+				{logLevel: LogLevel.Info, message: 'infoMessage'},
+				{logLevel: LogLevel.Warn, message: 'warnMessage'},
+				{logLevel: LogLevel.Error, message: 'errorMessage'}
+			);
+
+			const spyLogWriter = new SpyLogWriter();
+			const logListener = new LogEventLogger(spyLogWriter);
+
+			// The specific files we include in our workspace don't matter.
+			const workspace = await core.createWorkspace(['package.json']);
+			const ruleSelection = await core.selectRules(['all'], {workspace});
+
+			// ==== TESTED BEHAVIOR ====
+			logListener.listen(core);
+			await core.run(ruleSelection, {workspace});
+			logListener.stopListening();
+
+			// ==== ASSERTIONS ====
+			// Verify that the right messages were logged.
+			const logContents = spyLogWriter.getWrittenLog();
+			expect(logContents).toContain('fineMessage');
+			expect(logContents).toContain('debugMessage');
+			expect(logContents).toContain('infoMessage');
+			expect(logContents).toContain('warnMessage');
+			expect(logContents).toContain('errorMessage');
 		});
 	});
-})
+});

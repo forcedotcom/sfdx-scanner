@@ -14,6 +14,7 @@ import {
 	StubEnginePluginsFactory_withPreconfiguredStubEngines,
 	StubEnginePluginsFactory_withThrowingStubPlugin
 } from '../../stubs/StubEnginePluginsFactories';
+import {SpyTelemetryEmitter} from "../../stubs/SpyTelemetryEmitter";
 
 const PATH_TO_FILE_A = path.resolve('test', 'sample-code', 'fileA.cls');
 const PATH_TO_GOLDFILES = path.join(__dirname, '..', '..', 'fixtures', 'comparison-files', 'lib', 'actions', 'RunAction.test.ts');
@@ -49,6 +50,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: pluginsFactory,
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
@@ -93,7 +95,7 @@ describe('RunAction tests', () => {
 		// Verify that the expected rules were executed on the right files.
 		const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
 		expect(actualExecutedRules).toEqual(expectedRules);
-		const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
+		const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getRawFilesAndFolders();
 		expect(actualTargetFiles).toEqual([path.resolve('.')]);
 		// Verify that the expected results were passed into the Viewer and Writer.
 		expect(writer.getCallHistory()[0].getViolationCount()).toEqual(1);
@@ -102,18 +104,28 @@ describe('RunAction tests', () => {
 		expect(resultsViewer.getCallHistory()[0].getViolations()[0].getMessage()).toEqual('Fake message');
 	});
 
-	it('Engines with target-dependent rules run the right rules', async () => {
+	it.each([
+		{
+			case: 'Workspace only',
+			workspace: ['package.json', 'README.md'],
+			target: undefined
+		},
+		{
+			case: 'Workspace and Targets',
+			workspace: ['.'],
+			target: ['package.json', 'README.md']
+		}
+	])('Engines with target-dependent rules run the right rules. Case: $case', async ({workspace, target}) => {
 		// ==== SETUP ====
 		// Add a target-dependent engine to the engines that will be run.
 		const targetDependentEngine: TargetDependentEngine1 = new TargetDependentEngine1({});
 		stubEnginePlugin.addEngine(targetDependentEngine);
-		// Select a few specific targets instead of vacuously selecting the whole project.
-		const targetedFilesAndFolders = ['package.json', 'src', 'README.md'];
 		// Create the input
 		const input: RunInput = {
 			// Select only rules in the target-dependent engine.
 			"rule-selector": [targetDependentEngine.getName()],
-			"workspace": targetedFilesAndFolders,
+			workspace,
+			target,
 			'output-file': []
 		};
 
@@ -125,8 +137,9 @@ describe('RunAction tests', () => {
 		expect(engine1.runRulesCallHistory).toHaveLength(0);
 		const actualExecutedRules = targetDependentEngine.runRulesCallHistory[0].ruleNames;
 		// One rule per target should have been run in the target-dependent engine.
-		expect(actualExecutedRules).toHaveLength(targetedFilesAndFolders.length);
-		const expectedRuleNames = targetedFilesAndFolders.map(t => `ruleFor${path.resolve(t)}`);
+		const expectedTargetFiles = ['package.json', 'README.md'];
+		expect(actualExecutedRules).toHaveLength(expectedTargetFiles.length);
+		const expectedRuleNames = expectedTargetFiles.map(t => `ruleFor${path.resolve(t)}`);
 		// The rules' order might not exactly match the provided targets', but as long as they're all present, it's fine.
 		for (const expectedRuleName of expectedRuleNames) {
 			expect(actualExecutedRules).toContain(expectedRuleName);
@@ -219,6 +232,7 @@ describe('RunAction tests', () => {
 			pluginsFactory: new StubEnginePluginsFactory_withThrowingStubPlugin(),
 			logEventListeners: [],
 			progressListeners: [],
+			telemetryEmitter: new SpyTelemetryEmitter(),
 			writer,
 			resultsViewer,
 			actionSummaryViewer
@@ -287,7 +301,7 @@ describe('RunAction tests', () => {
 			// Verify that the expected rules were executed on the right files.
 			const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
 			expect(actualExecutedRules).toEqual(expectedRules);
-			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
+			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getRawFilesAndFolders();
 			expect(actualTargetFiles).toEqual([path.resolve('.')]);
 			// Verify that the summary output matches the expectation.
 			const preExecutionGoldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'pre-execution-summary.txt.goldfile'), 'utf-8');
@@ -336,7 +350,7 @@ describe('RunAction tests', () => {
 			// Verify that the expected rules were executed on the right files.
 			const actualExecutedRules = engine1.runRulesCallHistory[0].ruleNames;
 			expect(actualExecutedRules).toEqual(expectedRules);
-			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getFilesAndFolders();
+			const actualTargetFiles = engine1.runRulesCallHistory[0].runOptions.workspace.getRawFilesAndFolders();
 			expect(actualTargetFiles).toEqual([path.resolve('.')]);
 			// Verify that the summary output matches the expectation.
 			const preExecutionGoldfileContents: string = await fsp.readFile(path.join(PATH_TO_GOLDFILES, 'action-summaries', 'pre-execution-summary.txt.goldfile'), 'utf-8');
@@ -352,6 +366,47 @@ describe('RunAction tests', () => {
 			expect(displayedLogEvents).toContain(goldfileContents);
 		});
 	});
+
+	describe('Telemetry Emission', () => {
+		it('When a telemetry emitter is provided, it is used', async () => {
+			// ==== SETUP ====
+			// Create a telemetry emitter and set it to be used.
+			const spyTelemetryEmitter: SpyTelemetryEmitter = new SpyTelemetryEmitter();
+			dependencies.telemetryEmitter = spyTelemetryEmitter;
+			// Create the input.
+			const input: RunInput = {
+				// Select all rules.
+				'rule-selector': ['all'],
+				// Use the current directory, for convenience.
+				'workspace': ['.'],
+				// Outfiles can just be an empty list.
+				'output-file': []
+			};
+			// ==== TESTED BEHAVIOR ====
+			await action.execute(input);
+
+			// ==== ASSERTIONS ====
+			expect(spyTelemetryEmitter.getCapturedTelemetry()).toHaveLength(4);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[0].data.sfcaEvent).toEqual('engine1DescribeTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].source).toEqual('stubEngine1');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[1].data.sfcaEvent).toEqual('engine1ExecuteTelemetry');
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].source).toEqual('CLI');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.sfcaEvent).toEqual('engine_selection');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[2].data.ruleCount).toEqual(5);
+
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].eventName).toEqual('plugin-code-analyzer');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].source).toEqual('CLI');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.sfcaEvent).toEqual('engine_execution');
+			expect(spyTelemetryEmitter.getCapturedTelemetry()[3].data.violationCount).toEqual(0);
+		});
+	})
 });
 
 // TODO: Whenever we decide to document the custom_engine_plugin_modules flag in our configuration file, then we'll want

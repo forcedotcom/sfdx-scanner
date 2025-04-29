@@ -4,11 +4,11 @@ Display the current state of configuration for Code Analyzer.
 
 # command.description
 
-Code Analyzer gives you the ability to configure settings that modify Code Analyzer's behavior, to override the tags and severity levels of rules, and to configure the engine specific settings.  Use this command to see the current state of this configuration. You can also save this state to a YAML-formatted file that you can modify for your needs.
+Code Analyzer gives you the ability to configure settings that modify Code Analyzer's behavior, to override the tags and severity levels of rules, and to configure the engine specific settings. Use this command to see the current state of this configuration. You can also save this state to a YAML-formatted file that you can modify for your needs.
 
 To apply a custom configuration with Code Analyzer, either keep your custom configuration settings in a `code-analyzer.yml` file located in the current folder from which you are executing commands, or specify the location of your custom configuration file to the Code Analyzer commands with the --config-file flag.
 
-We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at http://sfdc.co/CodeAnalyzerFeedback.
+We're continually improving Salesforce Code Analyzer. Tell us what you think! Give feedback at https://sfdc.co/CodeAnalyzerFeedback.
 
 # command.examples
 
@@ -28,9 +28,9 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
   <%= config.bin %> <%= command.id %> --rule-selector Recommended
 
-- Display the configuration state associated with all the rules that are applicable to your workspace folder, `./src`:
+- Display the configuration state associated with all the rules that are applicable to the files targeted within the folder `./src`:
 
-  <%= config.bin %> <%= command.id %> --workspace ./src
+  <%= config.bin %> <%= command.id %> --target ./src
 
 - Display any relevant configuration settings associated with the rule name 'no-undef' from the 'eslint' engine:
 
@@ -42,15 +42,31 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
 # flags.workspace.summary
 
-Set of files you want to include in the code analysis.
+Set of files that make up your workspace.
 
 # flags.workspace.description
 
-Use the --workspace flag to display only the configuration associated with the rules that apply to the files that make up your workspace. Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
+Use the `--workspace` flag to display only the configuration associated with the rules that apply to the files that make up your workspace. Typically, a workspace is a single project folder that contains all your files. But it can also consist of one or more folders, one or more files, and use glob patterns (wildcards). If you specify this flag multiple times, then your workspace is the sum of the files and folders.
 
-This command uses the type of file in the workspace, such as JavaScript or Typescript, to determine the rules to include in the configuration state. For example, if your workspace contains only JavaScript files, the command doesn't include TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+This command uses the types of files in the workspace, such as JavaScript or Typescript, to determine the applicable configuration state. For example, if your workspace contains only JavaScript files, then the command doesn't display configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
 
-Some engines may be configured to add additional rules based on what it finds in your workspace.  For example, if you set the "engines.eslint.auto_discover_eslint_config" value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
+Some engines can be configured to add additional rules based on what it finds in your workspace. For example, if you set the engines.eslint.auto_discover_eslint_config value of your `code-analyzer.yml` file to true, then supplying your workspace allows the "eslint" engine to examine your files in order to find ESLint configuration files that could potentially add in additional rules.
+
+If you specify `--target` but not `--workspace`, then the current folder '.' is used as your workspace.
+
+# flags.target.summary
+
+Subset of files within your workspace that you want to target for analysis.
+
+# flags.target.description
+
+Use the `--target` flag to display the configuration state associated with the rules that apply to only a subset of targeted files within your workspace. You can specify a target as a file, a folder, or a glob pattern. If you specify this flag multiple times, then the full list of targeted files is the sum of the files and folders.
+
+The command uses the type of the targeted files, such as JavaScript or Typescript, to determine which configuration state is applicable. For example, if you target only JavaScript files, then the command doesn't display the configuration state associated with TypeScript rules. The command uses a file's extension to determine what kind of file it is, such as ".ts" for TypeScript.
+
+Each targeted file must live within the workspace specified by the `–-workspace` flag.
+
+If you specify `--workspace` but not `--target`, then all the files within your workspace are targeted.
 
 # flags.rule-selector.summary
 
@@ -58,13 +74,13 @@ Selection of rules, based on engine name, severity level, rule name, tag, or a c
 
 # flags.rule-selector.description
 
-Use the --rule-selector flag to display only the configuration associated with the rules based on specific criteria. You can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names.
+Use the `--rule-selector` flag to display only the configuration associated with the rules based on specific criteria. You can select by engine, such as the rules associated with the "retire-js" or "eslint" engine. Or select by the severity of the rules, such as high or moderate. You can also select rules using tag values or rule names.
 
-You can combine different criteria using colons to further filter the list; the colon works as an intersection.  For example, "--rule-selector eslint:Security" reduces the output to only contain the configuration state associated with the rules from the "eslint" engine that have the "Security" tag. To add multiple rule selectors together (a union), specify the --rule-selector flag multiple times, such as "--rule-selector eslint:Recommended --rule-selector retire-js:3".
+You can combine different criteria using colons to further filter the list; the colon works as an intersection. For example, `--rule-selector eslint:Security` reduces the output to only contain the configuration state associated with the rules from the "eslint" engine that have the "Security" tag. To add multiple rule selectors together (a union), specify the `--rule-selector` flag multiple times, such as `--rule-selector eslint:Recommended --rule-selector retire-js:3`.
 
 If you don't specify this flag, then the command uses the "all" rule selector.
 
-Run `<%= config.bin %> <%= command.id %>  --rule-selector Recommended` to display the configuration state associated with just the 'Recommended' rules, instead of all the rules.
+Run `<%= config.bin %> <%= command.id %> --rule-selector Recommended` to display the configuration state associated with just the 'Recommended' rules, instead of all the rules.
 
 # flags.config-file.summary
 
@@ -82,4 +98,6 @@ Output file to write the configuration state to. The file is written in YAML for
 
 # flags.output-file.description
 
-Use this flag to write the final config to a file, in addition to the terminal.
+If you specify a file within folder, such as `--output-file ./config/code-analyzer.yml`, the folder must already exist, or you get an error. If the file already exists, a prompt asks if you want to overwrite it.
+
+If you don't specify this flag, the command outputs the configuration state to the terminal.

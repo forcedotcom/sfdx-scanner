@@ -82,7 +82,7 @@ describe('WorkspaceUtil', () => {
 				const workspace: Workspace = await WorkspaceUtil.createWorkspace(core, input);
 
 				// ==== ASSERTIONS ====
-				const workspaceItems: string[] = workspace.getFilesAndFolders();
+				const workspaceItems: string[] = workspace.getRawFilesAndFolders();
 				const expectedWorkspaceSet = new Set(input.map(i => path.resolve('.', i)));
 				expect(workspaceItems).toHaveLength(expectedWorkspaceSet.size);
 				for (const expectedWorkspaceItem of expectedWorkspaceSet.keys()) {
@@ -135,7 +135,7 @@ describe('WorkspaceUtil', () => {
 				const workspace: Workspace = await WorkspaceUtil.createWorkspace(core, [input]);
 
 				// ==== ASSERTIONS ====
-				const actualWorkspacePaths: string[] = workspace.getFilesAndFolders();
+				const actualWorkspacePaths: string[] = workspace.getRawFilesAndFolders();
 				expect(actualWorkspacePaths).toHaveLength(output.size);
 				for (const expectedWorkspacePath of output.keys()) {
 					expect(actualWorkspacePaths).toContain(expectedWorkspacePath);
@@ -180,7 +180,7 @@ describe('WorkspaceUtil', () => {
 					const workspace: Workspace = await WorkspaceUtil.createWorkspace(core, [glob]);
 
 					// ==== ASSERTIONS ====
-					const workspaceFiles: string[] = workspace.getFilesAndFolders();
+					const workspaceFiles: string[] = workspace.getRawFilesAndFolders();
 					expect(workspaceFiles).toHaveLength(expectation.size);
 					for (const expectedWorkspacePath of expectation.keys()) {
 						expect(workspaceFiles).toContain(expectedWorkspacePath);
@@ -224,7 +224,7 @@ describe('WorkspaceUtil', () => {
 					const workspace: Workspace = await WorkspaceUtil.createWorkspace(core, [glob]);
 
 					// ==== ASSERTIONS ====
-					const workspaceFiles: string[] = workspace.getFilesAndFolders();
+					const workspaceFiles: string[] = workspace.getRawFilesAndFolders();
 					expect(workspaceFiles).toHaveLength(expectation.size);
 					for (const expectedWorkspacePath of expectation.keys()) {
 						expect(workspaceFiles).toContain(expectedWorkspacePath);

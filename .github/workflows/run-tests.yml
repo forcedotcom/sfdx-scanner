@@ -33,11 +33,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node.version }}
-      - run: yarn
-      - run: yarn build
-      - run: yarn test
+      - run: npm install
+      - run: npm run build
+      - run: npm run test
         id: jest-tests
-      - run: yarn lint
+      - run: npm run lint
       - name: Upload full artifact
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -61,8 +61,8 @@ jobs:
         with:
           node-version: 'lts/*' # Always use Node LTS for building the tarball
       # Install/build dependencies
-      - run: yarn
-      - run: yarn build
+      - run: npm install
+      - run: npm run build
       # Create the tarball
       - run: npm pack
       # Upload the tarball as an artifact
@@ -115,7 +115,7 @@ jobs:
         shell: bash
         run: |
           # We need to determine the Tarball's name first.
-          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-plugin-code-analyzer-5\\.0\\.0-beta\\.[0-9]*\\.tgz)
+          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-plugin-code-analyzer-.*\\.tgz)
           # We need to determine the Tarball's location in an installable way.
           # Get the path to the download folder. Swap out backslashes for forward slashes to ensure Windows compatibility.
           RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
@@ -130,4 +130,3 @@ jobs:
         with:
           name: smoke-test-results-${{ runner.os }}-node-${{ matrix.node.artifact }}
           path: smoke-test-results
-

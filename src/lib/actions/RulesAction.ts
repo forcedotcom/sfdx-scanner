@@ -24,6 +24,7 @@ export type RulesInput = {
 	'rule-selector': string[];
 	'output-file'?: string[];
 	workspace?: string[];
+	target?: string[];
 	view?: string;
 }
 
@@ -51,8 +52,9 @@ export class RulesAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
-		const selectOptions = input.workspace
-			? {workspace: await createWorkspace(core, input.workspace)}
+		const workspace: string[]|undefined = input.workspace || (input.target ? ['.'] : undefined);
+		const selectOptions = workspace
+			? {workspace: await createWorkspace(core, workspace, input.target)}
 			: undefined;
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.
@@ -66,7 +68,7 @@ export class RulesAction {
 
 		this.dependencies.writer.write(ruleSelection)
 		this.dependencies.viewer.view(rules);
-		
+
 		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(
 			ruleSelection,
 			logWriter.getLogDestination(),

@@ -80,6 +80,9 @@ export class StubEngine1 extends EngineApi.Engine {
 			type: EngineApi.EventType.DescribeRulesProgressEvent,
 			percentComplete: 0
 		});
+		this.emitTelemetryEvent('engine1DescribeTelemetry', {
+			someArg: true
+		});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
 			message: "someMiscFineMessageFromStubEngine1",
@@ -137,6 +140,9 @@ export class StubEngine1 extends EngineApi.Engine {
 		this.emitEvent<EngineApi.RunRulesProgressEvent>({
 			type: EngineApi.EventType.RunRulesProgressEvent,
 			percentComplete: 0
+		});
+		this.emitTelemetryEvent('engine1ExecuteTelemetry', {
+			someArg: true
 		});
 		this.emitEvent<EngineApi.LogEvent>({
 			type: EngineApi.EventType.LogEvent,
@@ -456,12 +462,12 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 		return Promise.resolve("1.3.0");
 	}
 
-	describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
+	async describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
 		if (!describeOptions.workspace) {
 			return Promise.resolve([]);
 		}
-		// Derive a rule for each of the targeted files/folders in the workspace.
-		return Promise.resolve(describeOptions.workspace.getFilesAndFolders().map(fileOrFolder => {
+		// Derive a rule for each of the targeted files.
+		return (await describeOptions.workspace.getTargetedFiles()).map(fileOrFolder => {
 			return {
 				name: `ruleFor${fileOrFolder}`,
 				severityLevel: EngineApi.SeverityLevel.Low,
@@ -469,7 +475,7 @@ export class TargetDependentEngine1 extends EngineApi.Engine {
 				description: `Rule synthesized for target "${fileOrFolder}`,
 				resourceUrls: [`https://example.com/${fileOrFolder}`]
 			}
-		}));
+		});
 	}
 
 	runRules(ruleNames: string[], runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {

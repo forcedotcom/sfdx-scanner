@@ -13,7 +13,8 @@ import {ConfigActionSummaryViewer} from '../../../src/lib/viewers/ActionSummaryV
 
 import {SpyConfigWriter} from '../../stubs/SpyConfigWriter';
 import {SpyConfigViewer} from '../../stubs/SpyConfigViewer';
-import {DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
+import {DisplayEvent, DisplayEventType, SpyDisplay} from '../../stubs/SpyDisplay';
+import { LogEventDisplayer } from '../../../src/lib/listeners/LogEventListener';
 
 const PATH_TO_FIXTURES = path.join(__dirname, '..', '..', 'fixtures');
 
@@ -32,7 +33,7 @@ describe('ConfigAction tests', () => {
 			beforeEach(() => {
 				spyDisplay = new SpyDisplay();
 				dependencies = {
-					logEventListeners: [],
+					logEventListeners: [new LogEventDisplayer(spyDisplay)],
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: new StubCodeAnalyzerConfigFactory(),
@@ -57,6 +58,7 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{section: 'config_root'},
 				{section: 'log_folder'},
+				{section: 'log_level'},
 				{section: 'rules'},
 				{section: 'engines'}
 			])('`$section` section header-comment is correct', async ({section}) => {
@@ -158,7 +160,7 @@ describe('ConfigAction tests', () => {
 				stubConfigFactory = new AlternativeStubCodeAnalyzerConfigFactory();
 				spyDisplay = new SpyDisplay();
 				dependencies = {
-					logEventListeners: [],
+					logEventListeners: [new LogEventDisplayer(spyDisplay)],
 					progressEventListeners: [],
 					viewer: new ConfigStyledYamlViewer(spyDisplay),
 					configFactory: stubConfigFactory,
@@ -184,6 +186,7 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{section: 'config_root'},
 				{section: 'log_folder'},
+				{section: 'log_level'},
 				{section: 'rules'},
 				{section: 'engines'}
 			])('`$section` section header-comment is correct', async ({section}) => {
@@ -253,6 +256,17 @@ describe('ConfigAction tests', () => {
 					.replace('__DUMMY_DEFAULT_CONFIG_ROOT__', 'null')
 					.replace('__DUMMY_DEFAULT_LOG_FOLDER__', 'null')
 				expect(output).toContain(goldFileContents);
+			});
+
+			it('When using non-default logLevel, it shows the change', async () => {
+				// ==== SETUP ====
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
+					log_level: "warn"
+				}));
+				
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
+				
+				expect(output).toContain('log_level: 2 # Modified from: 4');
 			});
 
 			it.each([
@@ -332,25 +346,44 @@ describe('ConfigAction tests', () => {
 				expect(output).toContain('disable_engine: true # Modified from: false');
 			});
 
-			it('Edge Case: When plugin throws error when attempting to create engine config and engine is enabled, then error', async () => {
-				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
-				dependencies.configFactory = new StubCodeAnalyzerConfigFactory();
-
-				await expect(runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag'])).rejects.toThrowError();
-			});
-
-			it('Edge Case: When plugin thrown error when attempting to create engine config but engine is disabled, then do not error', async () => {
+			it('Edge Case: When plugin throws error when attempting to create engine config but engine is disabled, then do not error', async () => {
 				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
 				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
 					engines: {
 						uncreatableEngine: {
-							disable_engine: true
+							disable_engine: true,
+							someField: 'some non default value'
 						}
 					}
 				}));
 
 				const output: string = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
+
+				expect(spyDisplay.getDisplayEvents().filter(e => e.type == DisplayEventType.ERROR)).toHaveLength(0);
+
 				expect(output).toContain('disable_engine: true # Modified from: false');
+				expect(output).toContain('someField: some non default value # Modified from: "someDefault"');
+			});
+
+			it('Edge Case: When plugin throws error when attempting to create engine config, but engine is enabled, then issue error log but continue with whatever is in the users config for that engine', async () => {
+				dependencies.pluginsFactory = new FactoryForThrowingEnginePlugin();
+				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
+					engines: {
+						uncreatableEngine: {
+							disable_engine: false,
+							someField: 'some non default value'
+						}
+					}
+				}));
+
+				const output: string = await runActionAndGetDisplayedConfig(dependencies, ['uncreatableEngine']);
+
+				const errorEvents: DisplayEvent[] = spyDisplay.getDisplayEvents().filter(e => e.type == DisplayEventType.ERROR);
+				expect(errorEvents).toHaveLength(1);
+				expect(errorEvents[0].data).toContain('Error thrown by createEngineConfig');
+
+				expect(output).toContain('disable_engine: false');
+				expect(output).toContain('someField: some non default value # Modified from: "someDefault"');
 			});
 
 			it.each([
@@ -375,6 +408,55 @@ describe('ConfigAction tests', () => {
 				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `StubEngine2_forConfigWithRelativePathScenario.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
+		});
+	});
+
+	describe('Target/Workspace resolution', () => {
+		const originalCwd: string = process.cwd();
+		const baseDir: string = path.resolve(__dirname, '..', '..', '..');
+
+		beforeEach(() => {
+			process.chdir(baseDir);
+		});
+
+		afterEach(() => {
+			process.chdir(originalCwd);
+		});
+
+		it.each([
+			{
+				case: 'a workspace is applied to the config',
+				workspace: [path.join(baseDir, 'package.json'), path.join(baseDir, 'README.md')],
+				target: undefined
+			},
+			{
+				case: 'a target further narrows the explicitly defined workspace',
+				workspace: ['.'],
+				target: ['package.json', 'README.md']
+			},
+			{
+				case: 'a target further narrows an implicitly defined workspace',
+				workspace: undefined,
+				target: ['package.json', 'README.md']
+			}
+		])('When $case, only the relevant rules are returned', async ({workspace, target}) => {
+			// ==== SETUP ====
+			spyDisplay = new SpyDisplay();
+			dependencies = {
+				logEventListeners: [new LogEventDisplayer(spyDisplay)],
+				progressEventListeners: [],
+				viewer: new ConfigStyledYamlViewer(spyDisplay),
+				configFactory: new StubCodeAnalyzerConfigFactory(),
+				actionSummaryViewer: new ConfigActionSummaryViewer(spyDisplay),
+				pluginsFactory: new WorkspaceAwareEnginePluginFactory()
+			};
+
+			// ==== TESTED BEHAVIOR ====
+			const output: string = await runActionAndGetDisplayedConfig(dependencies, ['all'], undefined, workspace, target);
+
+			// ==== ASSERTIONS ====
+			const goldFileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'workspace-resolution', 'workspaceAwareRules.yml.goldfile'));
+			expect(output).toContain(goldFileContents);
 		});
 	});
 
@@ -502,12 +584,14 @@ describe('ConfigAction tests', () => {
 		return fsp.readFile(goldFilePath, {encoding: 'utf-8'});
 	}
 
-	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string): Promise<string> {
+	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string, workspace?: string[], target?: string[]): Promise<string> {
 		// ==== SETUP ====
 		const action = ConfigAction.createAction(dependencies);
 		const input: ConfigInput = {
 			'rule-selector': ruleSelectors,
-			'config-file': configFile
+			'config-file': configFile,
+			workspace,
+			target
 		};
 
 		// ==== TESTED BEHAVIOR ====
@@ -515,8 +599,13 @@ describe('ConfigAction tests', () => {
 
 		// ==== OUTPUT PROCESSING ====
 		const displayEvents = spyDisplay.getDisplayEvents();
-		expect(displayEvents[4].type).toEqual(DisplayEventType.LOG);
-		return ansis.strip(displayEvents[4].data);
+		if (displayEvents[4].type === DisplayEventType.LOG) {
+			return ansis.strip(displayEvents[4].data);
+		} else if (displayEvents[5].type === DisplayEventType.LOG) {
+			return ansis.strip(displayEvents[5].data);
+		} else {
+			return 'Could Not Get Specific Output';
+		}
 	}
 });
 
@@ -794,6 +883,71 @@ class StubEngine3 extends EngineApi.Engine {
 	}
 }
 
+class WorkspaceAwareEnginePluginFactory implements EnginePluginsFactory {
+	public create(): EngineApi.EnginePlugin[] {
+		return [new WorkspaceAwareEnginePlugin()];
+	}
+}
+
+class WorkspaceAwareEnginePlugin extends EngineApi.EnginePluginV1 {
+	private readonly createdEngines: Map<string, EngineApi.Engine> = new Map();
+
+	getAvailableEngineNames(): string[] {
+		return ['workspaceAwareEngine'];
+	}
+
+	createEngine(engineName: string, config: EngineApi.ConfigObject): Promise<EngineApi.Engine> {
+		if (engineName === 'workspaceAwareEngine') {
+			this.createdEngines.set(engineName, new WorkspaceAwareEngine(config));
+		} else {
+			throw new Error(`no engine named ${engineName}`);
+		}
+		return Promise.resolve(this.getCreatedEngine(engineName));
+	}
+
+	public getCreatedEngine(engineName: string): EngineApi.Engine {
+		if (this.createdEngines.has(engineName)) {
+			return this.createdEngines.get(engineName)!;
+		}
+		throw new Error(`Engine named ${engineName} not yet instantiated`);
+	}
+}
+
+class WorkspaceAwareEngine extends EngineApi.Engine {
+	public constructor(_config: EngineApi.ConfigObject) {
+		super();
+	}
+
+	public getName(): string {
+		return 'workspaceAwareEngine';
+	}
+
+	public getEngineVersion(): Promise<string> {
+		return Promise.resolve('1.0.0');
+	}
+
+	public async describeRules(describeOptions: EngineApi.DescribeOptions): Promise<EngineApi.RuleDescription[]> {
+		if (!describeOptions.workspace) {
+			return Promise.resolve([]);
+		}
+
+		// Derive a rule for each of the targeted files.
+		return (await describeOptions.workspace.getTargetedFiles()).map(fileOrFolder => {
+			return {
+				name: `ruleFor${path.basename(fileOrFolder)}`,
+				severityLevel: EngineApi.SeverityLevel.Low,
+				tags: ['Recommended'],
+				description: `Rule synthesized for target "${fileOrFolder}`,
+				resourceUrls: [`https://example.com/${fileOrFolder}`]
+			};
+		});
+	}
+
+	public runRules(_ruleNames: string[], _runOptions: EngineApi.RunOptions): Promise<EngineApi.EngineRunResults> {
+		// Don't need to actually run any rules, since we're just testing configuration.
+		return Promise.resolve({violations: []});
+	}
+}
 
 class FactoryForThrowingEnginePlugin implements EnginePluginsFactory {
     create(): EngineApi.EnginePlugin[] {
@@ -805,6 +959,19 @@ class ThrowingEnginePlugin extends EngineApi.EnginePluginV1 {
     getAvailableEngineNames(): string[] {
         return ['uncreatableEngine'];
     }
+
+	describeEngineConfig(): EngineApi.ConfigDescription {
+		return {
+			overview: 'Some Overview',
+			fieldDescriptions: {
+				someField: {
+					descriptionText: 'some description',
+					valueType: 'string',
+					defaultValue: 'someDefault'
+				}
+			}
+		}
+	}
 
 	createEngineConfig(_engineName: string, _configValueExtractor: EngineApi.ConfigValueExtractor): Promise<EngineApi.ConfigObject> {
 		throw new Error('Error thrown by createEngineConfig');

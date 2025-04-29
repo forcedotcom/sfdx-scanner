@@ -10,7 +10,6 @@ import {
 } from '@salesforce/code-analyzer-core';
 import {CodeAnalyzerConfigFactory} from '../factories/CodeAnalyzerConfigFactory';
 import {EnginePluginsFactory} from '../factories/EnginePluginsFactory';
-import {createPathStarts} from '../utils/PathStartUtil';
 import {createWorkspace} from '../utils/WorkspaceUtil';
 import {ResultsViewer} from '../viewers/ResultsViewer';
 import {RunActionSummaryViewer} from '../viewers/ActionSummaryViewer';
@@ -19,12 +18,16 @@ import {LogFileWriter} from '../writers/LogWriter';
 import {LogEventListener, LogEventLogger} from '../listeners/LogEventListener';
 import {ProgressEventListener} from '../listeners/ProgressEventListener';
 import {BundleName, getMessage} from '../messages';
+import {TelemetryEmitter} from "../Telemetry";
+import {TelemetryEventListener} from "../listeners/TelemetryEventListener";
+import * as Constants from '../../Constants';
 
 export type RunDependencies = {
 	configFactory: CodeAnalyzerConfigFactory;
 	pluginsFactory: EnginePluginsFactory;
 	logEventListeners: LogEventListener[];
 	progressListeners: ProgressEventListener[];
+	telemetryEmitter: TelemetryEmitter;
 	writer: ResultsWriter;
 	resultsViewer: ResultsViewer;
 	actionSummaryViewer: RunActionSummaryViewer;
@@ -33,9 +36,9 @@ export type RunDependencies = {
 export type RunInput = {
 	'config-file'?: string;
 	'output-file': string[];
-	'path-start'?: string[];
 	'rule-selector': string[];
 	'severity-threshold'?: SeverityLevel;
+	target?: string[];
 	workspace: string[];
 
 }
@@ -57,6 +60,8 @@ export class RunAction {
 		// LogEventListeners should start listening as soon as the Core is instantiated, since Core can start emitting
 		// events they listen for basically immediately.
 		this.dependencies.logEventListeners.forEach(listener => listener.listen(core));
+		const telemetryListener: TelemetryEventListener = new TelemetryEventListener(this.dependencies.telemetryEmitter);
+		telemetryListener.listen(core);
 		const enginePlugins = this.dependencies.pluginsFactory.create();
 		const enginePluginModules = config.getCustomEnginePluginModules();
 		const addEnginePromises: Promise<void>[] = [
@@ -64,21 +69,20 @@ export class RunAction {
 			...enginePluginModules.map(pluginModule => core.dynamicallyAddEnginePlugin(pluginModule))
 		];
 		await Promise.all(addEnginePromises);
-		const workspace: Workspace = await createWorkspace(core, input.workspace);
+		const workspace: Workspace = await createWorkspace(core, input.workspace, input.target);
 
 		// EngineProgressListeners should start listening right before we call Core's `.selectRules()` method, since
 		// that's when progress events can start being emitted.
 		this.dependencies.progressListeners.forEach(listener => listener.listen(core));
 		const ruleSelection: RuleSelection = await core.selectRules(input['rule-selector'], {workspace});
-		const runOptions: RunOptions = {
-			workspace,
-			pathStartPoints: await createPathStarts(input['path-start'])
-		};
+		const runOptions: RunOptions = {workspace};
 		const results: RunResults = await core.run(ruleSelection, runOptions);
+		this.emitEngineTelemetry(ruleSelection, results, enginePlugins.flatMap(p => p.getAvailableEngineNames()));
 		// After Core is done running, the listeners need to be told to stop, since some of them have persistent UI elements
 		// or file handlers that must be gracefully ended.
 		this.dependencies.progressListeners.forEach(listener => listener.stopListening());
 		this.dependencies.logEventListeners.forEach(listener => listener.stopListening());
+		telemetryListener.stopListening();
 		this.dependencies.writer.write(results);
 		this.dependencies.resultsViewer.view(results);
 		this.dependencies.actionSummaryViewer.viewPostExecutionSummary(results, logWriter.getLogDestination(), input['output-file']);
@@ -91,6 +95,26 @@ export class RunAction {
 
 	public static createAction(dependencies: RunDependencies): RunAction {
 		return new RunAction(dependencies);
+	}
+
+	private emitEngineTelemetry(ruleSelection: RuleSelection, results: RunResults, coreEngineNames: string[]): void {
+		const selectedEngineNames: Set<string> = new Set(ruleSelection.getEngineNames());
+		for (const coreEngineName of coreEngineNames) {
+			if (!selectedEngineNames.has(coreEngineName)) {
+				continue;
+			}
+			this.dependencies.telemetryEmitter.emitTelemetry(Constants.TelemetrySource, Constants.TelemetryEventName, {
+				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_SELECTION,
+				engine: coreEngineName,
+				ruleCount: ruleSelection.getRulesFor(coreEngineName).length
+			});
+
+			this.dependencies.telemetryEmitter.emitTelemetry(Constants.TelemetrySource, Constants.TelemetryEventName, {
+				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_EXECUTION,
+				engine: coreEngineName,
+				violationCount: results.getEngineRunResults(coreEngineName).getViolationCount()
+			});
+		}
 	}
 }
 
