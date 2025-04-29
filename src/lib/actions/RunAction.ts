@@ -103,13 +103,13 @@ export class RunAction {
 			if (!selectedEngineNames.has(coreEngineName)) {
 				continue;
 			}
-			this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, {
+			this.dependencies.telemetryEmitter.emitTelemetry(Constants.TelemetrySource, Constants.TelemetryEventName, {
 				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_SELECTION,
 				engine: coreEngineName,
 				ruleCount: ruleSelection.getRulesFor(coreEngineName).length
 			});
 
-			this.dependencies.telemetryEmitter.emitTelemetry('RunAction', Constants.TelemetryEventName, {
+			this.dependencies.telemetryEmitter.emitTelemetry(Constants.TelemetrySource, Constants.TelemetryEventName, {
 				sfcaEvent: Constants.CliTelemetryEvents.ENGINE_EXECUTION,
 				engine: coreEngineName,
 				violationCount: results.getEngineRunResults(coreEngineName).getViolationCount()

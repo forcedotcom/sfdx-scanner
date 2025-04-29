@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/plugin-code-analyzer",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "5.0.0-beta.3",
+	"version": "5.0.0",
 	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -13,7 +13,7 @@
 		"@salesforce/code-analyzer-pmd-engine": "0.24.0",
 		"@salesforce/code-analyzer-regex-engine": "0.21.0",
 		"@salesforce/code-analyzer-retirejs-engine": "0.21.0",
-		"@salesforce/code-analyzer-sfge-engine": "0.4.0",
+		"@salesforce/code-analyzer-sfge-engine": "0.6.0",
 		"@salesforce/core": "6.7.6",
 		"@salesforce/sf-plugins-core": "5.0.13",
 		"@salesforce/ts-types": "^2.0.12",
