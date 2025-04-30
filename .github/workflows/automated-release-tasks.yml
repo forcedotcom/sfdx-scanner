@@ -31,38 +31,8 @@ jobs:
     needs: verify-should-run
     if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
     steps:
-      - name: Invoke v5 workflow
-        uses: actions/github-script@v6
+      - name: Create release branch
+        uses: ./.github/workflows/create-release-branch.yml
+        secrets: inherit
         with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          # TODO: remove inputs after April Release; will default to minor
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-release-branch.yml',
-              ref: 'dev',
-              inputs: {
-                "release-type": "patch"
-              }
-            });
-# TODO: Remove this after last v4.x release in April
-  create-v4-release-branch:
-    runs-on: macos-latest
-    needs: verify-should-run
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
-    steps:
-      - name: Invoke v4 GA workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-release-branch.yml',
-              ref: 'dev-4',
-              inputs: {
-                "release-type": "minor"
-              }
-            });
+          release-type: minor
