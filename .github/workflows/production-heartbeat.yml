@@ -7,11 +7,8 @@ on:
     # So this expression means "run at 45 minutes past 1, 5, and 9 AM/PM UTC". The hours were chosen so that
     # the jobs run only close to business hours of Central Time.
     # Days were chosen to run only from Monday through Friday.
-    - cron: '45 13,17,21 * * 1,2,3,4,5'
+    - cron: "45 13,17,21 * * 1,2,3,4,5"
 jobs:
-  smoke-test:
-  # We run the daily smoke tests against 'main' to validate that the code currently in production is valid
-    uses: ./.github/workflows/run-tests.yml
-    with:
-      node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
-      target-branch: main
+  invoke-heartbeat:
+    secrets: inherit
+    uses: ./.github/workflows/heartbeat-tests.yml
