@@ -58,7 +58,7 @@ jobs:
           INPUTS_GITHUB_TAG: ${{ github.event.release.tag_name || inputs.tag }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   # Step 2: Publish the tag as a release candidate.
-  publish-rc-new:
+  publish-rc:
     needs: verify-candidate-tag
     runs-on: ubuntu-latest
     steps:
