@@ -12,6 +12,11 @@ on:
           - minor
           - patch
         required: true
+  workflow_call:
+    inputs:
+      release-type:
+        type: string
+        required: true
 
 jobs:
   create-release-branch:

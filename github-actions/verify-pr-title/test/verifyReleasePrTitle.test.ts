@@ -3,7 +3,7 @@ import {verifyReleasePrTitle} from "../src/verifyReleasePrTitle";
 describe('#verifyReleasePrTitle', () => {
 	/**
 	 * The Type portion is the first part of the title.
-	 * E.g., in "RELEASE @W-1234@ - v4.2.0", the Type portion is "RELEASE".
+	 * E.g., in "RELEASE @W-1234@ - v5.2.0", the Type portion is "RELEASE".
 	 * Only acceptable value is RELEASE, with flexible casing.
 	 */
 	describe('Type portion', () => {
@@ -100,13 +100,13 @@ describe('#verifyReleasePrTitle', () => {
 	 * The Scope portion is not used for Release pull requests.
 	 */
 	it('Scope portion is rejected', () => {
-		const title = "RELEASE (PMD) @W-1234@ v4.2.0";
+		const title = "RELEASE (PMD) @W-1234@ v5.2.0";
 		expect(verifyReleasePrTitle(title)).toEqual(false);
 	});
 
 	/**
 	 * The Work Item portion is the third part of the title.
-	 * E.g., in "RELEASE @W-1234@ - v4.2.0", the Work Item portion is "@W-1234@".
+	 * E.g., in "RELEASE @W-1234@ - v5.2.0", the Work Item portion is "@W-1234@".
 	 */
 	describe('Work Item portion', () => {
 		function createTitle(workItem: string): string {
@@ -156,7 +156,7 @@ describe('#verifyReleasePrTitle', () => {
 
 	/**
 	 * The Description portion is the fourth (and last) part of the title.
-	 * E.g., in "RELEASE @W-1234@ - v4.2.0", the Description portion is "v4.2.0"
+	 * E.g., in "RELEASE @W-1234@ - v5.2.0", the Description portion is "v5.2.0"
 	 */
 	describe('Description portion', () => {
 		const restOfTitle = "RELEASE @W-123456@";
@@ -184,33 +184,33 @@ describe('#verifyReleasePrTitle', () => {
 	 */
 	describe('Portion separation', () => {
 		it('Space (" ") separation is allowed', () => {
-			const title = "RELEASE  @W-1234@        v4.2.0";
+			const title = "RELEASE  @W-1234@        v5.2.0";
 			expect(verifyReleasePrTitle(title)).toEqual(true);
 		});
 
 		describe('Separator characters are allowed', () => {
 			it('n-dash (-)', () => {
-				const title = "RELEASE - @W-1234@ - v4.2.0";
+				const title = "RELEASE - @W-1234@ - v5.2.0";
 				expect(verifyReleasePrTitle(title)).toEqual(true);
 			});
 
 			it('period (.)', () => {
-				const title = "RELEASE.@W-1234@.v4.2.0";
+				const title = "RELEASE.@W-1234@.v5.2.0";
 				expect(verifyReleasePrTitle(title)).toEqual(true);
 			});
 
 			it('comma (,)', () => {
-				const title = "RELEASE,@W-1234@,v4.2.0";
+				const title = "RELEASE,@W-1234@,v5.2.0";
 				expect(verifyReleasePrTitle(title)).toEqual(true);
 			});
 
 			it('colon (:)', () => {
-				const title = "RELEASE:@W-1234@:v4.2.0";
+				const title = "RELEASE:@W-1234@:v5.2.0";
 				expect(verifyReleasePrTitle(title)).toEqual(true);
 			});
 
 			it('semi colon (;)', () => {
-				const title = "RELEASE;@W-1234@;v4.2.0";
+				const title = "RELEASE;@W-1234@;v5.2.0";
 				expect(verifyReleasePrTitle(title)).toEqual(true);
 			});
 		});
