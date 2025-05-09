@@ -57,7 +57,7 @@ jobs:
         id: run-code-analyzer
         uses: forcedotcom/run-code-analyzer@d/W-18394864
         with:
-          run-arguments: --workspace . --view detail --output-file sfca_results.html --output-file sfca_results.json
+          run-arguments: --workspace . --view detail --output-file sfca_results.html --output-file sfca_results.json -c alt-config.yml
           results-artifact-name: salesforce-code-analyzer-results
 
       - name: Check the outputs to determine whether to fail
