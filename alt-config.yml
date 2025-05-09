@@ -1,0 +1,30 @@
+engines:
+  eslint:
+    disable_engine: true
+    disable_javascript_base_config: true
+    disable_lwc_base_config: true
+    disable_typescript_base_config: true
+    file_extensions:
+      typescript: ['.txt', '.ts']
+      other: ['.html']
+  regex:
+    disable_engine: true
+    custom_rules:
+      NoTodos:
+        regex: "/todo/gi"
+        file_extensions: [".txt", ".asdf"]
+        description: "detects todos # asdfasdfasdf"
+        tags: ['Recommended', 'beep']
+      NoConsoleLog:
+        regex: "/console/gi"
+        file_extensions: []
+        description: "detects console"
+rules:
+  cPd:
+    dETECtCOpyPASTeForApex:
+      severity: LOw
+  regex:
+    aVoIdTERMsWithIMPLICItBIAs:
+      severity: LoW
+    NoToDos:
+      seVerity: HIGH
