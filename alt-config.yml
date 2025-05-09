@@ -19,6 +19,8 @@ engines:
         regex: "/console/gi"
         file_extensions: []
         description: "detects console"
+
+        
 rules:
   cPd:
     dETECtCOpyPASTeForApex:
