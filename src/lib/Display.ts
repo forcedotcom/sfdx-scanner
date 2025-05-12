@@ -10,7 +10,7 @@ export interface Display {
 
 
 
-	
+
 	/**
 	 * Outputs message to stdout at error-level (non-blocking) only if the "--json" flag is not present.
 	 */
@@ -58,7 +58,12 @@ export class UxDisplay implements Display {
 		this.spinner = spinner;
 	}
 
+	public someMethod(someArg: string): void {
+		console.log('this method does not use its arg')
+	}
+
 	public displayError(msg: string): void {
+		this.someMethod('asdfasdf');
 		// Setting "exit" to false means that the error will be displayed in a non-halting fashion instead of killing
 		// the transaction entirely.
 		this.displayable.error(msg, {exit: false});
