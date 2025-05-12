@@ -22,6 +22,9 @@ engines:
 
 
 rules:
+  pmd:
+    WhileLoopsMustUseBraces:
+      tags: []
   cPd:
     dETECtCOpyPASTeForApex:
       severity: LOw
