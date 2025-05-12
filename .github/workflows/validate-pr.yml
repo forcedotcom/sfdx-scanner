@@ -61,6 +61,7 @@ jobs:
         uses: jfeingold35/sfdx-code-review-action@main
         with:
           github_token: ${{ github.token }}
+          engine: "pmd"
   test_action:
     runs-on: ubuntu-latest
     permissions:
