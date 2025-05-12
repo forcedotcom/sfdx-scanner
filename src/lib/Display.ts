@@ -37,7 +37,7 @@ export interface Display {
 
 
 
-	
+
 	/**
 	 * Output message to stdout at log-level (non-blocking) only if the "--json" flag is not present.
 	 */
