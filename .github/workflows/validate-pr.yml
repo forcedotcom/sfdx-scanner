@@ -58,7 +58,7 @@ jobs:
         run: sf plugins install code-analyzer@latest
 
       - name: call other action
-        uses: jfeingold35/sfdx-code-review-action@main
+        uses: jfeingold35/sfdx-code-review-action@jf/exp
         with:
           github_token: ${{ github.token }}
           engine: "pmd"
