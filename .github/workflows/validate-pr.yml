@@ -62,6 +62,8 @@ jobs:
         with:
           github_token: ${{ github.token }}
           engine: "pmd"
+          category: "Best Practices"
+
   test_action:
     runs-on: ubuntu-latest
     permissions:
