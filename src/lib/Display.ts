@@ -8,6 +8,9 @@ import {Ux, Spinner} from '@salesforce/sf-plugins-core';
  */
 export interface Display {
 
+
+
+
 	/**
 	 * Outputs message to stdout at error-level (non-blocking) only if the "--json" flag is not present.
 	 */
@@ -22,6 +25,39 @@ export interface Display {
 	 * Output message to stdout at info-level (non-blocking) only if the "--json" flag is not present.
 	 */
 	displayInfo(msg: string): void;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * Output message to stdout at log-level (non-blocking) only if the "--json" flag is not present.
@@ -55,7 +91,12 @@ export class UxDisplay implements Display {
 		this.spinner = spinner;
 	}
 
+	public someMethod(someArg: string): void {
+		console.log('this method does not use its arg')
+	}
+
 	public displayError(msg: string): void {
+		this.someMethod('asdfasdf');
 		// Setting "exit" to false means that the error will be displayed in a non-halting fashion instead of killing
 		// the transaction entirely.
 		this.displayable.error(msg, {exit: false});
