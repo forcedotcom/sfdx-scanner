@@ -3,7 +3,7 @@ description: Report an issue with a scanner command.
 title: "[BUG][scanner] <YOUR_TITLE_HERE>"
 labels: []
 body:
-  - type: dropdown
+  - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
@@ -14,11 +14,9 @@ body:
         4. Verify that your code is syntactically valid.
         5. Verify that the error is reproducible on another machine.
         6. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
-
-        **I confirm that I have gone through these steps and still have an issue to report.**
-        <sup>(You must select "Yes" to create an issue.)</sup>
       options:
-        - "Yes"
+        - label: I confirm I have gone through the above steps and still have an issue to report
+          required: true
     validations:
       required: true
   - type: textarea
