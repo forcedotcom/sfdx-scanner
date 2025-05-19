@@ -3,7 +3,7 @@
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
 	"version": "5.0.0",
 	"author": "Salesforce Code Analyzer Team",
-	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
+	"bugs": "https://github.com/forcedotcom/code-analyzer/issues",
 	"dependencies": {
 		"@oclif/core": "3.27.0",
 		"@salesforce/code-analyzer-core": "0.29.0",

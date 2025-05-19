@@ -2,14 +2,6 @@ name: apply-npm-tag-to-version
 on:
   workflow_dispatch:
     inputs:
-      package_name:
-        description: 'Select Package Name:'
-        required: true
-        type: choice
-        options:
-          - '@salesforce/plugin-code-analyzer'
-          # TODO: Remove after April Release
-          - '@salesforce/sfdx-scanner' 
       tag_name:
         description: 'Tag Name (ex: latest):'
         required: true
@@ -39,17 +31,11 @@ jobs:
           echo "::error::You did not confirm, so dist-tag not called."
           exit 1
 
-      - name: Validate package name (sanity check)
-        if: ${{ github.event.inputs.package_name != '@salesforce/plugin-code-analyzer' && github.event.inputs.package_name != '@salesforce/sfdx-scanner' }}
-        run: |
-          echo "Invalid package name. Please choose one of the allowed package names."
-          exit 1
-
       - name: Prepare NPM Credentials
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Apply tag
         run: |
-          echo "You have confirmed that using this action is only recommended for emergency rollback situations and that you are responsible for manually applying the ${{ github.event.inputs.tag_name }} tag to ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }}."
+          echo "You have confirmed that using this action is only recommended for emergency rollback situations and that you are responsible for manually applying the ${{ github.event.inputs.tag_name }} tag to @salesforce/plugin-code-analyzer@${{ github.event.inputs.version }}."
           echo "Applying tag..."
-          npm dist-tag add ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }} ${{ github.event.inputs.tag_name }}
+          npm dist-tag add @salesforce/plugin-code-analyzer@${{ github.event.inputs.version }} ${{ github.event.inputs.tag_name }}

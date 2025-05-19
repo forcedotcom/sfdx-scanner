@@ -1,15 +1,15 @@
-name: Report a Bug with a code-analyzer command
-description: Report an issue with a code-analyzer command.
-title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
+name: Report a Bug with a scanner command (v4)
+description: Report an issue with a scanner command.
+title: "[BUG][scanner] <YOUR_TITLE_HERE>"
 labels: []
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `code-analyzer` issues on your own. Follow these steps:
+        Oftentimes, you can resolve `scanner` issues on your own. Follow these steps:
         1. Read the error message.
-        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation.
+        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
         4. Verify that your code is syntactically valid.
         5. Verify that the error is reproducible on another machine.
@@ -65,11 +65,11 @@ body:
       required: true
   - type: input
     attributes:
-      label: Code Analyzer Plugin (code-analyzer) Version
+      label: Scanner Plugin Version
       description: |
         What do you get from the command "sf plugins"?
       placeholder: |
-        Example: code-analyzer 5.0.0
+        Example: @salesforce/sfdx-scanner/4.10.0
     validations:
       required: true
   - type: input
@@ -88,15 +88,6 @@ body:
         What do you get from the command "java -version"?
       placeholder: |
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
-    validations:
-      required: false
-  - type: input
-    attributes:
-      label: Python Version
-      description: |
-        What do you get from the command "python --version"?
-      placeholder: |
-        Example: Python 3.11.8
     validations:
       required: false
   - type: textarea
@@ -120,4 +111,4 @@ body:
         - Critical
       default: 0
     validations:
-      required: true
+      required: true 
