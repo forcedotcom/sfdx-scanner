@@ -90,15 +90,6 @@ body:
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
     validations:
       required: false
-  - type: input
-    attributes:
-      label: Python Version
-      description: |
-        What do you get from the command "python --version"?
-      placeholder: |
-        Example: Python 3.11.8
-    validations:
-      required: false
   - type: textarea
     attributes:
       label: Additional Context (Screenshots, Files, etc)
