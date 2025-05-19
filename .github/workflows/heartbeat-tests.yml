@@ -1,7 +1,13 @@
 name: heartbeat-tests
 on:
-  workflow_call: # As per documentation, the colon is necessary even though no config is required.
   workflow_dispatch: # As per documentation, the colon is necessary even though no config is required.
+  schedule:
+    # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple values
+    # can be specified with comma-separated lists. All times are UTC.
+    # So this expression means "run at 45 minutes past 1, 5, and 9 AM/PM UTC". The hours were chosen so that
+    # the jobs run only close to business hours of Central Time.
+    # Days were chosen to run only from Monday through Friday.
+    - cron: "45 13,17,21 * * 1,2,3,4,5"
 
 jobs:
   production-heartbeat:
@@ -14,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os.vm }}
     timeout-minutes: 60
     steps:
-      # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
+      # === Setup. We need to get the code, set up nodejs, java, and python, and create the results directory. ===
       - uses: actions/checkout@v4
         with:
           ref: 'dev'
@@ -25,6 +31,9 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - uses: actions/setup-python@v5
+        with:
+        python-version: '3.10'
       - run: mkdir smoke-test-results
 
       # === Set our environment variables, either using default values or the repo's secrets ===

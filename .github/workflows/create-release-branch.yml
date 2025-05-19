@@ -77,7 +77,7 @@ jobs:
             mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!) {
               createCommitOnBranch(input: {
                 branch: {
-                  repositoryNameWithOwner: "forcedotcom/sfdx-scanner",
+                  repositoryNameWithOwner: "forcedotcom/code-analyzer",
                   branchName: $branch
                 },
                 message: {
