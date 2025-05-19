@@ -111,7 +111,7 @@ jobs:
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           # GHA env-vars don't have robust conditional logic, so we'll use this if-else branch to define some bash env-vars.
-          ALERT_SEV="critical"
+          ALERT_SEV="info"
           ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
           # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
