@@ -33,19 +33,22 @@ export class AnnotatedConfigModel implements ConfigModel {
 	// configs not associated with the user's rule selection, thus we can't use the engines from allDefaultRules.
 	private readonly  relevantEngines: Set<string>;
 
-	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+	private readonly includeUnmodifiedRules: boolean;
+
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>, includeUnmodifiedRules: boolean) {
 		this.codeAnalyzer = codeAnalyzer;
 		this.userRules = userRules;
 		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
+		this.includeUnmodifiedRules = includeUnmodifiedRules;
 	}
 
 	toFormattedOutput(format: OutputFormat): string {
 		// istanbul ignore else: Should be impossible
 		if (format === OutputFormat.STYLED_YAML) {
-			return new StyledYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
+			return new StyledYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines, this.includeUnmodifiedRules).toYaml();
 		} else if (format === OutputFormat.RAW_YAML) {
-			return new PlainYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines).toYaml();
+			return new PlainYamlFormatter(this.codeAnalyzer, this.userRules, this.allDefaultRules, this.relevantEngines, this.includeUnmodifiedRules).toYaml();
 		} else {
 			throw new Error(`Unsupported`)
 		}
@@ -58,13 +61,15 @@ abstract class YamlFormatter {
 	private readonly userRules: RuleSelection;
 	private readonly allDefaultRules: RuleSelection;
 	private readonly relevantEngines: Set<string>;
+	private readonly includeUnmodifiedRules: boolean;
 
-	protected constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
+	protected constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>, includeUnmodifiedRules: boolean) {
 		this.config = codeAnalyzer.getConfig();
 		this.codeAnalyzer = codeAnalyzer;
 		this.userRules = userRules;
 		this.allDefaultRules = allDefaultRules;
 		this.relevantEngines = relevantEngines;
+		this.includeUnmodifiedRules = includeUnmodifiedRules;
 	}
 
 	protected abstract toYamlComment(commentText: string): string
@@ -85,16 +90,13 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlFieldWithFieldDescription(fieldName: string, resolvedValue: unknown, fieldDescription: ConfigFieldDescription): string {
-		const resolvedValueJson: string = JSON.stringify(resolvedValue);
-		const defaultValueJson: string = JSON.stringify(fieldDescription.defaultValue);
-
 		let yamlField: string;
-		if (!fieldDescription.wasSuppliedByUser && resolvedValueJson !== defaultValueJson) {
+		if (!fieldDescription.wasSuppliedByUser && !isSame(resolvedValue, fieldDescription.defaultValue)) {
 			// Whenever the user did not supply the value themselves but the resolved value is different from the
 			// default value, this means the value was not a "fixed" value but a value "calculated" at runtime.
 			// Since "calculated" values often depend on the specific environment, we do not want to actually hard code
 			// this value into the config since checking in the config to CI/CD system may create a different value.
-			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [resolvedValueJson]);
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.last-calculated-as', [JSON.stringify(resolvedValue)]);
 			yamlField = this.toYamlUncheckedFieldWithInlineComment(fieldName, fieldDescription.defaultValue, commentText);
 		} else {
 			yamlField = this.toYamlField(fieldName, resolvedValue, fieldDescription.defaultValue);
@@ -104,14 +106,10 @@ abstract class YamlFormatter {
 	}
 
 	private toYamlField(fieldName: string, resolvedValue: unknown, defaultValue: unknown): string {
-		const resolvedValueJson: string = JSON.stringify(resolvedValue);
-		const defaultValueJson: string = JSON.stringify(defaultValue);
-
-		if (resolvedValueJson === defaultValueJson) {
+		if (isSame(resolvedValue, defaultValue)) {
 			return this.toYamlUncheckedField(fieldName, resolvedValue);
 		}
-
-		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [defaultValueJson]);
+		const commentText: string = getMessage(BundleName.ConfigModel, 'template.modified-from', [JSON.stringify(defaultValue)]);
 		resolvedValue = replaceAbsolutePathsWithRelativePathsWherePossible(resolvedValue, this.config.getConfigRoot() + path.sep);
 		return this.toYamlUncheckedFieldWithInlineComment(fieldName, resolvedValue, commentText);
 	}
@@ -155,13 +153,23 @@ abstract class YamlFormatter {
 	private toYamlRuleOverridesForEngine(engineName: string): string {
 		const engineConfigHeader: string = getMessage(BundleName.ConfigModel, 'template.rule-overrides-section',
 			[engineName.toUpperCase()]);
-		let yamlCode: string = this.toYamlSectionHeadingComment(engineConfigHeader) + '\n';
-		yamlCode += `${engineName}:\n`;
+		const ruleOverrideYamlStrings: string[] = [];
 		for (const userRule of this.userRules.getRulesFor(engineName)) {
 			const defaultRule: Rule|null = this.getDefaultRuleFor(engineName, userRule.getName());
-			yamlCode += indent(this.toYamlRuleOverridesForRule(userRule, defaultRule), 2) + '\n';
+			const ruleOverrideYaml: string = this.toYamlRuleOverridesForRule(userRule, defaultRule);
+			if (ruleOverrideYaml) {
+				ruleOverrideYamlStrings.push(indent(ruleOverrideYaml, 2));
+			}
 		}
-		return yamlCode.trimEnd();
+
+		let yamlCode: string = this.toYamlSectionHeadingComment(engineConfigHeader) + '\n';
+		if (ruleOverrideYamlStrings.length > 0) {
+			yamlCode += `${engineName}:\n` + ruleOverrideYamlStrings.join('\n');
+		} else {
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-rule-overrides');
+			yamlCode += `${engineName}: {} ${this.toYamlComment(commentText)}`;
+		}
+		return yamlCode;
 	}
 
 	private getDefaultRuleFor(engineName: string, ruleName: string): Rule|null {
@@ -175,15 +183,23 @@ abstract class YamlFormatter {
 
 	private toYamlRuleOverridesForRule(userRule: Rule, defaultRule: Rule|null): string {
 		const userSeverity: SeverityLevel = userRule.getSeverityLevel();
+		const defaultSeverity: SeverityLevel = defaultRule !== null ? defaultRule.getSeverityLevel() : userSeverity;
 		const userTags: string[] = userRule.getTags();
-		return `"${userRule.getName()}":\n` +
-			indent(this.toYamlField('severity', userSeverity, defaultRule !== null ? defaultRule.getSeverityLevel() : userSeverity), 2) + '\n' +
-			indent(this.toYamlField('tags', userTags, defaultRule !== null ? defaultRule.getTags() : userTags), 2);
+		const defaultTags: string[] = defaultRule !== null ? defaultRule.getTags() : userTags;
+
+		let yamlCode: string = '';
+		if (this.includeUnmodifiedRules || !isSame(userSeverity, defaultSeverity)) {
+			yamlCode += indent(this.toYamlField('severity', userSeverity, defaultSeverity), 2) + '\n';
+		}
+		if (this.includeUnmodifiedRules || !isSame(userTags, defaultTags)) {
+			yamlCode += indent(this.toYamlField('tags', userTags, defaultTags), 2);
+		}
+		return yamlCode.length === 0 ? '' :  `"${userRule.getName()}":\n${yamlCode.trimEnd()}`;
 	}
 
 	private toYamlEngineOverrides(): string {
 		if (this.relevantEngines.size === 0) {
-			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-engines-selected');
+			const commentText: string = getMessage(BundleName.ConfigModel, 'template.yaml.no-rules-selected');
 			return `engines: {} ${this.toYamlComment(commentText)}`;
 		}
 
@@ -221,8 +237,8 @@ abstract class YamlFormatter {
 }
 
 class PlainYamlFormatter extends YamlFormatter {
-	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>, includeUnmodifiedRules: boolean) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines, includeUnmodifiedRules);
 	}
 
 	protected toYamlComment(commentText: string): string {
@@ -231,8 +247,8 @@ class PlainYamlFormatter extends YamlFormatter {
 }
 
 class StyledYamlFormatter extends YamlFormatter {
-	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>) {
-		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines);
+	constructor(codeAnalyzer: CodeAnalyzer, userRules: RuleSelection, allDefaultRules: RuleSelection, relevantEngines: Set<string>, includeUnmodifiedRules: boolean) {
+		super(codeAnalyzer, userRules, allDefaultRules, relevantEngines, includeUnmodifiedRules);
 	}
 
 	protected toYamlComment(commentText: string): string {
@@ -261,4 +277,8 @@ function replaceAbsolutePathsWithRelativePathsWherePossible(value: unknown, pare
 	}
 	// Return the value unchanged if it's a number, boolean, or null
 	return value;
+}
+
+function isSame(resolvedValue: unknown, defaultValue: unknown): boolean {
+	return JSON.stringify(resolvedValue) === JSON.stringify(defaultValue);
 }
