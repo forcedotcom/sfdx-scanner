@@ -17,8 +17,6 @@ body:
       options:
         - label: I confirm I have gone through the above steps and still have an issue to report
           required: true
-    validations:
-      required: true
   - type: textarea
     attributes:
       label: Bug Description
