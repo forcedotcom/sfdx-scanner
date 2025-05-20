@@ -1,0 +1,9 @@
+  # ======================================================================
+  # STUBENGINE1 ENGINE RULE OVERRIDES
+  # ======================================================================
+  StubEngine1:
+    "Stub1Rule1":
+      tags: # Modified from: ["Recommended","CodeStyle"]
+        - Recommended
+        - CodeStyle
+        - Beep
