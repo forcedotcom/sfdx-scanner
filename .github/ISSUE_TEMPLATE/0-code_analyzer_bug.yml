@@ -1,7 +1,6 @@
-name: Report a Bug with a code-analyzer command
+name: Report a Bug with the sf CLI `code-analyzer` commands
 description: Report an issue with a code-analyzer command.
 title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
-labels: []
 body:
   - type: checkboxes
     attributes:
@@ -20,7 +19,7 @@ body:
   - type: textarea
     attributes:
       label: Bug Description
-      description: Provide a clear and concise description of what the bug is and include the exact command that you ran.
+      description: Provide a clear and concise description of what the bug is.
     validations:
       required: true
   - type: textarea

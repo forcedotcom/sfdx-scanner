@@ -1,6 +1,6 @@
 {
 	"name": "@salesforce/plugin-code-analyzer",
-	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
+	"description": "Static code scanner that applies quality and security rules to Salesforce code and provides feedback.",
 	"version": "5.0.0",
 	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/code-analyzer/issues",
@@ -122,7 +122,7 @@
 			"<rootDir>/dist/"
 		]
 	},
-	"repository": "forcedotcom/sfdx-scanner",
+	"repository": "forcedotcom/code-analyzer",
 	"scripts": {
 		"build": "tsc --build tsconfig.build.json",
 		"prepack": "rm -rf lib && tsc --build tsconfig.build.json && oclif manifest && oclif readme && npm shrinkwrap",

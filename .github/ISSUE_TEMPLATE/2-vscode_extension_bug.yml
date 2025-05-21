@@ -1,12 +1,12 @@
-name: Report a Bug with a scanner command (v4)
-description: Report an issue with a scanner command.
-title: "[BUG][scanner] <YOUR_TITLE_HERE>"
+name: Report a Bug with the Salesforce Code Analyzer VS Code Extension
+description: Report an issue with the Salesforce Code Analyzer VS Code Extension.
+title: "[BUG][vscode-extension] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `scanner` issues on your own. Follow these steps:
+        Oftentimes, you can resolve `vscode-extension` issues on your own. Follow these steps:
         1. Read the error message.
         2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
@@ -19,7 +19,7 @@ body:
   - type: textarea
     attributes:
       label: Bug Description
-      description: Provide a clear and concise description of what the bug is.
+      description: Provide a clear and concise overview of the bug.
     validations:
       required: true
   - type: textarea
@@ -55,22 +55,42 @@ body:
       required: true
   - type: input
     attributes:
+      label: Visual Studio Code Version
+      description: |
+        What version do you find from clicking on "Code > About Visual Studio Code"?
+      placeholder: |
+        Example: Version: 1.89.1 (Universal)
+    validations:
+      required: true
+  - type: input
+    attributes:
       label: Salesforce CLI Version
       description: |
-        What do you get from the command "sf --version"?
+        What do you get from typing the command "sf --version" in the terminal?
       placeholder: |
         Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Urgency
+      description: "Are you using Code Analyzer V4? (Is the setting `Code Analyzer: Use V4 Deprecated` checked?)"
+      options:
+        - Yes
+        - No
+        - Not sure
+      default: 0
     validations:
       required: true
   - type: input
     attributes:
       label: Scanner Plugin Version
       description: |
-        What do you get from the command "sf plugins"?
+        If you are using V4, what do you get from typing the command "sf plugins" in the terminal?
       placeholder: |
         Example: @salesforce/sfdx-scanner/4.10.0
     validations:
-      required: true
+      required: false
   - type: input
     attributes:
       label: Node Version
@@ -87,6 +107,15 @@ body:
         What do you get from the command "java -version"?
       placeholder: |
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Python Version
+      description: |
+        What do you get from the command "python --version"?
+      placeholder: |
+        Example: Python 3.11.8
     validations:
       required: false
   - type: textarea
