@@ -1,7 +1,6 @@
 name: Request a New Feature
 description: Request a new Salesforce Code Analyzer feature, such as a new rule or an additional engine.
 title: "[Feature Request] <YOUR_TITLE_HERE>"
-labels: ['USER STORY']
 body:
 - type: textarea
   attributes:
