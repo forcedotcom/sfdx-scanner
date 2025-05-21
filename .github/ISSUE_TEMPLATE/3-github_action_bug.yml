@@ -1,14 +1,14 @@
-name: Report a Bug with a scanner command (v4)
-description: Report an issue with a scanner command.
-title: "[BUG][scanner] <YOUR_TITLE_HERE>"
+name: Report a Bug with the Run Salesforce Code Analyzer Github Action
+description: Report an issue with the Run Salesforce Code Analyzer Github Action
+title: "[BUG][github-action] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `scanner` issues on your own. Follow these steps:
+        Oftentimes, you can resolve these issues on your own. Follow these steps:
         1. Read the error message.
-        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
+        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
         4. Verify that your code is syntactically valid.
         5. Verify that the error is reproducible on another machine.
@@ -19,7 +19,7 @@ body:
   - type: textarea
     attributes:
       label: Bug Description
-      description: Provide a clear and concise description of what the bug is.
+      description: Provide a clear and concise overview of the bug.
     validations:
       required: true
   - type: textarea
@@ -57,25 +57,25 @@ body:
     attributes:
       label: Salesforce CLI Version
       description: |
-        What do you get from the command "sf --version"?
+        What version of the Salesforce CLI are you using in your workflow?
       placeholder: |
         Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
     validations:
       required: true
   - type: input
     attributes:
-      label: Scanner Plugin Version
+      label: Code Analyzer Plugin (code-analyzer) Version
       description: |
-        What do you get from the command "sf plugins"?
+        What version of the Code Analyzer Plugin are you using in your workflow?
       placeholder: |
-        Example: @salesforce/sfdx-scanner/4.10.0
+        Example: code-analyzer 5.0.0
     validations:
       required: true
   - type: input
     attributes:
       label: Node Version
       description: |
-        What do you get from the command "node --version"?
+        What version of Node are you using in your workflow?
       placeholder: |
         Example: v23.4.0
     validations:
@@ -84,9 +84,18 @@ body:
     attributes:
       label: Java Version
       description: |
-        What do you get from the command "java -version"?
+        What version of Java are you using in your workflow (if applicable)?
       placeholder: |
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
+    validations:
+      required: false
+  - type: input
+    attributes:
+      label: Python Version
+      description: |
+        What version of Python are you using in your workflow (if applicable)?
+      placeholder: |
+        Example: Python 3.11.8
     validations:
       required: false
   - type: textarea
