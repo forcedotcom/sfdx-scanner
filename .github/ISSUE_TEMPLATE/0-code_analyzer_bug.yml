@@ -1,12 +1,12 @@
-name: Report a Bug with the sf CLI `code-analyzer` (v5) commands
-description: Report an issue with the `code-analyzer` plugin.
+name: Report a Bug with the sf CLI "code-analyzer" (v5) commands
+description: Report an issue with the "code-analyzer" plugin.
 title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `code-analyzer` issues on your own. Follow these steps:
+        Oftentimes, you can resolve "code-analyzer" issues on your own. Follow these steps:
         1. Read the error message.
         2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
