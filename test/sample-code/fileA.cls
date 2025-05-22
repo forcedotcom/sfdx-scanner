@@ -17,7 +17,7 @@ public class fileA {
 
 
 
-	public        void methodDeclaredAtLine20() {
+	public              void methodDeclaredAtLine20() {
 
 
 
@@ -25,7 +25,7 @@ public class fileA {
 
 
 
-	boolean                            b = false;
+	boolean                                  b = false;
 
 
 
