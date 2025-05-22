@@ -1,12 +1,12 @@
-name: Report a Bug with the sf CLI `scanner` (v4) commands
-description: Report an issue with the `scanner` plugin.
+name: Report a Bug with the sf CLI "scanner" (v4) commands
+description: Report an issue with the "scanner" plugin.
 title: "[BUG][scanner] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `scanner` issues on your own. Follow these steps:
+        Oftentimes, you can resolve "scanner" issues on your own. Follow these steps:
         1. Read the error message.
         2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.

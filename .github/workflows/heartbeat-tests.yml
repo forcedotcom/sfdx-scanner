@@ -87,9 +87,11 @@ jobs:
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
+        shell: bash
         run: |
           echo "SF CLI required ${{ steps.sf_install.outputs.retry_count }} retries"
           echo "Code Analyzer Plugin required ${{ steps.code_analyzer_install.outputs.retry_count }} retries"
+          echo ""
           echo "Verifying installed plugins:"
           sf plugins
 
