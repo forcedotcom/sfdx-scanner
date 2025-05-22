@@ -1,5 +1,5 @@
-name: Report a Bug with the sf CLI `code-analyzer` commands
-description: Report an issue with a code-analyzer command.
+name: Report a Bug with the sf CLI `code-analyzer` (v5) commands
+description: Report an issue with the `code-analyzer` plugin.
 title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes

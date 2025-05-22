@@ -1,8 +1,8 @@
 [![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/code-analyzer/blob/master/package.json)
 
 # Salesforce Code Analyzer
-Salesforce Code Analyzer is a unified tool for static analysis of source code.
-Code Analyzer analyzes multiple languages including Apex, JavaScript, HTML, and CSS, and Salesforce metadata such as Flows.
+Salesforce Code Analyzer is a unified tool to help Salesforce developers analyze their source code for security vulnerabilities, performance issues, best practices, and more.
+Code Analyzer analyzes multiple languages including Apex, JavaScript, HTML, CSS, and Salesforce metadata such as Flows.
 It relies on a consistent command-line interface and produces a results file of rule violations.
 Use the results to review and improve your code.
 
@@ -17,7 +17,7 @@ Integrate Code Analyzer into your Continuous Integration/Continuous Development 
 Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation to learn:
 * how to install Code Analyzer
 * what is included in the Code Analyzer command reference
-* what rules are included from code-scanning engines such as PMD and ESLint
+* what rules are included from engines such as PMD and ESLint
 * how to write and manage custom rules
 * how to set up your CI/CD process with Code Analyzer
 * how to see review code violations with the Code Analyzer VS Code Extension
