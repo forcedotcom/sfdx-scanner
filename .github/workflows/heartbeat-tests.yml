@@ -15,25 +15,25 @@ jobs:
       # By default, if any job in a matrix fails, all other jobs are immediately cancelled. This makes the jobs run to completion instead.
       fail-fast: false
       matrix:
-        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
-        node: ['lts/*']
+        os: [{ vm: ubuntu-latest, exe: .sh }, { vm: windows-2019, exe: .cmd }]
+        node: ["lts/*"]
     runs-on: ${{ matrix.os.vm }}
     timeout-minutes: 60
     steps:
       # === Setup. We need to get the code, set up nodejs, java, and python, and create the results directory. ===
       - uses: actions/checkout@v4
         with:
-          ref: 'dev'
+          ref: "dev"
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '11'
+          distribution: "temurin"
+          java-version: "11"
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - run: mkdir smoke-test-results
 
       # === Set our environment variables, either using default values or the repo's secrets ===
@@ -65,16 +65,15 @@ jobs:
             rm -rf ./test/test-jars
           fi
 
-
       # === Make three attempts to install SF through npm ===
       - name: Install SF
         id: sf_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g @salesforce/cli${{ env.CLI_VERSION }})
+          (echo "retry_count=0" >> $GITHUB_OUTPUT && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
+          (echo "retry_count=1" >> $GITHUB_OUTPUT && sleep 60 && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
+          (echo "retry_count=2" >> $GITHUB_OUTPUT && sleep 300 && npm install -g @salesforce/cli${{ env.CLI_VERSION }})
 
       # === Make three attempts to install the code analyzer plugin through sf ===
       - name: Install Code Analyzer Plugin
@@ -82,13 +81,17 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }})
+          (echo "retry_count=0" >> $GITHUB_OUTPUT && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }}) ||
+          (echo "retry_count=1" >> $GITHUB_OUTPUT && sleep 60 && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }}) ||
+          (echo "retry_count=2" >> $GITHUB_OUTPUT && sleep 300 && sf plugins install code-analyzer${{ env.CODE_ANALYZER_VERSION }})
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
-        run: sf plugins
+        run: |
+          echo "SF CLI required ${{ steps.sf_install.outputs.retry_count }} retries"
+          echo "Code Analyzer Plugin required ${{ steps.code_analyzer_install.outputs.retry_count }} retries"
+          echo -e "\nVerifying installed plugins:"
+          sf plugins
 
       # === Attempt to execute the smoke tests ===
       - name: Run smoke tests

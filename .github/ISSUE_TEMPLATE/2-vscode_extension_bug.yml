@@ -1,5 +1,5 @@
-name: Report a Bug with the Salesforce Code Analyzer VS Code Extension
-description: Report an issue with the Salesforce Code Analyzer VS Code Extension.
+name: Report a Bug with the "Salesforce Code Analyzer" VS Code Extension
+description: Report an issue limited to the VS Code Extension.
 title: "[BUG][vscode-extension] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
@@ -10,9 +10,10 @@ body:
         1. Read the error message.
         2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
         3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
-        4. Verify that your code is syntactically valid.
-        5. Verify that the error is reproducible on another machine.
-        6. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
+        4. Verify that the error can not be reproduced using the Salesforce CLI directly.
+        5. Verify that your code is syntactically valid.
+        6. Verify that the error is reproducible on another machine.
+        7. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
       options:
         - label: I confirm I have gone through the above steps and still have an issue to report
           required: true
