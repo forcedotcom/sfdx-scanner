@@ -1,5 +1,5 @@
-name: Report a Bug with a scanner command (v4)
-description: Report an issue with a scanner command.
+name: Report a Bug with the sf CLI `scanner` (v4) commands
+description: Report an issue with the `scanner` plugin.
 title: "[BUG][scanner] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
