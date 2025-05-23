@@ -4,18 +4,18 @@ title: "[Feature Request] <YOUR_TITLE_HERE>"
 body:
 - type: textarea
   attributes:
-    label: Need/Problem Description
-    description: First provide a clear and concise description of what your need or problem is.
+    label: Your Need or Problem
+    description: Provide a clear and concise description of your need or problem.
     placeholder: When I do XYZ, I am unable to...
   validations:
     required: true
 - type: textarea
   attributes:
-    label: Describe your Desired Solution
-    description: Provide a clear and concise description of the enhancement you would like to see added to Salesforce Code Analyzer.
+    label: Your Desired Solution
+    description: Provide a clear and concise description of the enhancement you'd like us to add to Salesforce Code Analyzer.
     placeholder: |
-      Please add a command
-         scanner abc xyz
+      Please add a command, such as:
+         code-analyzer abc xyz
       that gives the following output:
          ...
   validations:

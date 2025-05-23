@@ -13,7 +13,7 @@ body:
 - type: textarea
   attributes:
     label: Context
-    description: Provide any relevant context such as your use case, environment, or specific scenario.
+    description: Provide any relevant context, such as your use case, environment, or specific scenario.
     placeholder: I'm using Salesforce Code Analyzer in the following context...
 - type: textarea
   attributes:
@@ -30,7 +30,7 @@ body:
   attributes:
     label: Are you interested in contributing to this project?
     options:
-    - Yes, I'd like to contribute
-    - Maybe in the future
-    - No, just providing feedback
-    default: 0 
+    - Yes, I'd like to contribute.
+    - Maybe in the future.
+    - No, I'm just providing feedback.
+    default: 0

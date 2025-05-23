@@ -28,7 +28,7 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 
   <%= config.bin %> <%= command.id %> --rule-selector Recommended
 
-- By default, only rule override values that you have specified in your `code-analyzer.yml` file that are not default values are displayed. To display the default rule values, in addition to the modified values, for the recommended rules:
+- Display all the default rule values for the recommended rules, instead of only the rule values you've explicitly overriden in your `code-analyzer.yml` file. By default, only overriden rule values are displayed unless you specify the `--include-unmodified-rules` flag:
 
   <%= config.bin %> <%= command.id %> --rule-selector Recommended --include-unmodified-rules
 
@@ -108,8 +108,8 @@ If you don't specify this flag, the command outputs the configuration state to t
 
 # flags.include-unmodified-rules.summary
 
-Includes unmodified rules in the rule override settings.
+Include unmodified rules in the rule override settings.
 
 # flags.include-unmodified-rules.description
 
-The default behavior of the config command is to not include the unmodified rules with their default values in the rule override settings (for the rules selected via the `–-rule-selector` flag). This helps prevent your configuration file from being unnecessarily large. If you wish to instead include the unmodified rules, in addition to the modified rules, then specify this flag.
+The default behavior of the config command is to not include the unmodified rules with their default values in the rule override settings (for the rules selected via the `–-rule-selector` flag). This default behavior prevents your configuration file from being unnecessarily large. If you want to include the unmodified rules, in addition to the modified rules, then specify this flag.
