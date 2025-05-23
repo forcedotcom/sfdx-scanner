@@ -1,38 +1,37 @@
-name: Report a Bug with a code-analyzer command
-description: Report an issue with a code-analyzer command.
+name: Report a Bug With the Salesforce CLI "code-analyzer" (v5) Commands
+description: Report an issue with one of the commands contained in the "@salesforce/plugin-code-analyzer" Salesforce CLI plugin.
 title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
-labels: []
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve `code-analyzer` issues on your own. Follow these steps:
+        You can often resolve "code-analyzer" issues on your own. Follow these steps:
         1. Read the error message.
-        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation.
-        3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
+        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/get-started.html) documentation.
+        3. Double-check the command that you ran. Make sure that items like file names, method names, and category names are correctly spelled and cased.
         4. Verify that your code is syntactically valid.
-        5. Verify that the error is reproducible on another machine.
-        6. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
+        5. Verify that the error is reproducible on another computer.
+        6. Check the open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
       options:
-        - label: I confirm I have gone through the above steps and still have an issue to report
+        - label: I confirm I have gone through the above steps and still have an issue to report.
           required: true
   - type: textarea
     attributes:
       label: Bug Description
-      description: Provide a clear and concise description of what the bug is and include the exact command that you ran.
+      description: Provide a clear and concise description of what the bug is.
     validations:
       required: true
   - type: textarea
     attributes:
       label: Output / Logs
-      description: Attach any output or logs here
+      description: Attach any output or logs here.
       placeholder: |
-        Add log output here or drag files here.
+        Add log output or drag files here.
   - type: textarea
     attributes:
       label: Steps To Reproduce
-      description: List out the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+      description: List the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
       placeholder: |
         1. I first do ...
         2. Then I do ...
@@ -58,25 +57,25 @@ body:
     attributes:
       label: Salesforce CLI Version
       description: |
-        What do you get from the command "sf --version"?
+        What do you get when you run the "sf --version" command?
       placeholder: |
-        Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+        Example: @salesforce/cli/2.90.4 darwin-x64 node-v22.15.0
     validations:
       required: true
   - type: input
     attributes:
       label: Code Analyzer Plugin (code-analyzer) Version
       description: |
-        What do you get from the command "sf plugins"?
+        What do you get when you run the "sf plugins" command?
       placeholder: |
-        Example: code-analyzer 5.0.0
+        Example: code-analyzer 5.0.0 (5.0.0)
     validations:
       required: true
   - type: input
     attributes:
       label: Node Version
       description: |
-        What do you get from the command "node --version"?
+        What do you get when you run the "node --version" command?
       placeholder: |
         Example: v23.4.0
     validations:
@@ -85,7 +84,7 @@ body:
     attributes:
       label: Java Version
       description: |
-        What do you get from the command "java -version"?
+        What do you get when you run the "java -version" command?
       placeholder: |
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
     validations:
@@ -94,7 +93,7 @@ body:
     attributes:
       label: Python Version
       description: |
-        What do you get from the command "python --version"?
+        What do you get when you run the "python --version" command?
       placeholder: |
         Example: Python 3.11.8
     validations:
@@ -102,7 +101,7 @@ body:
   - type: textarea
     attributes:
       label: Additional Context (Screenshots, Files, etc)
-      description: Add any other context about the problem.
+      description: Add any other context about your problem.
       placeholder: |
         Drag any files or screenshots you have here.
   - type: textarea
