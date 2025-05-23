@@ -1,21 +1,21 @@
 name: Report a Bug with the "Run Salesforce Code Analyzer" GitHub Action
-description: Report an issue limited to the GitHub Action.
+description: Report an issue limited to only the GitHub Action.
 title: "[BUG][github-action] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve these issues on your own. Follow these steps:
+        You can often resolve these issues on your own. Follow these steps:
         1. Read the error message.
-        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer.html) documentation.
-        3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
+        2. Read the [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/get-started.html) documentation.
+        3. Double-check the command that you ran. Make sure that items like file names, method names, and tag names are correctly spelled and cased.
         4. Verify that your code is syntactically valid.
-        5. Verify that the error can not be reproduced using the Salesforce CLI directly.
-        6. Verify that the error is reproducible on another machine.
+        5. Verify that you can't reproduce the error using the appropriate Salesforce CLI command directly.
+        6. Verify that the error is reproducible on another computer.
         7. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
       options:
-        - label: I confirm I have gone through the above steps and still have an issue to report
+        - label: I confirm I have gone through the above steps and still have an issue to report.
           required: true
   - type: textarea
     attributes:
@@ -28,11 +28,11 @@ body:
       label: Output / Logs
       description: Attach any output or logs here
       placeholder: |
-        Add log output here or drag files here.
+        Add log output or drag files here.
   - type: textarea
     attributes:
       label: Steps To Reproduce
-      description: List out the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+      description: List the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
       placeholder: |
         1. I first do ...
         2. Then I do ...
@@ -49,9 +49,9 @@ body:
     attributes:
       label: Operating System
       description: |
-        What is your machine's operating system?
+        What's your computer's operating system?
       placeholder: |
-        Example: MacOS Sonoma 14.4.1
+        Example: macOS Sonoma 14.4.1
     validations:
       required: true
   - type: input
@@ -60,12 +60,12 @@ body:
       description: |
         What version of the Salesforce CLI are you using in your workflow?
       placeholder: |
-        Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+        Example: @salesforce/cli/2.90.4 darwin-x64 node-v22.15.0
     validations:
       required: true
   - type: input
     attributes:
-      label: Code Analyzer Plugin (code-analyzer) Version
+      label: Code Analyzer Plugin ("code-analyzer") Version
       description: |
         What version of the Code Analyzer Plugin are you using in your workflow?
       placeholder: |
