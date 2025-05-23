@@ -87,10 +87,22 @@ describe('ConfigAction tests', () => {
 				expect(output).toContain(goldFileContents);
 			});
 
-			it('Selected rules are present and uncommented', async () => {
+			it('When not including unmodified rules, then selected rules are not present', async () => {
 				// ==== TESTED BEHAVIOR ====
 				// Select the rules with the CodeStyle tag
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
+
+				// ==== ASSERTIONS ====
+				const unExpectedStub1RuleOverrideText: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'default-configurations', 'Stub1Rule1.yml.goldfile'));
+				expect(output).not.toContain(unExpectedStub1RuleOverrideText);
+				const expectedRuleOverrideText: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'default-configurations', 'rulesSectionWithNoModifications.yml.goldfile'));
+				expect(output).toContain(expectedRuleOverrideText);
+			});
+
+			it('When including unmodified rules, then selected rules are present and uncommented', async () => {
+				// ==== TESTED BEHAVIOR ====
+				// Select the rules with the CodeStyle tag
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle'], undefined, undefined, undefined, true);
 
 				// ==== ASSERTIONS ====
 				// Rather than exhaustively check every rule, we'll just check one, because if that one is correct then
@@ -137,14 +149,14 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
 
 				// ==== ASSERTIONS ====
-				expect(output).toContain('rules: {} # Remove this empty object {} when you are ready to specify your first rule override');
+				expect(output).toContain('rules: {} # Empty object used because rule selection returned no rules');
 				expect(output).toContain('engines: {} # Empty object used because rule selection returned no rules');
 			});
 
-			it('Edge case: When a selected rule has no tags by default, `tags` is an empty array with no comment', async () => {
+			it('Edge case: When including unmodified rules and a selected rule has no tags by default, `tags` is an empty array with no comment', async () => {
 				// ==== TESTED BEHAVIOR ====
 				// Select Stub1Rule7, which has no tags, by its name directly.
-				const output = await runActionAndGetDisplayedConfig(dependencies, ['Stub1Rule7']);
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['Stub1Rule7'], undefined, undefined, undefined, true);
 
 				// ==== ASSERTIONS ====
 				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'default-configurations', 'Stub1Rule7.yml.goldfile'));
@@ -263,9 +275,9 @@ describe('ConfigAction tests', () => {
 				dependencies.configFactory = new StubCodeAnalyzerConfigFactory(CodeAnalyzerConfig.fromObject({
 					log_level: "warn"
 				}));
-				
+
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['all']);
-				
+
 				expect(output).toContain('log_level: 2 # Modified from: 4');
 			});
 
@@ -274,12 +286,25 @@ describe('ConfigAction tests', () => {
 				{overrideStatus: 'overridden severity', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule2'},
 				{overrideStatus: 'overridden tags and severity', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule3'},
 				{overrideStatus: 'no overrides', commentStatus: 'no comment', ruleName: 'Stub1Rule4'},
-			])('Selected and enabled rules with $overrideStatus are present with $commentStatus', async ({ruleName}) => {
+			])('When including unmodified rule settings, selected and enabled rules with $overrideStatus are present with $commentStatus', async ({ruleName}) => {
+				// ==== TESTED BEHAVIOR ====
+				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle'], undefined, undefined, undefined, true);
+
+				// ==== ASSERTIONS ====
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `${ruleName}.yml.goldfile`));
+				expect(output).toContain(goldFileContents);
+			});
+
+			it.each([
+				{overrideStatus: 'overridden tags', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule1'},
+				{overrideStatus: 'overridden severity', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule2'},
+				{overrideStatus: 'overridden tags and severity', commentStatus: 'comment indicating original values', ruleName: 'Stub1Rule3'}
+			])('When not including unmodified rule settings, selected and enabled rules with $overrideStatus are present with $commentStatus', async ({ruleName}) => {
 				// ==== TESTED BEHAVIOR ====
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['CodeStyle']);
 
 				// ==== ASSERTIONS ====
-				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `${ruleName}.yml.goldfile`));
+				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations-only-modifications', `${ruleName}.yml.goldfile`));
 				expect(output).toContain(goldFileContents);
 			});
 
@@ -329,7 +354,7 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
 
 				// ==== ASSERTIONS ====
-				expect(output).toContain('rules: {} # Remove this empty object {} when you are ready to specify your first rule override');
+				expect(output).toContain('rules: {} # Empty object used because rule selection returned no rules');
 				expect(output).toContain('engines: {} # Empty object used because rule selection returned no rules');
 			});
 
@@ -342,7 +367,7 @@ describe('ConfigAction tests', () => {
 				const output = await runActionAndGetDisplayedConfig(dependencies, ['NoRuleHasThisTag']);
 
 				// ==== ASSERTIONS ====
-				expect(output).toContain('rules: {} # Remove this empty object {} when you are ready to specify your first rule override');
+				expect(output).toContain('rules: {} # Empty object used because rule selection returned no rules');
 				expect(output).toContain('disable_engine: true # Modified from: false');
 			});
 
@@ -389,9 +414,9 @@ describe('ConfigAction tests', () => {
 			it.each([
 				{overrideStatus: 'via override', commentStatus: 'there is a comment', ruleName: 'Stub1Rule7'},
 				{overrideStatus: 'by default', commentStatus: 'there is no comment', ruleName: 'Stub1Rule8'}
-			])('Edge Case: When selected rule has no tags $overrideStatus, `tags` is an empty array and $commentStatus', async ({ruleName}) => {
+			])('Edge Case: When including unmodified rule settings and selected rule has no tags $overrideStatus, `tags` is an empty array and $commentStatus', async ({ruleName}) => {
 				// ==== TESTED BEHAVIOR ====
-				const output = await runActionAndGetDisplayedConfig(dependencies, [ruleName]);
+				const output = await runActionAndGetDisplayedConfig(dependencies, [ruleName], undefined, undefined, undefined, true);
 
 				// ==== ASSERTIONS ====
 				const goldFileContents = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'override-configurations', `${ruleName}.yml.goldfile`));
@@ -452,7 +477,7 @@ describe('ConfigAction tests', () => {
 			};
 
 			// ==== TESTED BEHAVIOR ====
-			const output: string = await runActionAndGetDisplayedConfig(dependencies, ['all'], undefined, workspace, target);
+			const output: string = await runActionAndGetDisplayedConfig(dependencies, ['all'], undefined, workspace, target, true);
 
 			// ==== ASSERTIONS ====
 			const goldFileContents: string = await readGoldFile(path.join(PATH_TO_COMPARISON_DIR, 'workspace-resolution', 'workspaceAwareRules.yml.goldfile'));
@@ -584,14 +609,15 @@ describe('ConfigAction tests', () => {
 		return fsp.readFile(goldFilePath, {encoding: 'utf-8'});
 	}
 
-	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string, workspace?: string[], target?: string[]): Promise<string> {
+	async function runActionAndGetDisplayedConfig(dependencies: ConfigDependencies, ruleSelectors: string[], configFile?: string, workspace?: string[], target?: string[], includeUnmodifiedRules?: boolean): Promise<string> {
 		// ==== SETUP ====
 		const action = ConfigAction.createAction(dependencies);
 		const input: ConfigInput = {
 			'rule-selector': ruleSelectors,
 			'config-file': configFile,
 			workspace,
-			target
+			target,
+			'include-unmodified-rules': includeUnmodifiedRules
 		};
 
 		// ==== TESTED BEHAVIOR ====

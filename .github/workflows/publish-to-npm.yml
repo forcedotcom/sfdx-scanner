@@ -46,16 +46,42 @@ jobs:
           TAG=${{ github.event.release.tag_name || inputs.tag }}
           PACKAGE_VERSION=v`cat package.json | jq '.version' | xargs`
           [[ ${TAG} == ${PACKAGE_VERSION} ]] || (echo "Tag name must match package.json version, prefixed by lowercase v" && exit 1)
+      - name: Check if this version number is already used on NPM
+        run: |
+          RESPONSE=$(npm view .@$INPUTS_GITHUB_TAG version --json --silent || echo "Not published")
+          if [ "$RESPONSE" = "\"$INPUTS_GITHUB_TAG\"" ]; then
+            echo "NPM already has a package with this version number, so publishing is impossible." && exit 1
+          else
+            echo "NPM does not yet have a package with this version number, so we're free to use it here."
+          fi
+        env:
+          INPUTS_GITHUB_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
   # Step 2: Publish the tag as a release candidate.
   publish-rc:
     needs: verify-candidate-tag
-    uses: salesforcecli/github-workflows/.github/workflows/npmPublish.yml@main
-    with:
-      ctc: false # We've been told we don't have to care about this until someone makes us care.
-      sign: true
-      tag: latest-rc # Publish as a release candidate, so we can do our validations against it.
-      githubTag: ${{ github.event.release.tag_name || inputs.tag }}
-    secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - run: npm install && npm run build
+      - run: npm install -g @salesforce/plugin-release-management
+      - name: NPM release
+        run: |
+          sf-release npm:package:release \
+            --githubtag "$INPUTS_GITHUB_TAG" \
+            --npmtag "$INPUTS_NPM_TAG" \
+            --no-install \
+            --sign
+        env:
+          INPUTS_GITHUB_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+          INPUTS_NPM_TAG: latest-rc # Publish as a release candidate, so we can do our validations against it.
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
   # Step 3: Run smoke tests against the release candidate.
   rc-test:
     needs: publish-rc

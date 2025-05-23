@@ -1,5 +1,4 @@
-    "Stub1Rule3":
-      severity: 3 # Modified from: 4
-      tags: # Modified from: ["BestPractices"]
+    "Stub1Rule4":
+      severity: 2
+      tags:
         - CodeStyle
-        - BestPractices
