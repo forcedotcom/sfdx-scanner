@@ -1,4 +1,4 @@
-name: Report a Bug With the "Salesforce Code Analyzer" VS Code Extension
+name: Report a Bug with the "Salesforce Code Analyzer" VS Code Extension
 description: Report an issue that's with the VS Code extension but not with the CLI commands.
 title: "[BUG][vscode-extension] <YOUR_TITLE_HERE>"
 body:
@@ -74,7 +74,7 @@ body:
       required: true
   - type: dropdown
     attributes:
-      label: Code Analyzer Version
+      label: Using v4
       description: "Are you using Code Analyzer v4? (Is the setting 'Code Analyzer: Use v4 (Deprecated)' checked?)"
       options:
         - "Yes"
@@ -85,11 +85,11 @@ body:
       required: true
   - type: input
     attributes:
-      label: Scanner Plugin Version
+      label: Plugin Versions
       description: |
-        If you are using Code Analyzer v4, what do you get when you run the "sf plugins" command in the terminal?
+        What do you get when you run the "sf plugins" command in the terminal?
       placeholder: |
-        Example: @salesforce/sfdx-scanner 4.12.0 (4.12.0)
+        Example: code-analyzer 5.0.0. If you selected "Yes" to "Using v4", also include the scanner version, such as: @salesforce/sfdx-scanner 4.12.0.
     validations:
       required: false
   - type: input

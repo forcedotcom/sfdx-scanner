@@ -1,4 +1,4 @@
-name: Report a Bug With the "code-analyzer" (v5) CLI Commands
+name: Report a Bug with the "code-analyzer" (v5) CLI Commands
 description: Report an issue with one of the commands contained in the "@salesforce/plugin-code-analyzer" Salesforce CLI plugin.
 title: "[BUG][code-analyzer] <YOUR_TITLE_HERE>"
 body:

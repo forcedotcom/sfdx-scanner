@@ -1,4 +1,4 @@
-name: Report a Bug With the "scanner" (v4) CLI Commands
+name: Report a Bug with the "scanner" (v4) CLI Commands
 description: Report an issue with one of the commands contained in the "@salesforce/sfdx-scanner" Salesforce CLI plugin.
 title: "[BUG][scanner] <YOUR_TITLE_HERE>"
 body:
