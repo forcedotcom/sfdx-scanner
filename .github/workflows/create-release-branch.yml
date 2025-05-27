@@ -23,8 +23,6 @@ jobs:
     runs-on: macos-latest
     env:
       GH_TOKEN: ${{ github.token }}
-    permissions:
-      contents: write
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
