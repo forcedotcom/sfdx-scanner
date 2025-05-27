@@ -67,6 +67,7 @@ jobs:
 
       # === Make three attempts to install SF through npm ===
       - name: Install SF
+        shell: bash
         id: sf_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
@@ -77,6 +78,7 @@ jobs:
 
       # === Make three attempts to install the code analyzer plugin through sf ===
       - name: Install Code Analyzer Plugin
+        shell: bash
         id: code_analyzer_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
@@ -89,6 +91,7 @@ jobs:
       - name: Log plugins
         shell: bash
         run: |
+          echo "Plugins Results Output"
           echo "SF CLI required ${{ steps.sf_install.outputs.retry_count }} retries"
           echo "Code Analyzer Plugin required ${{ steps.code_analyzer_install.outputs.retry_count }} retries"
           echo ""

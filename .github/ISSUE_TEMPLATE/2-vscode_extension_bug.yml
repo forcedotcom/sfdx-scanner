@@ -1,21 +1,21 @@
-name: Report a Bug with the "Salesforce Code Analyzer" VS Code Extension
-description: Report an issue limited to the VS Code Extension.
+name: Report a Bug With the "Salesforce Code Analyzer" VS Code Extension
+description: Report an issue that's with the VS Code extension but not with the CLI commands.
 title: "[BUG][vscode-extension] <YOUR_TITLE_HERE>"
 body:
   - type: checkboxes
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        Oftentimes, you can resolve "vscode-extension" issues on your own. Follow these steps:
+        You can often resolve "vscode-extension" issues on your own. Follow these steps:
         1. Read the error message.
-        2. Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation.
-        3. Double-check the command that you ran. Ensure that items like file names, method names, and category names are correctly spelled and cased.
-        4. Verify that the error can not be reproduced using the Salesforce CLI directly.
+        2. Read the [Salesforce Code Analyzer VS Code Extension](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/analyze-vscode.html) documentation.
+        3. Double-check the VS Code extension feature you used. Make sure that items like file names, method names, and category names are correctly spelled and cased.
+        4. Verify that you can't reproduce the issue using the appropriate Salesforce CLI command directly.
         5. Verify that your code is syntactically valid.
-        6. Verify that the error is reproducible on another machine.
+        6. Verify that the error is reproducible on another computer.
         7. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
       options:
-        - label: I confirm I have gone through the above steps and still have an issue to report
+        - label: I confirm I have gone through the above steps and still have an issue to report.
           required: true
   - type: textarea
     attributes:
@@ -26,13 +26,13 @@ body:
   - type: textarea
     attributes:
       label: Output / Logs
-      description: Attach any output or logs here
+      description: Attach any output or logs here.
       placeholder: |
-        Add log output here or drag files here.
+        Add log output or drag files here.
   - type: textarea
     attributes:
       label: Steps To Reproduce
-      description: List out the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+      description: List the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
       placeholder: |
         1. I first do ...
         2. Then I do ...
@@ -49,16 +49,16 @@ body:
     attributes:
       label: Operating System
       description: |
-        What is your machine's operating system?
+        What is your computer's operating system?
       placeholder: |
-        Example: MacOS Sonoma 14.4.1
+        Example: macOS Sonoma 14.4.1
     validations:
       required: true
   - type: input
     attributes:
       label: Visual Studio Code Version
       description: |
-        What version do you find from clicking on "Code > About Visual Studio Code"?
+        What version do you see when you click "Code > About Visual Studio Code"?
       placeholder: |
         Example: Version: 1.89.1 (Universal)
     validations:
@@ -67,19 +67,19 @@ body:
     attributes:
       label: Salesforce CLI Version
       description: |
-        What do you get from typing the command "sf --version" in the terminal?
+        What do you get when you run the "sf --version" command in the terminal?
       placeholder: |
-        Example: @salesforce/cli/2.40.7 darwin-arm64 node-v20.12.2
+        Example: @salesforce/cli/2.90.4 darwin-x64 node-v22.15.0
     validations:
       required: true
   - type: dropdown
     attributes:
       label: Urgency
-      description: "Are you using Code Analyzer V4? (Is the setting 'Code Analyzer: Use V4 Deprecated' checked?)"
+      description: "Are you using Code Analyzer v4? (Is the setting 'Code Analyzer: Use v4 (Deprecated)' checked?)"
       options:
-        - Yes
-        - No
-        - Not sure
+        - "Yes"
+        - "No"
+        - "Not sure"
       default: 0
     validations:
       required: true
@@ -87,16 +87,16 @@ body:
     attributes:
       label: Scanner Plugin Version
       description: |
-        If you are using V4, what do you get from typing the command "sf plugins" in the terminal?
+        If you are using Code Analyzer v4, what do you get when you run the "sf plugins" command in the terminal?
       placeholder: |
-        Example: @salesforce/sfdx-scanner/4.10.0
+        Example: @salesforce/sfdx-scanner 4.12.0 (4.12.0)
     validations:
       required: false
   - type: input
     attributes:
       label: Node Version
       description: |
-        What do you get from the command "node --version"?
+        What do you get when you run the "node --version" command in the terminal?
       placeholder: |
         Example: v23.4.0
     validations:
@@ -105,7 +105,7 @@ body:
     attributes:
       label: Java Version
       description: |
-        What do you get from the command "java -version"?
+        What do you get when you run the "java -version" command in the terminal?
       placeholder: |
         Example: openjdk version "11.0.17.0.1" 2022-10-18 LTS
     validations:
@@ -114,7 +114,7 @@ body:
     attributes:
       label: Python Version
       description: |
-        What do you get from the command "python --version"?
+        What do you get when you run the "python --version" command in the terminal?
       placeholder: |
         Example: Python 3.11.8
     validations:
