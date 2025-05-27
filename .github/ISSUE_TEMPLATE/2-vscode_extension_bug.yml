@@ -6,11 +6,11 @@ body:
     attributes:
       label: Have you tried to resolve this issue yourself first?
       description: |
-        You can often resolve "vscode-extension" issues on your own. Follow these steps:
+        You can often resolve these issues on your own. Follow these steps:
         1. Read the error message.
         2. Read the [Salesforce Code Analyzer VS Code Extension](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/analyze-vscode.html) documentation.
         3. Double-check the VS Code extension feature you used. Make sure that items like file names, method names, and category names are correctly spelled and cased.
-        4. Verify that you can't reproduce the issue using the appropriate Salesforce CLI command directly.
+        4. Verify that you can't reproduce the issue using the same Salesforce CLI command. Use the "Developer: Set Log Level" command from the Command Palette to set the log levels to 'DEBUG', and then the "Output" panel will display the code-analyzer command.
         5. Verify that your code is syntactically valid.
         6. Verify that the error is reproducible on another computer.
         7. Check open and closed [issues](https://github.com/forcedotcom/code-analyzer/issues) to see if your issue is already logged.
@@ -32,7 +32,7 @@ body:
   - type: textarea
     attributes:
       label: Steps To Reproduce
-      description: List the steps that you used to reproduce the bug behavior. Be as specific and clear as possible.
+      description: List the steps that you used to reproduce the bug behavior. Be as specific and clear as possible. If possible, ensure the steps are reproducible on another machine and attach any files that demonstrate the issue.
       placeholder: |
         1. I first do ...
         2. Then I do ...
