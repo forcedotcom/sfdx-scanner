@@ -11,13 +11,13 @@ You're also required to upload your Salesforce Code Analyzer scan reports.
 Attach your Code Analyzer reports to your submission in the AppExchange Security Review Wizard.
 For more info, read [Scan Your Code with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) and [AppExchange Security Review](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_overview.htm).
 
-Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code. Salesforce provides an official [Github Action](https://github.com/marketplace/actions/run-salesforce-code-analyzer) to assist with this.
+Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code. Salesforce provides an official [Github Action](https://github.com/marketplace/actions/run-salesforce-code-analyzer) to assist with this task.
 
 # Salesforce Code Analyzer Documentation
-Read [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview) documentation to learn:
-* how to install Code Analyzer
-* what is included in the Code Analyzer command reference
-* what rules are included from engines such as PMD and ESLint
-* how to write and manage custom rules
-* how to set up your CI/CD process with Code Analyzer
-* how to see review code violations with the Code Analyzer VS Code Extension
+Read the [Salesforce Code Analyzer](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/get-started.html) documentation to learn:
+* How to install Code Analyzer.
+* What's included in the Code Analyzer command reference.
+* What rules are included from engines such as PMD and ESLint.
+* How to write and manage custom rules.
+* How to set up your CI/CD process with Code Analyzer.
+* How to review code violations with the Code Analyzer VS Code Extension.
