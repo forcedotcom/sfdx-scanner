@@ -1,0 +1,36 @@
+name: General Feedback
+description: Share general feedback, comments, or questions about Salesforce Code Analyzer.
+title: "[Feedback] <YOUR_TITLE_HERE>"
+labels: ['FEEDBACK']
+body:
+- type: textarea
+  attributes:
+    label: Feedback
+    description: Share your thoughts, comments, or questions about Salesforce Code Analyzer.
+    placeholder: I'd like to share some feedback about...
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Context
+    description: Provide any relevant context such as your use case, environment, or specific scenario.
+    placeholder: I'm using Salesforce Code Analyzer in the following context...
+- type: textarea
+  attributes:
+    label: Suggestions
+    description: Do you have any suggestions for improvement?
+    placeholder: I think it would be better if...
+- type: textarea
+  attributes:
+    label: Additional Information
+    description: Add any other information, screenshots, or examples.
+    placeholder: |
+      Drag any files or screenshots you have here.
+- type: dropdown
+  attributes:
+    label: Are you interested in contributing to this project?
+    options:
+    - Yes, I'd like to contribute
+    - Maybe in the future
+    - No, just providing feedback
+    default: 0 

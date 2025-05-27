@@ -50,6 +50,10 @@ export default class ConfigCommand extends SfCommand<void> implements Displayabl
 			summary: getMessage(BundleName.ConfigCommand, 'flags.output-file.summary'),
 			description: getMessage(BundleName.ConfigCommand, 'flags.output-file.description'),
 			char: 'f'
+		}),
+		'include-unmodified-rules': Flags.boolean({
+			summary: getMessage(BundleName.ConfigCommand, 'flags.include-unmodified-rules.summary'),
+			description: getMessage(BundleName.ConfigCommand, 'flags.include-unmodified-rules.description')
 		})
 	};
 

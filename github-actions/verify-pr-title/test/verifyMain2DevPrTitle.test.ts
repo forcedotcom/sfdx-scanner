@@ -4,11 +4,11 @@ import {verifyMain2DevPrTitle} from "../src/verifyMain2DevPrTitle";
 describe('#verifyMain2DevPrTitle', () => {
 	/**
 	 * The Type portion is the first part of the title.
-	 * E.g., in "Main2Dev @W-1234@ - v4.2.0", the Type portion is "Main2Dev".
+	 * E.g., in "Main2Dev @W-1234@ - v5.2.0", the Type portion is "Main2Dev".
 	 * Only acceptable value is Main2Dev, with flexible casing.
 	 */
 	describe('Type portion', () => {
-		const restOfTitle = "@W-111111@ Merging after v4.2.0";
+		const restOfTitle = "@W-111111@ Merging after v5.2.0";
 		describe('Valid types', () => {
 			it('Uppercase: MAIN2DEV', () => {
 				const title = `MAIN2DEV ${restOfTitle}`
@@ -101,17 +101,17 @@ describe('#verifyMain2DevPrTitle', () => {
 	 * The Scope portion is not used for Release pull requests.
 	 */
 	it('Scope portion is rejected', () => {
-		const title = "Main2Dev (PMD) @W-1234@ Merging after v4.2.0";
+		const title = "Main2Dev (PMD) @W-1234@ Merging after v5.2.0";
 		expect(verifyMain2DevPrTitle(title)).toEqual(false);
 	});
 
 	/**
 	 * The Work Item portion is the third part of the title.
-	 * E.g., in "Main2Dev @W-1234@ - Merging after v4.2.0", the Work Item portion is "@W-1234@".
+	 * E.g., in "Main2Dev @W-1234@ - Merging after v5.2.0", the Work Item portion is "@W-1234@".
 	 */
 	describe('Work Item portion', () => {
 		function createTitle(workItem: string): string {
-			return `Main2Dev ${workItem} Merging after v4.2.0`;
+			return `Main2Dev ${workItem} Merging after v5.2.0`;
 		}
 
 		it('Work Item cannot be absent', () => {
@@ -157,7 +157,7 @@ describe('#verifyMain2DevPrTitle', () => {
 
 	/**
 	 * The Description portion is the fourth (and last) part of the title.
-	 * E.g., in "Main2Dev @W-1234@ - Merging after v4.2.0", the Description portion is "Merging after v4.2.0"
+	 * E.g., in "Main2Dev @W-1234@ - Merging after v5.2.0", the Description portion is "Merging after v5.2.0"
 	 */
 	describe('Description portion', () => {
 		const restOfTitle = "Main2Dev @W-123456@";
@@ -173,7 +173,7 @@ describe('#verifyMain2DevPrTitle', () => {
 		});
 
 		it('Description must contain "merging"', () => {
-			const title = `${restOfTitle} after v4.2.0`;
+			const title = `${restOfTitle} after v5.2.0`;
 			expect(verifyMain2DevPrTitle(title)).toEqual(false);
 		});
 
@@ -183,7 +183,7 @@ describe('#verifyMain2DevPrTitle', () => {
 		})
 
 		it('Description can contain any character classes', () => {
-			const title = `${restOfTitle} merging asdfasdf334 v4.2.0 @@$%#!{}`;
+			const title = `${restOfTitle} merging asdfasdf334 v5.2.0 @@$%#!{}`;
 			expect(verifyMain2DevPrTitle(title)).toEqual(true);
 		});
 	});
@@ -191,37 +191,37 @@ describe('#verifyMain2DevPrTitle', () => {
 	/**
 	 * The portions should be separated from each other by either whitespace or a flexible group
 	 * of special characters.
-	 * E.g., "Main2Dev ; @W-1234@ . Merging after v4.2.0".
+	 * E.g., "Main2Dev ; @W-1234@ . Merging after v5.2.0".
 	 */
 	describe('Portion separation', () => {
 		it('Space (" ") separation is allowed', () => {
-			const title = "Main2Dev     @W-1234@  merging after  v4.2.0";
+			const title = "Main2Dev     @W-1234@  merging after  v5.2.0";
 			expect(verifyMain2DevPrTitle(title)).toEqual(true);
 		});
 
 		describe('Separator characters are allowed', () => {
 			it('n-dash (-)', () => {
-				const title = "Main2Dev - @W-1234@ - merging after v4.2.0";
+				const title = "Main2Dev - @W-1234@ - merging after v5.2.0";
 				expect(verifyMain2DevPrTitle(title)).toEqual(true);
 			});
 
 			it('period (.)', () => {
-				const title = "Main2Dev.@W-1234@.merging after v4.2.0";
+				const title = "Main2Dev.@W-1234@.merging after v5.2.0";
 				expect(verifyMain2DevPrTitle(title)).toEqual(true);
 			});
 
 			it('comma (,)', () => {
-				const title = "Main2Dev,@W-1234@,merging after v4.2.0";
+				const title = "Main2Dev,@W-1234@,merging after v5.2.0";
 				expect(verifyMain2DevPrTitle(title)).toEqual(true);
 			});
 
 			it('colon (:)', () => {
-				const title = "Main2Dev:@W-1234@:merging after v4.2.0";
+				const title = "Main2Dev:@W-1234@:merging after v5.2.0";
 				expect(verifyMain2DevPrTitle(title)).toEqual(true);
 			});
 
 			it('semi colon (;)', () => {
-				const title = "Main2Dev;@W-1234@;merging after v4.2.0";
+				const title = "Main2Dev;@W-1234@;merging after v5.2.0";
 				expect(verifyMain2DevPrTitle(title)).toEqual(true);
 			});
 		});

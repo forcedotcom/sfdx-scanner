@@ -12,6 +12,11 @@ on:
           - minor
           - patch
         required: true
+  workflow_call:
+    inputs:
+      release-type:
+        type: string
+        required: true
 
 jobs:
   create-release-branch:
@@ -72,7 +77,7 @@ jobs:
             mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!) {
               createCommitOnBranch(input: {
                 branch: {
-                  repositoryNameWithOwner: "forcedotcom/sfdx-scanner",
+                  repositoryNameWithOwner: "forcedotcom/code-analyzer",
                   branchName: $branch
                 },
                 message: {

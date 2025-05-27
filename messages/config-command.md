@@ -1,6 +1,6 @@
 # command.summary
 
-Display the current state of configuration for Code Analyzer.
+Output the current state of configuration for Code Analyzer.
 
 # command.description
 
@@ -27,6 +27,10 @@ We're continually improving Salesforce Code Analyzer. Tell us what you think! Gi
 - Display the configuration state for just the recommended rules, instead of all the rules:
 
   <%= config.bin %> <%= command.id %> --rule-selector Recommended
+
+- Display all the default rule values for the recommended rules, instead of only the rule values you've explicitly overriden in your `code-analyzer.yml` file. By default, only overriden rule values are displayed unless you specify the `--include-unmodified-rules` flag:
+
+  <%= config.bin %> <%= command.id %> --rule-selector Recommended --include-unmodified-rules
 
 - Display the configuration state associated with all the rules that are applicable to the files targeted within the folder `./src`:
 
@@ -101,3 +105,11 @@ Output file to write the configuration state to. The file is written in YAML for
 If you specify a file within folder, such as `--output-file ./config/code-analyzer.yml`, the folder must already exist, or you get an error. If the file already exists, a prompt asks if you want to overwrite it.
 
 If you don't specify this flag, the command outputs the configuration state to the terminal.
+
+# flags.include-unmodified-rules.summary
+
+Include unmodified rules in the rule override settings.
+
+# flags.include-unmodified-rules.description
+
+The default behavior of the config command is to not include the unmodified rules with their default values in the rule override settings (for the rules selected via the `–-rule-selector` flag). This default behavior prevents your configuration file from being unnecessarily large. If you want to include the unmodified rules, in addition to the modified rules, then specify this flag.

@@ -6,7 +6,6 @@ on:
     # So this expression means "run at 12 PM UTC, every Friday".
     - cron: "0 12 * * 5"
 
-
 jobs:
   # Depending on circumstances, we may want to exit early instead of running the workflow to completion.
   verify-should-run:
@@ -26,43 +25,10 @@ jobs:
           NEXT_TUESDAY_DATE=$(date -u -v+tue +%d)
           # This workflow should only be allowed to run to completion on the Friday before Release Day.
           [[ $TODAY_DOW != 5 || $NEXT_RELEASE_DATE != $NEXT_TUESDAY_DATE ]] && echo "should_run=false" >> "$GITHUB_OUTPUT" || echo "should_run=true" >> "$GITHUB_OUTPUT"
-  create-v5-release-branch:
-    runs-on: macos-latest
+  create-release-branch:
     needs: verify-should-run
     if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
-    steps:
-      - name: Invoke v5 workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          # TODO: remove inputs after April Release; will default to minor
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-release-branch.yml',
-              ref: 'dev',
-              inputs: {
-                "release-type": "patch"
-              }
-            });
-# TODO: Remove this after last v4.x release in April
-  create-v4-release-branch:
-    runs-on: macos-latest
-    needs: verify-should-run
-    if: ${{ needs.verify-should-run.outputs.should-run == 'true' }}
-    steps:
-      - name: Invoke v4 GA workflow
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.SVC_CLI_BOT_GITHUB_TOKEN }}
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'create-release-branch.yml',
-              ref: 'dev-4',
-              inputs: {
-                "release-type": "minor"
-              }
-            });
+    uses: ./.github/workflows/create-release-branch.yml
+    secrets: inherit
+    with:
+      release-type: minor
