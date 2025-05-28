@@ -57,12 +57,12 @@ jobs:
       - name: Install Latest Salesforce Code Analyzer CLI Plugin
         run: sf plugins install code-analyzer@latest
 
-      - name: call other action
-        uses: jfeingold35/sfdx-code-review-action@jf/exp
-        with:
-          github_token: ${{ github.token }}
-          engine: "pmd"
-          category: "Best Practices"
+#      - name: call other action
+#        uses: jfeingold35/sfdx-code-review-action@jf/exp
+#        with:
+#          github_token: ${{ github.token }}
+#          engine: "pmd"
+#          category: "Best Practices"
 
   test_action:
     runs-on: ubuntu-latest
