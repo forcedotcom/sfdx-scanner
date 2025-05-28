@@ -93,7 +93,7 @@ jobs:
         run: sf plugins install code-analyzer@latest
       - name: Run Salesforce Code Analyzer
         id: run-code-analyzer
-        uses: forcedotcom/run-code-analyzer@d/W-18394864-b
+        uses: forcedotcom/run-code-analyzer@jf/experiment-4
         with:
           run-arguments: --workspace . --view detail --output-file sfca_results.html --output-file sfca_results.json -c alt-config.yml
           results-artifact-name: salesforce-code-analyzer-results
