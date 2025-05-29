@@ -2,6 +2,20 @@ name: Request a New Feature
 description: Request a new Salesforce Code Analyzer feature, such as a new rule or an additional engine.
 title: "[Feature Request] <YOUR_TITLE_HERE>"
 body:
+  - type: dropdown
+    attributes:
+      label: Product Area
+      description: What is the product area of the feature you are requesting?
+      options:
+        - The "code-analyzer" CLI
+        - The "Salesforce Code Analyzer" VS Code Extension
+        - The “Run Salesforce Code Analyzer” GitHub Action
+        - An Engine
+        - A Rule
+        - Other
+      default: 0
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Your Need or Problem
