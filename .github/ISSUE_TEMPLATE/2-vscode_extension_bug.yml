@@ -77,19 +77,19 @@ body:
       label: Using v4
       description: "Are you using Code Analyzer v4? (Is the setting 'Code Analyzer: Use v4 (Deprecated)' checked?)"
       options:
-        - "Yes"
+        - ""
         - "No"
+        - "Yes"
         - "Not sure"
-      default: 0
     validations:
       required: true
   - type: input
     attributes:
-      label: Plugin Versions
+      label: Code Analyzer CLI Plugin Version
       description: |
         What do you get when you run the "sf plugins" command in the terminal?
       placeholder: |
-        Example: code-analyzer 5.0.0. If you selected "Yes" to "Using v4", also include the scanner version, such as: @salesforce/sfdx-scanner 4.12.0.
+        code-analyzer 5.0.0; or if using v4: @salesforce/sfdx-scanner 4.12.0
     validations:
       required: false
   - type: input
