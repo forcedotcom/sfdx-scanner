@@ -66,8 +66,6 @@ jobs:
 
   test_action:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
       - name: Check out files
         uses: actions/checkout@v4
