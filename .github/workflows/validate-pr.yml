@@ -67,6 +67,7 @@ jobs:
   test_action:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - name: Check out files
