@@ -4,8 +4,6 @@
 	"version": "5.1.0",
 	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/code-analyzer/issues",
-	"o11yUploadEndpoint": "https://794testsite.my.site.com/byolwr/webruntime/log/metrics",
-	"enableO11y": "true",
 	"dependencies": {
 		"@oclif/core": "3.27.0",
 		"@salesforce/code-analyzer-core": "0.29.0",
