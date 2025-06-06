@@ -438,7 +438,7 @@ describe('ConfigAction tests', () => {
 
 	describe('Target/Workspace resolution', () => {
 		const originalCwd: string = process.cwd();
-		const baseDir: string = path.resolve(__dirname, '..', '..', '..');
+		const baseDir: string = path.resolve(__dirname, '..', '..', 'fixtures', 'example-workspaces', 'workspace-with-misc-files');
 
 		beforeEach(() => {
 			process.chdir(baseDir);
