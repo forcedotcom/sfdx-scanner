@@ -91,7 +91,7 @@ jobs:
       # run to completion instead.
       fail-fast: false
       matrix:
-        os: [{vm: ubuntu-latest, exe: .sh}, {vm: macos-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: macos-latest, exe: .sh}, {vm: windows-latest, exe: .cmd}]
     runs-on: ${{ matrix.os.vm }}
     steps:
       # We need to checkout the tag to get the smoke tests
