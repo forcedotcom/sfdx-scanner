@@ -23,8 +23,6 @@ jobs:
     runs-on: macos-latest
     env:
       GH_TOKEN: ${{ github.token }}
-    permissions:
-      contents: write
     outputs:
       branch-name: ${{ steps.create-branch.outputs.branch_name }}
     steps:
@@ -71,10 +69,12 @@ jobs:
           MESSAGE="Preparing for v$NEW_VERSION release."
           # GraphQL needs the latest versions of the files we changed, as Base64 encoded strings.
           NEW_PACKAGE="$(cat package.json | base64)"
+          NEW_PACKAGE_LOCK="$(cat package-lock.json | base64)"
           gh api graphql -F message="$MESSAGE" -F oldOid=`git rev-parse HEAD` -F branch="$BRANCH" \
           -F newPackage="$NEW_PACKAGE" \
+          -F newPackageLock="$NEW_PACKAGE_LOCK" \
           -f query='
-            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!) {
+            mutation ($message: String!, $oldOid: GitObjectID!, $branch: String!, $newPackage: Base64String!, $newPackageLock: Base64String!) {
               createCommitOnBranch(input: {
                 branch: {
                   repositoryNameWithOwner: "forcedotcom/code-analyzer",
@@ -88,6 +88,10 @@ jobs:
                     {
                       path: "package.json",
                       contents: $newPackage
+                    },
+                    {
+                      path: "package-lock.json",
+                      contents: $newPackageLock
                     }
                   ]
                 },

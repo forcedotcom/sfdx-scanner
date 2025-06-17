@@ -13,7 +13,8 @@
 		"allowJs": false,
 		"strictNullChecks": true,
 		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
+		"emitDecoratorMetadata": true,
+		"isolatedModules": true
 	},
 	"include": [
 		"./src"

@@ -20,9 +20,39 @@ jobs:
       # Private actions must check out repo first.
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Verify PR title
-        uses: ./github-actions/verify-pr-title
-        id: verify_pr_title
+      - name: Verify PR Title
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          title_upper=$(echo "$title" | tr '[:lower:]' '[:upper:]')
+          base_ref="${{ github.base_ref }}"
+
+          # Define regex patterns for different types of PR titles
+          MAIN2DEV_REGEX="^MAIN2DEV[[:space:]]*:?[[:space:]]*@W-[[:digit:]]{8,9}@.*MERGING.+[[:digit:]]{1,2}\.[[:digit:]]{1,2}\.[[:digit:]]{1,2}.*"
+          RELEASE2MAIN_REGEX="^RELEASE[[:space:]]*:?[[:space:]]*@W-[[:digit:]]{8,9}@.+"
+          PR_INTO_DEV_OR_RELEASE_REGEX="^(FIX|CHANGE|NEW)([[:space:]]*\([^)]+\))?[[:space:]]*:?[[:space:]]*@W-[[:digit:]]{8,9}@.+"
+
+          # Validate PR title based on base_ref and head_ref
+          if [[ "$base_ref" == "dev" && "${{ startsWith(github.head_ref, 'm2d/') }}" == "true" ]]; then
+            if [[ ! "$title_upper" =~ $MAIN2DEV_REGEX ]]; then
+              echo "::error::Invalid PR title: '$title'. Please follow the format: Main2Dev @W-XXXXXXXX@ Merging.*\d+\.\d+\.\d+"
+              exit 1
+            fi
+          elif [[ "$base_ref" == "main" ]]; then
+            if [[ ! "$title_upper" =~ $RELEASE2MAIN_REGEX ]]; then
+              echo "::error::Invalid PR title: '$title'. Please follow the format: RELEASE @W-XXXXXXXX@ Summary"
+              exit 1
+            fi
+          elif [[ "$base_ref" == "dev" || "${{ startsWith(github.base_ref, 'release-') }}" == "true" ]]; then
+            if [[ ! "$title_upper" =~ $PR_INTO_DEV_OR_RELEASE_REGEX ]]; then
+              echo "::error::Invalid PR title: '$title'. Please follow the format: FIX|CHANGE|NEW (__) @W-XXXXXXXX@ Summary"
+              exit 1
+            fi
+          else
+            echo "PR title '$title' automatically accepted for $base_ref branch."
+          fi
+
+          # If no errors, print success
+          echo "Valid PR title: '$title'"
   # Separately, we also need to run all of our tests.
   run_tests:
     uses: ./.github/workflows/run-tests.yml
