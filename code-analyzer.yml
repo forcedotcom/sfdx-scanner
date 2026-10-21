@@ -1,9 +1,0 @@
-engines:
-  pmd:
-    disable_engine: true
-  cpd:
-    disable_engine: true
-  sfge:
-    disable_engine: true
-  flow:
-    disable_engine: true
