@@ -29,6 +29,7 @@ export type RulesInput = {
 	'output-file'?: string[];
 	workspace?: string[];
 	target?: string[];
+	'target-org'?: string;
 	view?: string;
 }
 
@@ -40,7 +41,10 @@ export class RulesAction {
 	}
 
 	public async execute(input: RulesInput): Promise<void> {
-		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file']);
+		const cliOverrides = input['target-org'] !== undefined
+			? {targetOrg: input['target-org']}
+			: undefined;
+		const config: CodeAnalyzerConfig = this.dependencies.configFactory.create(input['config-file'], cliOverrides);
 		const logWriter: LogFileWriter = await LogFileWriter.fromConfig(config);
 		this.dependencies.actionSummaryViewer.viewPreExecutionSummary(logWriter.getLogDestination());
 		// We always add a Logger Listener to the appropriate listeners list, because we should Always Be Logging.

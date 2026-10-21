@@ -7,6 +7,7 @@ import * as FlowEngineModule from '@salesforce/code-analyzer-flow-engine';
 import * as SfgeEngineModule from '@salesforce/code-analyzer-sfge-engine';
 import * as ApexGuruEngineModule from '@salesforce/code-analyzer-apexguru-engine';
 import * as UIBundleEngineModule from '@salesforce/code-analyzer-uibundle-engine';
+import * as FlowAnalyzerEngineModule from '@salesforce/code-analyzer-flowanalyzer-engine';
 
 export interface EnginePluginsFactory {
 	create(): EnginePlugin[];
@@ -22,7 +23,8 @@ export class EnginePluginsFactoryImpl implements EnginePluginsFactory {
 			FlowEngineModule.createEnginePlugin(),
 			SfgeEngineModule.createEnginePlugin(),
 			ApexGuruEngineModule.createEnginePlugin(),
-			UIBundleEngineModule.createEnginePlugin()
+			UIBundleEngineModule.createEnginePlugin(),
+			FlowAnalyzerEngineModule.createEnginePlugin()
 		];
 	}
 }

@@ -92,7 +92,7 @@ export class CodeAnalyzerConfigFactoryImpl implements CodeAnalyzerConfigFactory 
 			};
 		}
 
-		// Apply target-org override to apexguru engine config
+		// Apply target-org override to engines that require an explicit org
 		if (cliOverrides.targetOrg) {
 			const enginesSection = mergedConfig.engines as Record<string, Record<string, unknown>> | undefined;
 			mergedConfig = {
@@ -101,6 +101,10 @@ export class CodeAnalyzerConfigFactoryImpl implements CodeAnalyzerConfigFactory 
 					...(enginesSection || {}),
 					apexguru: {
 						...(enginesSection?.apexguru || {}),
+						target_org: cliOverrides.targetOrg
+					},
+					flowAnalyzer: {
+						...(enginesSection?.flowAnalyzer || {}),
 						target_org: cliOverrides.targetOrg
 					}
 				}
@@ -121,6 +125,9 @@ export class CodeAnalyzerConfigFactoryImpl implements CodeAnalyzerConfigFactory 
 		if (cliOverrides?.targetOrg) {
 			configObject.engines = {
 				apexguru: {
+					target_org: cliOverrides.targetOrg
+				},
+				flowAnalyzer: {
 					target_org: cliOverrides.targetOrg
 				}
 			};

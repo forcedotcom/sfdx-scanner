@@ -290,6 +290,9 @@ describe('CodeAnalyzerConfigFactoryImpl', () => {
 				expect(testedConfig.getEngineOverridesFor('apexguru')).toEqual({
 					target_org: 'my-org@example.com'
 				});
+				expect(testedConfig.getEngineOverridesFor('flowAnalyzer')).toEqual({
+					target_org: 'my-org@example.com'
+				});
 			});
 
 			it('When config file exists (without engines) and targetOrg override is provided, applies it to apexguru engine', () => {
@@ -299,6 +302,9 @@ describe('CodeAnalyzerConfigFactoryImpl', () => {
 				const testedConfig = factory.create(configPath, { targetOrg: 'my-org@example.com' });
 
 				expect(testedConfig.getEngineOverridesFor('apexguru')).toEqual({
+					target_org: 'my-org@example.com'
+				});
+				expect(testedConfig.getEngineOverridesFor('flowAnalyzer')).toEqual({
 					target_org: 'my-org@example.com'
 				});
 				// Original config values should still be loaded
@@ -321,6 +327,9 @@ describe('CodeAnalyzerConfigFactoryImpl', () => {
 				expect(testedConfig.getEngineOverridesFor('apexguru')).toEqual({
 					target_org: 'my-org@example.com'
 				});
+				expect(testedConfig.getEngineOverridesFor('flowAnalyzer')).toEqual({
+					target_org: 'my-org@example.com'
+				});
 			});
 
 			it('When both noSuppressions and targetOrg overrides are provided, both are applied', () => {
@@ -332,6 +341,9 @@ describe('CodeAnalyzerConfigFactoryImpl', () => {
 
 				expect(testedConfig.getSuppressionsEnabled()).toBe(false);
 				expect(testedConfig.getEngineOverridesFor('apexguru')).toEqual({
+					target_org: 'my-org@example.com'
+				});
+				expect(testedConfig.getEngineOverridesFor('flowAnalyzer')).toEqual({
 					target_org: 'my-org@example.com'
 				});
 			});
